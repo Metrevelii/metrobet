@@ -12,6 +12,18 @@
   /* Fills an element left to right once; set --progress-duration inline. */
   --animate-progress: progress var(--progress-duration, 5s) linear forwards;
 
+  /* One-shot highlight that fades out (e.g. odds movement). Restart by changing the element key. */
+  --animate-flash: flash 2.5s ease-out forwards;
+
+  @keyframes flash {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
   @keyframes progress {
     from {
       transform: scaleX(0);

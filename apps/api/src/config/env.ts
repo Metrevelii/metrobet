@@ -20,6 +20,9 @@ const envSchema = z.object({
   MEDIA_DIR: z.string().default('uploads'),
   MEDIA_PUBLIC_URL: z.url().default('http://localhost:4000/media'),
 
+  /** `simulated` runs the built-in odds feed; `off` disables it (e.g. in tests that don't need it). */
+  SPORTSBOOK_FEED: z.enum(['simulated', 'off']).default('simulated'),
+
   /** The player site, asked to drop cached content after admin changes. */
   WEB_URL: z.url().default('http://localhost:3000'),
   WEB_REVALIDATE_SECRET: secret,

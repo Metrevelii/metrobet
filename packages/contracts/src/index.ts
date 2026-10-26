@@ -6,3 +6,4 @@ export * from './common/locale.js';
 export * from './common/localized.js';
 export * from './media/media.js';
 export * from './promotions/promotion.js';
+export * from './sportsbook/sportsbook.js';

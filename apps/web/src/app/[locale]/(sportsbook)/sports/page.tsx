@@ -1,20 +1,8 @@
-import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 
-import { ComingSoon } from '@/components/shared/coming-soon';
-import { PromotionsSlider } from '@/features/promotions';
+import { redirect } from '@/i18n/navigation';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('Nav');
-  return { title: t('sports') };
-}
-
+/** /sports opens the most popular sport. */
 export default async function SportsPage() {
-  const t = await getTranslations('Nav');
-  return (
-    <div className="flex flex-col gap-6">
-      <PromotionsSlider placement="sports" />
-      <ComingSoon title={t('sports')} />
-    </div>
-  );
+  redirect({ href: '/sports/football', locale: await getLocale() });
 }

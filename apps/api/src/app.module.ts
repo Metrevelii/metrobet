@@ -7,6 +7,7 @@ import { CasinoModule } from './modules/casino/casino.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { PromotionsModule } from './modules/promotions/promotions.module.js';
+import { SportsbookModule } from './modules/sportsbook/sportsbook.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PromotionsModule } from './modules/promotions/promotions.module.js';
     HealthModule,
     MediaModule,
     PromotionsModule,
+    SportsbookModule,
   ],
 })
 export class AppModule {}

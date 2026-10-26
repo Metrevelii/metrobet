@@ -130,6 +130,8 @@ isolated so it can be swapped later without touching components:
 - `apps/backoffice/src/features/promotions/CLAUDE.md`: promotions management screens
 - `apps/api/src/modules/casino/CLAUDE.md`: game catalogue, aggregator port, mock aggregator
 - `apps/web/src/features/casino/CLAUDE.md`: casino lobby, listings, favorites, launcher
+- `apps/api/src/modules/sportsbook/CLAUDE.md`: odds feed port, simulated feed, store, Socket.IO
+- `apps/web/src/features/sportsbook/CLAUDE.md`: sports pages, live odds, betslip
 
 ## Roadmap
 
@@ -140,7 +142,8 @@ isolated so it can be swapped later without touching components:
    drag-to-reorder/toggle/delete, editor with live preview), instant site revalidation
 3. ✅ Casino: lobby, categories, providers, search, favorites/recent, demo launcher (mock
    aggregator synced into Postgres). Crash page lists crash games
-4. ⏳ Sportsbook: sports/leagues/events, odds button, bet slip, live (mock odds feed)
+4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
+   betslip (singles/accumulator, odds changes). Free deterministic simulated feed
 5. ⏳ Crash games section
 6. ⏳ Backoffice screens (players, bets, games, sportsbook management, audit log)
 7. ⏳ **Last:** auth, KYC, wallet/ledger, payments (TBC/BoG), real provider integrations

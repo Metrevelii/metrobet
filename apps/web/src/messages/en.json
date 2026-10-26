@@ -26,7 +26,23 @@
   "Betslip": {
     "title": "Betslip",
     "empty": "Your betslip is empty",
-    "emptyHint": "Tap on odds to add selections"
+    "emptyHint": "Tap on odds to add selections",
+    "single": "Singles",
+    "combo": "Accumulator",
+    "stake": "Stake",
+    "totalStake": "Total stake",
+    "totalOdds": "Total odds",
+    "potentialWin": "Potential win",
+    "placeBet": "Place bet",
+    "loginToBet": "Log in to place bets",
+    "clear": "Clear all",
+    "remove": "Remove",
+    "oddsChanged": "Odds changed",
+    "acceptChanges": "Accept odds changes",
+    "suspended": "Suspended",
+    "comboSameEvent": "An accumulator can't contain two selections from the same event",
+    "open": "Open betslip",
+    "count": "{count, plural, one {# selection} other {# selections}}"
   },
   "Home": {
     "liveNow": "Live now",
@@ -36,7 +52,8 @@
   "Common": {
     "comingSoon": "Coming soon",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "close": "Close"
   },
   "Promotions": {
     "title": "Promotions",
@@ -112,6 +129,61 @@
       "unavailable": "This game can't be opened right now",
       "unavailableHint": "Please try again in a moment or pick another game.",
       "rtp": "RTP {value}%"
+    }
+  },
+  "Sports": {
+    "sports": {
+      "football": "Football",
+      "basketball": "Basketball",
+      "tennis": "Tennis"
+    },
+    "live": "Live",
+    "upcoming": "Upcoming",
+    "liveNow": "Live now",
+    "allLive": "All live",
+    "noLive": "No live events right now",
+    "noLiveHint": "Check the upcoming matches below.",
+    "noEvents": "No events right now",
+    "moreMarkets": "+{count}",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "allMarkets": "All markets",
+    "suspended": "Suspended",
+    "periods": {
+      "1H": "1st half",
+      "HT": "Half-time",
+      "2H": "2nd half",
+      "FT": "Full time",
+      "Q1": "Q1",
+      "Q2": "Q2",
+      "Q3": "Q3",
+      "Q4": "Q4",
+      "BREAK": "Break",
+      "S1": "Set 1",
+      "S2": "Set 2",
+      "S3": "Set 3"
+    },
+    "markets": {
+      "1x2": "Match result",
+      "double_chance": "Double chance",
+      "total": "Total {line}",
+      "btts": "Both teams to score",
+      "moneyline": "Winner",
+      "spread": "Handicap {line}",
+      "set_winner": "Set {line} winner"
+    },
+    "selections": {
+      "home": "1",
+      "draw": "X",
+      "away": "2",
+      "over": "Over {line}",
+      "under": "Under {line}",
+      "yes": "Yes",
+      "no": "No",
+      "home_draw": "1X",
+      "home_away": "12",
+      "draw_away": "X2",
+      "drawLong": "Draw"
     }
   }
 }

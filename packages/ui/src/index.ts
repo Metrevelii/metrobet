@@ -9,6 +9,7 @@ export * from './components/hero-banner';
 export * from './components/input';
 export * from './components/label';
 export * from './components/native-select';
+export * from './components/sheet';
 export * from './components/skeleton';
 export * from './components/switch';
 export * from './components/tabs';
