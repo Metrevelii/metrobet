@@ -100,8 +100,14 @@ isolated so it can be swapped later without touching components:
 
 ## Conventions
 
-- Commits: Conventional Commits: `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `test:`.
-- Branches: `feat/<short-name>`, `fix/<short-name>`; PRs into `main`.
+- Commits: Conventional Commits, enforced by the `commit-msg` hook: `feat`, `fix`, `refactor`,
+  `perf`, `chore`, `docs`, `test`, `ci`, `build`, `style`, `revert`, with an optional scope
+  (`feat(casino): add game tile`).
+- Git hooks (lefthook, `lefthook.yml`, installed by `pnpm install`): pre-commit runs Prettier and
+  `oxlint --fix` on staged files and re-stages fixes.
+- CI (`.github/workflows/ci.yml`) runs `pnpm check` and `pnpm build` on every push to `main` and
+  on PRs. Keep `main` green.
+- Workflow: commit straight to `main` (no feature branches/PRs for now).
 - Imports: packages by name (`@metrobet/ui`), app code by alias (`@/…`), siblings relative.
 - When you create a new feature module (web feature folder or Nest module), give it a short
   `CLAUDE.md`: purpose, data flow, invariants, gotchas. Add it to the index below.
