@@ -19,8 +19,8 @@ export const slugSchema = z
 
 /** Text-free artwork: copy is rendered as HTML on top, so one image serves every locale. */
 export const promotionImageSchema = z.object({
-  desktop: z.string().min(1),
-  mobile: z.string().min(1),
+  desktop: z.string().min(1, 'Upload an image'),
+  mobile: z.string().min(1, 'Upload an image'),
 });
 
 /**
@@ -46,6 +46,44 @@ export const promotionSchema = z.object({
   endsAt: z.iso.datetime().nullable(),
 });
 export type Promotion = z.infer<typeof promotionSchema>;
+
+/** Derived, never stored: where a promotion is in its lifecycle at a point in time. */
+export const PROMOTION_STATUSES = ['live', 'scheduled', 'expired', 'inactive'] as const;
+export type PromotionStatus = (typeof PROMOTION_STATUSES)[number];
+
+export function getPromotionStatus(
+  promotion: Pick<Promotion, 'isActive' | 'startsAt' | 'endsAt'>,
+  now: number = Date.now(),
+): PromotionStatus {
+  if (!promotion.isActive) return 'inactive';
+  if (promotion.startsAt && Date.parse(promotion.startsAt) > now) return 'scheduled';
+  if (promotion.endsAt && Date.parse(promotion.endsAt) <= now) return 'expired';
+  return 'live';
+}
+
+/** Create/update payload from the backoffice. `id` and `sortOrder` are owned by the server. */
+export const promotionInputSchema = promotionSchema
+  .omit({ id: true, sortOrder: true })
+  .extend({
+    ctaHref: z
+      .string()
+      .trim()
+      .regex(/^(\/|https:\/\/)/, 'Must start with / or https://')
+      .nullable(),
+    placements: z.array(promotionPlacementSchema).min(1, 'Pick at least one placement'),
+  })
+  .refine(
+    ({ startsAt, endsAt }) => !startsAt || !endsAt || Date.parse(endsAt) > Date.parse(startsAt),
+    { path: ['endsAt'], message: 'End must be after start' },
+  );
+export type PromotionInput = z.infer<typeof promotionInputSchema>;
+
+export const promotionActiveInputSchema = z.object({ isActive: z.boolean() });
+export type PromotionActiveInput = z.infer<typeof promotionActiveInputSchema>;
+
+/** Full display order: every promotion id, first to last. */
+export const promotionReorderInputSchema = z.object({ ids: z.array(z.string()).min(1) });
+export type PromotionReorderInput = z.infer<typeof promotionReorderInputSchema>;
 
 /** Slider/list item, already localized by the API. */
 export const promotionCardSchema = z.object({

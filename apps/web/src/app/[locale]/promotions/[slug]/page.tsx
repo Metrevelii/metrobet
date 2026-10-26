@@ -1,11 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle, cn, Skeleton } from '@metrobet/ui';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  cn,
+  heroBannerAspect,
+  Skeleton,
+} from '@metrobet/ui';
 import { CalendarClock, ChevronLeft, ScrollText } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getFormatter, getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
-import { BANNER_ASPECT, getPromotion, PromoBanner } from '@/features/promotions';
+import { getPromotion, PromoBanner } from '@/features/promotions';
 import { Link } from '@/i18n/navigation';
 
 type Props = PageProps<'/[locale]/promotions/[slug]'>;
@@ -70,7 +78,7 @@ async function PromotionDetailView({ params }: Pick<Props, 'params'>) {
 function PromotionDetailSkeleton() {
   return (
     <>
-      <Skeleton className={cn('rounded-xl', BANNER_ASPECT)} />
+      <Skeleton className={cn('rounded-xl', heroBannerAspect.responsive)} />
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <Skeleton className="h-40 rounded-lg" />
         <Skeleton className="h-40 rounded-lg" />

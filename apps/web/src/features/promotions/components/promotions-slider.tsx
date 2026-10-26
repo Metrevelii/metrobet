@@ -1,10 +1,9 @@
 import type { PromotionPlacement } from '@metrobet/contracts';
-import { cn, Skeleton } from '@metrobet/ui';
+import { cn, heroBannerAspect, Skeleton } from '@metrobet/ui';
 import { getLocale } from 'next-intl/server';
 import { Suspense } from 'react';
 
 import { getPromotions } from '../data';
-import { BANNER_ASPECT } from './promo-banner';
 import { PromoSlider } from './promo-slider';
 
 async function SliderLoader({ placement }: { placement: PromotionPlacement }) {
@@ -16,7 +15,7 @@ async function SliderLoader({ placement }: { placement: PromotionPlacement }) {
 /** Drop-in promo slider for any page. Renders nothing when there are no live promotions. */
 export function PromotionsSlider({ placement }: { placement: PromotionPlacement }) {
   return (
-    <Suspense fallback={<Skeleton className={cn('rounded-xl', BANNER_ASPECT)} />}>
+    <Suspense fallback={<Skeleton className={cn('rounded-xl', heroBannerAspect.responsive)} />}>
       <SliderLoader placement={placement} />
     </Suspense>
   );

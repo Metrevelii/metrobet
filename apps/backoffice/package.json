@@ -10,12 +10,16 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@metrobet/contracts": "workspace:*",
     "@metrobet/ui": "workspace:*",
     "lucide-react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@metrobet/tsconfig": "workspace:*",

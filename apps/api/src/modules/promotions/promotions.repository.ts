@@ -1,10 +1,25 @@
-import type { Promotion } from '@metrobet/contracts';
+import type { Promotion, PromotionInput } from '@metrobet/contracts';
+
+/** Thrown by create/update when another promotion already uses the slug. */
+export class PromotionSlugTakenError extends Error {
+  constructor(readonly slug: string) {
+    super(`Slug "${slug}" is already used by another promotion`);
+  }
+}
 
 /**
- * Storage port for promotions. The in-memory adapter is used until the database lands;
- * a Drizzle adapter will replace it without touching the service or controller.
+ * Storage port for promotions (bound to the Drizzle adapter). Lists are ordered by sortOrder.
+ * Methods that target one promotion return null when it does not exist.
  */
 export abstract class PromotionsRepository {
   abstract findAll(): Promise<Promotion[]>;
+  abstract findById(id: string): Promise<Promotion | null>;
   abstract findBySlug(slug: string): Promise<Promotion | null>;
+  /** Appends to the end of the display order. */
+  abstract create(input: PromotionInput): Promise<Promotion>;
+  abstract update(id: string, input: PromotionInput): Promise<Promotion | null>;
+  abstract setActive(id: string, isActive: boolean): Promise<Promotion | null>;
+  /** `ids` must contain every promotion exactly once, in the new order. */
+  abstract reorder(ids: string[]): Promise<void>;
+  abstract delete(id: string): Promise<Promotion | null>;
 }

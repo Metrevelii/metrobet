@@ -18,8 +18,9 @@ backoffice (later) ──writes──▶ api /promotions ──▶ data.ts ('use
   and throws on other errors (`app/[locale]/error.tsx` shows).
 - `links.ts`: `promotionHref()`, which is client-safe. Keep server-only code out of anything a
   client component imports.
-- When the backoffice edits promotions, it should trigger `revalidateTag(PROMOTIONS_CACHE_TAG)`
-  in the web app (route handler with a shared secret, to be added with the backoffice).
+- Backoffice edits reach the site within seconds: the api calls `POST /api/revalidate`
+  (`app/api/revalidate/route.ts`) with tag `promotions`. Keep `PROMOTIONS_CACHE_TAG` in sync with
+  the api's `admin-promotions.service.ts`.
 
 ## Components
 
@@ -27,7 +28,7 @@ backoffice (later) ──writes──▶ api /promotions ──▶ data.ts ('use
 | ------------------ | -------------------------- | --------------------------------------------------------------------- |
 | `PromotionsSlider` | any page: `placement` prop | Server. Suspense + skeleton; renders nothing when empty               |
 | `PromoSlider`      | client                     | Carousel from `@metrobet/ui`, autoplay, arrows, progress indicators   |
-| `PromoBanner`      | slider slide + detail hero | Artwork + HTML title/subtitle/CTA. `href` = whole banner is a link    |
+| `PromoBanner`      | slider slide + detail hero | `HeroBanner` (ui) + artwork + CTA. `href` = whole banner is a link    |
 | `PromotionCard`    | `/promotions` grid         | Uses the mobile artwork, cropped to 16:9                              |
 | `PromotionPicture` | inside the above           | `<picture>` art direction (desktop ≥768px / mobile) via getImageProps |
 
@@ -49,8 +50,9 @@ off, so autoplay is off too. Don't add a separate `setInterval`.
   **top ~60%** (mobile); the opposite side sits under the text gradient.
 - Desktop shows at 8:3 (sides crop slightly); mobile at 9:7. Cards crop the mobile art to 16:9
   from the top.
-- Current art is placeholder SVG in `apps/web/public/promotions/`. Real assets will be CDN URLs;
-  add the host to `images.remotePatterns` in `next.config.ts` then.
+- Placeholder art (seed data) is SVG in `apps/web/public/promotions/` (site-relative paths).
+  Uploaded art is an absolute URL from the api (`MEDIA_PUBLIC_URL`), allowed via
+  `images.remotePatterns` in `next.config.ts`.
 
 ## Promotion page
 

@@ -25,6 +25,8 @@ function promotion(overrides: Partial<Promotion> & Pick<Promotion, 'slug'>): Pro
   };
 }
 
+const unused = () => Promise.reject(new Error('not used by PromotionsService'));
+
 class FakeRepository extends PromotionsRepository {
   constructor(private readonly items: Promotion[]) {
     super();
@@ -35,6 +37,12 @@ class FakeRepository extends PromotionsRepository {
   findBySlug(slug: string) {
     return Promise.resolve(this.items.find((item) => item.slug === slug) ?? null);
   }
+  findById = unused;
+  create = unused;
+  update = unused;
+  setActive = unused;
+  reorder = unused;
+  delete = unused;
 }
 
 describe('PromotionsService', () => {

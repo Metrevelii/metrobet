@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { MediaModule } from './modules/media/media.module.js';
 import { PromotionsModule } from './modules/promotions/promotions.module.js';
 
 @Module({
@@ -15,6 +16,7 @@ import { PromotionsModule } from './modules/promotions/promotions.module.js';
     }),
     DatabaseModule,
     HealthModule,
+    MediaModule,
     PromotionsModule,
   ],
 })

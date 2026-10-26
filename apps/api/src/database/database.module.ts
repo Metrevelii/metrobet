@@ -22,7 +22,7 @@ import * as schema from './schema/index.js';
     {
       provide: DRIZZLE,
       inject: [PG_POOL],
-      useFactory: (pool: Pool) => drizzle(pool, { schema }),
+      useFactory: (pool: Pool) => drizzle(pool, { schema, casing: 'snake_case' }),
     },
   ],
   exports: [DRIZZLE],

@@ -8,16 +8,21 @@ under `/api` (e.g. `GET /api/health`).
 ```
 src/
   main.ts              bootstrap only
-  app.setup.ts         configureApp(): global prefix, CORS, shutdown hooks (shared with e2e)
+  app.setup.ts         configureApp(): prefix, CORS, shutdown hooks, /media static (shared with e2e)
   app.module.ts        root module: Config, Database, feature modules
   config/env.ts        Zod env schema, validated on boot (fails fast)
   database/
     database.module.ts global pg Pool + Drizzle providers
     database.tokens.ts DRIZZLE / PG_POOL tokens, `Database` type
     schema/index.ts    re-exports every module's tables (used by drizzle-kit)
-  modules/<name>/      one folder per bounded context (health now; later auth, wallet,
-                       sportsbook, casino, bonus, risk, backoffice)
-test/                  e2e specs (*.e2e-spec.ts)
+    errors.ts          isUniqueViolation() for Postgres constraint errors
+    migrate.ts seed.ts scripts (db:migrate, db:seed via tsx)
+  common/              guards (AdminKeyGuard), pipes (ZodValidationPipe)
+  modules/<name>/      one folder per bounded context:
+                         health · promotions · audit (audit_log) · media (uploads)
+                         · web (revalidates the player site's cache)
+                       later: auth, wallet, sportsbook, casino, bonus, risk
+test/                  e2e specs (*.e2e-spec.ts) against a real `metrobet_test` database
 drizzle/               generated SQL migrations (commit them)
 ```
 
@@ -38,6 +43,22 @@ drizzle/               generated SQL migrations (commit them)
   then `pnpm --filter @metrobet/api db:generate` and `db:migrate`. Never edit generated migrations
   by hand after they are committed.
 - Local Postgres: `docker compose up -d` from the repo root. Copy `.env.example` to `.env`.
+- Casing: TypeScript camelCase ↔ SQL snake_case is automatic (`casing: 'snake_case'` in both
+  the client and drizzle.config). Don't write column names by hand.
+- Timestamps are `timestamptz` read as `Date`; convert to ISO strings at the repository edge
+  (contracts use ISO strings). Localized copy is `jsonb` typed as `LocalizedText`.
+- Map unique-constraint violations to domain errors in the repository (`isUniqueViolation`), and
+  to HTTP 409 in the service.
+
+## Admin endpoints
+
+- Everything under `/api/admin/*` uses `@UseGuards(AdminKeyGuard)` (temporary shared key, header
+  `x-admin-key`). Attribute changes to `ADMIN_KEY_ACTOR` until staff accounts exist.
+- Every admin mutation must `AuditService.record()` (before/after) and, if it changes what the
+  player site shows, call `WebRevalidationService.revalidate(tag)`.
+- Media: `POST /api/admin/media/:folder` (multipart `file`). Type is checked by magic bytes
+  (PNG/JPEG/WebP/AVIF; SVG is rejected). Stored by `MediaStorage` (local disk now, served at
+  `/media`); swap the binding for S3/CDN later.
 
 ## Gotchas
 

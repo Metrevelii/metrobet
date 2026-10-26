@@ -72,7 +72,12 @@ below.
   `'use cache'` with `cacheTag` + `cacheLife`. Client components never call the API for content.
 - Builds must not depend on the API being up (CI builds without it): content loaders return an
   empty state or throw to `error.tsx`. Never crash the shell.
-- Env: `API_URL` (see `.env.example`; copy to `.env.local`).
+- Env (`.env.local`, see `.env.example`): `API_URL`, `MEDIA_PUBLIC_URL` (allowed in
+  `images.remotePatterns`), `IMAGES_ALLOW_LOCAL_IP` (dev only), `REVALIDATE_SECRET`.
+- **On-demand revalidation:** `POST /api/revalidate { tags }` with header `x-revalidate-secret`
+  (called by the api after backoffice changes) runs `revalidateTag(tag, { expire: 0 })`.
+- A loader whose failure path uses a short `cacheLife` counts as request-time data: render it
+  inside `<Suspense>` (otherwise prerendering fails with `blocking-prerender-dynamic`).
 
 ## Styling
 

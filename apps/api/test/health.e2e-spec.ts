@@ -1,33 +1,20 @@
-import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import type { App } from 'supertest/types.js';
 
-import { AppModule } from '../src/app.module.js';
-import { configureApp } from '../src/app.setup.js';
-import { DRIZZLE } from '../src/database/database.tokens.js';
+import { createTestApp } from './create-app.js';
 
 describe('GET /api/health (e2e)', () => {
-  let app: INestApplication<App>;
+  let ctx: Awaited<ReturnType<typeof createTestApp>>;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(DRIZZLE)
-      .useValue({ execute: () => Promise.resolve() })
-      .compile();
-
-    app = moduleRef.createNestApplication();
-    configureApp(app);
-    await app.init();
+    ctx = await createTestApp();
   });
+  afterAll(() => ctx?.app.close());
 
-  afterAll(async () => {
-    await app?.close();
-  });
-
-  it('returns service health', () =>
-    request(app.getHttpServer())
+  it('reports the database as up', () =>
+    request(ctx.app.getHttpServer())
       .get('/api/health')
       .expect(200)
-      .expect(({ body }) => expect(body).toMatchObject({ status: 'up' })));
+      .expect(({ body }) =>
+        expect(body).toMatchObject({ status: 'up', services: { database: 'up' } }),
+      ));
 });

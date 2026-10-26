@@ -6,11 +6,19 @@ so there is no build step.
 
 ## Exports
 
-| Import                    | What                                                                              |
-| ------------------------- | --------------------------------------------------------------------------------- |
-| `@metrobet/ui`            | components (`Button`, `Badge`, `Card*`, `Carousel*`, `Input`, `Skeleton`), `cn()` |
-| `@metrobet/ui/styles.css` | the only stylesheet an app imports (Tailwind + tokens + theme)                    |
-| `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font             |
+| Import                    | What                                                                  |
+| ------------------------- | --------------------------------------------------------------------- |
+| `@metrobet/ui`            | components (see below), `cn()`                                        |
+| `@metrobet/ui/styles.css` | the only stylesheet an app imports (Tailwind + tokens + theme)        |
+| `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font |
+
+Components: `Alert`, `AlertDialog*`, `Badge`, `Button`, `Card*`, `Carousel*`, `HeroBanner`,
+`Input`, `Label`, `NativeSelect`, `Skeleton`, `Switch`, `Tabs*`, `Textarea`.
+
+- `HeroBanner`: artwork + scrim + badge/title/subtitle/action. `layout`: `responsive` (site),
+  `desktop` / `mobile` (fixed, e.g. backoffice previews). Aspect classes in `heroBannerAspect`.
+  The site's promo slider and the backoffice preview both render it, so they never drift.
+- Form controls show the error style via `aria-invalid` (the backoffice `Field` sets it).
 
 ## How theming works
 

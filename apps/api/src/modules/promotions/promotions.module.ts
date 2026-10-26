@@ -1,15 +1,21 @@
 import { Module } from '@nestjs/common';
 
-import { InMemoryPromotionsRepository } from './in-memory-promotions.repository.js';
+import { AuditModule } from '../audit/audit.module.js';
+import { WebModule } from '../web/web.module.js';
+import { AdminPromotionsController } from './admin-promotions.controller.js';
+import { AdminPromotionsService } from './admin-promotions.service.js';
+import { DrizzlePromotionsRepository } from './drizzle-promotions.repository.js';
 import { PromotionsController } from './promotions.controller.js';
 import { PromotionsRepository } from './promotions.repository.js';
 import { PromotionsService } from './promotions.service.js';
 
 @Module({
-  controllers: [PromotionsController],
+  imports: [AuditModule, WebModule],
+  controllers: [PromotionsController, AdminPromotionsController],
   providers: [
     PromotionsService,
-    { provide: PromotionsRepository, useClass: InMemoryPromotionsRepository },
+    AdminPromotionsService,
+    { provide: PromotionsRepository, useClass: DrizzlePromotionsRepository },
   ],
   exports: [PromotionsService],
 })

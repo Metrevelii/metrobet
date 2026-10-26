@@ -1,12 +1,9 @@
 import type { Locale, Promotion, PromotionCard, PromotionDetail } from '@metrobet/contracts';
-import { localize } from '@metrobet/contracts';
+import { getPromotionStatus, localize } from '@metrobet/contracts';
 
 /** Active and inside its schedule window at `now` (ms). */
 export function isLive(promotion: Promotion, now: number): boolean {
-  if (!promotion.isActive) return false;
-  if (promotion.startsAt && Date.parse(promotion.startsAt) > now) return false;
-  if (promotion.endsAt && Date.parse(promotion.endsAt) <= now) return false;
-  return true;
+  return getPromotionStatus(promotion, now) === 'live';
 }
 
 export function toCard(promotion: Promotion, locale: Locale): PromotionCard {

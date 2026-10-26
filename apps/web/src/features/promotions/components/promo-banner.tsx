@@ -1,13 +1,10 @@
 import type { PromotionCard } from '@metrobet/contracts';
-import { buttonVariants, cn } from '@metrobet/ui';
+import { buttonVariants, cn, HeroBanner } from '@metrobet/ui';
 
 import { Link } from '@/i18n/navigation';
 
 import { PromotionBadge } from './promotion-badge';
 import { PromotionPicture } from './promotion-picture';
-
-/** Shared banner proportions; artwork is produced for these (see PromotionPicture). */
-export const BANNER_ASPECT = 'aspect-9/7 md:aspect-8/3';
 
 type PromoBannerProps = {
   promotion: PromotionCard;
@@ -20,58 +17,49 @@ type PromoBannerProps = {
   className?: string;
 };
 
-/** Artwork with localized title, subtitle and CTA overlaid. Used by the slider and promo page. */
+const CTA = cn(buttonVariants({ size: 'lg' }), 'max-md:h-10 max-md:px-4');
+
+/** A promotion rendered with the shared HeroBanner. Used by the slider and the promo page. */
 export function PromoBanner({
   promotion,
   href,
   ctaHref,
-  titleAs: Title = 'h2',
+  titleAs,
   eager,
   className,
 }: PromoBannerProps) {
-  const cta = cn(buttonVariants({ size: 'lg' }), 'mt-1 self-start max-md:h-10 max-md:px-4');
+  const action = href ? (
+    <span className={CTA}>{promotion.ctaLabel}</span>
+  ) : ctaHref ? (
+    <Link href={ctaHref} className={CTA}>
+      {promotion.ctaLabel}
+    </Link>
+  ) : undefined;
 
-  const body = (
-    <>
-      <PromotionPicture
-        image={promotion.image}
-        eager={eager}
-        sizes="(min-width: 1280px) 1100px, 100vw"
-        className="transition-transform duration-700 ease-out group-hover/banner:scale-[1.03]"
-      />
-      <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent md:bg-linear-to-r md:from-background/95 md:via-background/50" />
-      <div className="relative flex h-full flex-col justify-end gap-2 p-5 md:max-w-[60%] md:justify-center md:gap-3 md:p-8 lg:p-10">
-        <PromotionBadge category={promotion.category} className="self-start" />
-        <Title className="text-2xl leading-tight font-black tracking-tight text-balance md:text-3xl xl:text-4xl">
-          {promotion.title}
-        </Title>
-        <p className="line-clamp-1 text-sm text-muted-foreground md:line-clamp-2 md:text-base">
-          {promotion.subtitle}
-        </p>
-        {href ? (
-          <span className={cta}>{promotion.ctaLabel}</span>
-        ) : (
-          ctaHref && (
-            <Link href={ctaHref} className={cta}>
-              {promotion.ctaLabel}
-            </Link>
-          )
-        )}
-      </div>
-    </>
-  );
-
-  const frame = cn(
-    'group/banner relative block overflow-hidden rounded-xl border bg-card',
-    BANNER_ASPECT,
-    className,
+  const banner = (
+    <HeroBanner
+      className={href ? undefined : className}
+      media={
+        <PromotionPicture
+          image={promotion.image}
+          eager={eager}
+          sizes="(min-width: 1280px) 1100px, 100vw"
+          className="transition-transform duration-700 ease-out group-hover/banner:scale-[1.03]"
+        />
+      }
+      badge={<PromotionBadge category={promotion.category} />}
+      title={promotion.title}
+      titleAs={titleAs}
+      subtitle={promotion.subtitle}
+      action={action}
+    />
   );
 
   return href ? (
-    <Link href={href} className={frame}>
-      {body}
+    <Link href={href} className={cn('block rounded-xl', className)}>
+      {banner}
     </Link>
   ) : (
-    <div className={frame}>{body}</div>
+    banner
   );
 }

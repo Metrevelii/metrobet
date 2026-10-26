@@ -1,6 +1,7 @@
 import {
   Gamepad2,
   LayoutDashboard,
+  Megaphone,
   ScrollText,
   Ticket,
   Trophy,
@@ -12,6 +13,7 @@ export type NavItem = { href: string; label: string; icon: LucideIcon };
 
 export const BACKOFFICE_NAV = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/promotions', label: 'Promotions', icon: Megaphone },
   { href: '/players', label: 'Players', icon: Users },
   { href: '/bets', label: 'Bets', icon: Ticket },
   { href: '/sportsbook', label: 'Sportsbook', icon: Trophy },

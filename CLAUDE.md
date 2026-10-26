@@ -50,12 +50,18 @@ Requires **Node 24** (`nvm use`, see `.nvmrc`) and pnpm via corepack (`corepack 
 
 ```bash
 pnpm install
-docker compose up -d        # postgres + redis for the api
-cp apps/api/.env.example apps/api/.env
+docker compose up -d        # postgres + redis (OrbStack/Docker)
+# env files (gitignored; copy from the .env.example next to each):
+#   apps/api/.env, apps/web/.env.local, apps/backoffice/.env.local
+#   shared secrets must match: ADMIN_API_KEY (api ↔ backoffice),
+#   WEB_REVALIDATE_SECRET (api) = REVALIDATE_SECRET (web)
+pnpm --filter @metrobet/api db:migrate   # apply SQL migrations
+pnpm --filter @metrobet/api db:seed      # demo promotions (idempotent)
 
 pnpm dev                    # all apps (turbo builds contracts first)
 pnpm --filter @metrobet/web dev
 pnpm build | pnpm typecheck | pnpm test
+pnpm --filter @metrobet/api test:e2e   # real Postgres, own `metrobet_test` database
 pnpm lint                   # oxlint, whole repo, one root config (.oxlintrc.json)
 pnpm format                 # prettier, whole repo
 pnpm check                  # lint + format:check + typecheck + test: run before committing
@@ -120,14 +126,16 @@ isolated so it can be swapped later without touching components:
 - `packages/ui/CLAUDE.md`: design tokens, themes, component rules
 - `packages/contracts/CLAUDE.md`: shared schemas
 - `apps/web/src/features/promotions/CLAUDE.md`: promo slider, promotion pages
-- `apps/api/src/modules/promotions/CLAUDE.md`: promotions API, live/schedule rules
+- `apps/api/src/modules/promotions/CLAUDE.md`: promotions API, admin endpoints, live/schedule rules
+- `apps/backoffice/src/features/promotions/CLAUDE.md`: promotions management screens
 
 ## Roadmap
 
 1. ✅ Monorepo scaffold, tooling, CLAUDE.md files
 2. ✅ Design system foundation (tokens, Midnight Pro theme, primitives) + web/backoffice shells
-   2a. ✅ Promotions: promo slider on home/section pages, `/promotions` list and detail pages, API
-   (in-memory). Backoffice management comes with the database
+   2a. ✅ Promotions: promo slider on home/section pages, `/promotions` list and detail pages
+   2b. ✅ Postgres + Drizzle, audit log, media uploads, backoffice promotions management (list with
+   drag-to-reorder/toggle/delete, editor with live preview), instant site revalidation
 3. ⏳ Casino: lobby, categories/providers, game tile, game launcher (mock aggregator)
 4. ⏳ Sportsbook: sports/leagues/events, odds button, bet slip, live (mock odds feed)
 5. ⏳ Crash games section
@@ -139,6 +147,9 @@ interfaces the real integrations will use, so swapping them changes no UI code.
 
 ## Gotchas
 
+- **Admin API protection is temporary**: `/api/admin/*` accepts a shared `ADMIN_API_KEY`
+  (sent only server-side by the backoffice). Audit actor is `backoffice:shared-key`. Replace with
+  staff auth + RBAC in roadmap step 7. Never expose the key to the browser (`NEXT_PUBLIC_*`).
 - **TypeScript is pinned to ~6.0**: TS 7 (native) is out, but NestJS CLI 12 and
   typescript-eslint require < 6.1. Revisit when they support 7.
 - **pnpm 12 blocks dependency build scripts** unless listed under `allowBuilds` in
