@@ -9,6 +9,7 @@
     "live": "Live",
     "casino": "Casino",
     "crash": "Crash",
+    "promotions": "Promotions",
     "betslip": "Betslip"
   },
   "Header": {
@@ -28,14 +29,41 @@
     "emptyHint": "Tap on odds to add selections"
   },
   "Home": {
-    "heroTitle": "Sports, casino and crash in one place",
-    "heroSubtitle": "Top odds, live betting and thousands of games.",
-    "heroCta": "Start playing",
     "liveNow": "Live now",
     "popularGames": "Popular games",
     "viewAll": "View all"
   },
   "Common": {
     "comingSoon": "Coming soon"
+  },
+  "Promotions": {
+    "title": "Promotions",
+    "sliderLabel": "Featured promotions",
+    "slide": "{index} of {total}",
+    "goTo": "Go to slide {index}",
+    "previous": "Previous",
+    "next": "Next",
+    "allPromotions": "All promotions",
+    "details": "Details",
+    "terms": "Terms & conditions",
+    "validUntil": "Valid until {date}",
+    "ongoing": "Ongoing",
+    "empty": "No active promotions right now",
+    "categories": {
+      "casino": "Casino",
+      "sports": "Sports",
+      "crash": "Crash",
+      "general": "Bonus"
+    }
+  },
+  "Errors": {
+    "title": "Something went wrong",
+    "description": "We couldn't load this page. Please try again.",
+    "retry": "Try again"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "This page doesn't exist or is no longer available.",
+    "back": "Back to home"
   }
 }

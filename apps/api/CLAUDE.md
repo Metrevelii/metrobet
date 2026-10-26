@@ -42,6 +42,11 @@ drizzle/               generated SQL migrations (commit them)
 ## Gotchas
 
 - **ESM**: relative imports need the `.js` extension (`'./health.controller.js'`).
+- **Always inject with an explicit token: `@Inject(SomeService)` / `@Inject(DRIZZLE)`.** Vitest
+  transpiles without decorator metadata, so type-based injection silently gets `undefined` in tests.
+  Ports are abstract classes (e.g. `PromotionsRepository`) used directly as tokens.
+- Validate input with `new ZodValidationPipe(schemaFromContracts)` (`src/common/pipes`) on
+  `@Query`, `@Body` and `@Param`.
 - **Do not use `import type` for injected classes.** DI relies on `emitDecoratorMetadata`;
   type-only imports erase the class. That is why `verbatimModuleSyntax` is off here and the
   `consistent-type-imports` lint rule is disabled for `apps/api`.

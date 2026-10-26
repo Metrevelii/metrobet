@@ -12,11 +12,11 @@ src/
     page.tsx           home
     sports/ live/ casino/ crash/
   components/
-    layout/            AppShell, Header, SideNav, BottomNav, BetslipPanel, LocaleSwitcher, Logo
+    layout/            AppShell, Header, SideNav, BottomNav, BetslipPanel, LocaleSwitcher, Logo, NavItems
     shared/            app-level reusable blocks (EmptyState, Section, ComingSoon)
-  features/<feature>/  product features (sportsbook, casino, crash): components, hooks, mocks
+  features/<feature>/  product features (promotions, later sportsbook, casino, crash); index.ts is the public API
+  lib/api.ts           apiGet(path, schema, params): server-side fetch to @metrobet/api + Zod parse
   config/              single-source config (navigation.ts)
-  hooks/               cross-feature hooks (use-is-active)
   i18n/                routing.ts, request.ts, navigation.ts
   messages/            ka.json, en.json, ru.json
   proxy.ts             next-intl locale detection/redirects (Next 16 name for middleware)
@@ -34,7 +34,9 @@ stay thin: they fetch/compose and render feature components.
 - **xl (≥1280px)**: adds the right `BetslipPanel` rail (sticky)
 
 Header tabs, side nav and bottom nav all render from `MAIN_NAV` in `config/navigation.ts`.
-Add a section once there. Active state comes from `useIsActive(href)`.
+Add a section once there (`bottomNav: false` keeps it out of the 5-slot mobile bar). Active state
+comes from `<NavItems items renderItem={(item, active) => …} />`, which handles the Suspense rule
+below.
 
 ## i18n
 
@@ -58,6 +60,19 @@ Add a section once there. Active state comes from `useIsActive(href)`.
 - Live data (odds, scores, balance) will come over WebSocket in Client Components; server
   renders the initial snapshot.
 - Skeletons, not spinners: use `Skeleton` from `@metrobet/ui` matching the final layout.
+- **Client hooks that read the URL (`usePathname`, `useSearchParams`, `useParams`) must sit
+  inside `<Suspense>`**, or any non-prerendered route (e.g. `/promotions/[slug]`) fails the build
+  with `blocking-prerender-client-hook`. Render a URL-agnostic fallback (see `NavItems`,
+  `LocaleSwitcher`).
+- Route-level `error.tsx` and `not-found.tsx` live in `app/[locale]/`.
+
+## Data from the API
+
+- Server Components only: feature `data.ts` files call `apiGet()` from `@/lib/api` inside
+  `'use cache'` with `cacheTag` + `cacheLife`. Client components never call the API for content.
+- Builds must not depend on the API being up (CI builds without it): content loaders return an
+  empty state or throw to `error.tsx`. Never crash the shell.
+- Env: `API_URL` (see `.env.example`; copy to `.env.local`).
 
 ## Styling
 

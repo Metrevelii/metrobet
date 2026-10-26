@@ -3,17 +3,20 @@
 import { cn } from '@metrobet/ui';
 import { useTranslations } from 'next-intl';
 
-import { MAIN_NAV } from '@/config/navigation';
-import { useIsActive } from '@/hooks/use-is-active';
+import { MAIN_NAV, type NavItem } from '@/config/navigation';
 import { Link } from '@/i18n/navigation';
 
-function BottomNavLink({ item }: { item: (typeof MAIN_NAV)[number] }) {
+import { NavItems } from './nav-items';
+
+const BOTTOM_NAV = MAIN_NAV.filter((item) => item.bottomNav);
+
+function BottomNavLink({ item, active }: { item: NavItem; active: boolean }) {
   const t = useTranslations('Nav');
-  const active = useIsActive(item.href);
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
+      aria-current={active ? 'page' : undefined}
       className={cn(
         'flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground',
         active && 'text-primary',
@@ -33,9 +36,10 @@ export function BottomNav({ className }: { className?: string }) {
         className,
       )}
     >
-      {MAIN_NAV.map((item) => (
-        <BottomNavLink key={item.href} item={item} />
-      ))}
+      <NavItems
+        items={BOTTOM_NAV}
+        renderItem={(item, active) => <BottomNavLink key={item.href} item={item} active={active} />}
+      />
     </nav>
   );
 }

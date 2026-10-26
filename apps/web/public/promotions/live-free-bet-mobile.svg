@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+<defs>
+<linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#4d7cff"/></linearGradient>
+<linearGradient id="g2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#4d7cff"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+<pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1.4" fill="#ffffff" opacity=".07"/></pattern>
+<radialGradient id="glow" cx="0.6222222222222222" cy="0.32857142857142857" r=".55"><stop offset="0" stop-color="#22d3ee" stop-opacity=".45"/><stop offset=".5" stop-color="#4d7cff" stop-opacity=".12"/><stop offset="1" stop-color="#0b0e14" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="900" height="700" fill="#0b0e14"/>
+<rect width="900" height="700" fill="#141925" opacity=".6"/>
+<rect width="900" height="700" fill="url(#dots)"/>
+<rect width="900" height="700" fill="url(#glow)"/>
+<path d="M495.00000000000006 700 L675.0 0 L720.0 0 L540.0 700Z" fill="#ffffff" opacity=".03"/>
+<path d="M612.0 700 L792.0 0 L810.0 0 L630.0 700Z" fill="#ffffff" opacity=".03"/>
+<circle cx="560" cy="230" r="184.0" fill="none" stroke="url(#g1)" stroke-width="3.2" opacity="0.25"/><circle cx="560" cy="230" r="140.0" fill="none" stroke="url(#g1)" stroke-width="4.800000000000001" opacity="0.5"/><circle cx="560" cy="230" r="96.0" fill="none" stroke="url(#g1)" stroke-width="6.4" opacity="0.75"/><circle cx="560" cy="230" r="56.0" fill="url(#g2)"/><polygon points="542.4,202.8 588.8,230 542.4,257.2" fill="#0b0e14"/><polyline points="296.0,230 360.0,230 380.0,182.0 404.0,278.0 424.0,230 480.0,230" fill="none" stroke="#22d3ee" stroke-width="5.6000000000000005" stroke-linejoin="round" stroke-linecap="round"/><rect x="656.0" y="94.0" width="88.0" height="35.2" rx="17.6" fill="#ff3b4e"/><circle cx="676.8" cy="111.6" r="6.4" fill="#fff"/><rect x="691.2" y="106.8" width="40.0" height="9.600000000000001" rx="4.800000000000001" fill="#fff"/>
+</svg>

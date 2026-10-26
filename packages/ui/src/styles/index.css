@@ -8,6 +8,20 @@
 
 @source '../';
 
+@theme {
+  /* Fills an element left to right once; set --progress-duration inline. */
+  --animate-progress: progress var(--progress-duration, 5s) linear forwards;
+
+  @keyframes progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+}
+
 @layer base {
   *,
   ::before,

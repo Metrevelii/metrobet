@@ -1,17 +1,18 @@
 # Git hooks (installed automatically by `pnpm install`).
 # Skip once in an emergency with: LEFTHOOK=0 git commit ...
+# Binaries are called directly (not via pnpm) so hooks work regardless of the shell's Node/pnpm.
 
 pre-commit:
   parallel: true
   jobs:
     - name: format
       glob: '*.{js,jsx,ts,tsx,mjs,cjs,json,css,md,yml,yaml}'
-      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      run: ./node_modules/.bin/prettier --write --ignore-unknown {staged_files}
       stage_fixed: true
 
     - name: lint
       glob: '*.{js,jsx,ts,tsx,mjs,cjs}'
-      run: pnpm exec oxlint --fix {staged_files}
+      run: ./node_modules/.bin/oxlint --fix {staged_files}
       stage_fixed: true
 
 commit-msg:

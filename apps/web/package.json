@@ -16,7 +16,8 @@
     "next": "catalog:",
     "next-intl": "^4.14.9",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@metrobet/tsconfig": "workspace:*",

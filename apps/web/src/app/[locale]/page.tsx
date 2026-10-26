@@ -1,24 +1,14 @@
-import { Badge, Button, Card, Skeleton } from '@metrobet/ui';
+import { Badge, Skeleton } from '@metrobet/ui';
 import { getTranslations } from 'next-intl/server';
 
 import { Section } from '@/components/shared/section';
-import { Link } from '@/i18n/navigation';
+import { PromotionsSlider } from '@/features/promotions';
 
 export default async function HomePage() {
   const t = await getTranslations('Home');
   return (
     <div className="flex flex-col gap-8">
-      <Card className="relative overflow-hidden border-primary/20 bg-glow p-6 sm:p-10">
-        <div className="flex max-w-xl flex-col gap-4">
-          <h1 className="text-3xl font-black tracking-tight text-balance sm:text-4xl">
-            {t('heroTitle')}
-          </h1>
-          <p className="text-muted-foreground">{t('heroSubtitle')}</p>
-          <Button size="lg" className="self-start shadow-glow" asChild>
-            <Link href="/sports">{t('heroCta')}</Link>
-          </Button>
-        </div>
-      </Card>
+      <PromotionsSlider placement="home" />
 
       <Section
         title={

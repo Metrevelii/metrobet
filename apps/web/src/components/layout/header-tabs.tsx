@@ -3,16 +3,19 @@
 import { cn } from '@metrobet/ui';
 import { useTranslations } from 'next-intl';
 
-import { MAIN_NAV } from '@/config/navigation';
-import { useIsActive } from '@/hooks/use-is-active';
+import { MAIN_NAV, type NavItem } from '@/config/navigation';
 import { Link } from '@/i18n/navigation';
 
-function HeaderTab({ item }: { item: (typeof MAIN_NAV)[number] }) {
+import { NavItems } from './nav-items';
+
+const HEADER_TABS = MAIN_NAV.filter((item) => item.href !== '/');
+
+function HeaderTab({ item, active }: { item: NavItem; active: boolean }) {
   const t = useTranslations('Nav');
-  const active = useIsActive(item.href);
   return (
     <Link
       href={item.href}
+      aria-current={active ? 'page' : undefined}
       className={cn(
         'relative flex h-16 items-center px-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground',
         active &&
@@ -27,9 +30,10 @@ function HeaderTab({ item }: { item: (typeof MAIN_NAV)[number] }) {
 export function HeaderTabs() {
   return (
     <nav className="hidden items-center md:flex">
-      {MAIN_NAV.slice(1).map((item) => (
-        <HeaderTab key={item.href} item={item} />
-      ))}
+      <NavItems
+        items={HEADER_TABS}
+        renderItem={(item, active) => <HeaderTab key={item.href} item={item} active={active} />}
+      />
     </nav>
   );
 }

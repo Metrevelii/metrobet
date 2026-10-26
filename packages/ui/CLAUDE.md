@@ -6,11 +6,11 @@ so there is no build step.
 
 ## Exports
 
-| Import                    | What                                                                    |
-| ------------------------- | ----------------------------------------------------------------------- |
-| `@metrobet/ui`            | components (`Button`, `Badge`, `Card*`, `Input`, `Skeleton`) and `cn()` |
-| `@metrobet/ui/styles.css` | the only stylesheet an app imports (Tailwind + tokens + theme)          |
-| `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font   |
+| Import                    | What                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| `@metrobet/ui`            | components (`Button`, `Badge`, `Card*`, `Carousel*`, `Input`, `Skeleton`), `cn()` |
+| `@metrobet/ui/styles.css` | the only stylesheet an app imports (Tailwind + tokens + theme)                    |
+| `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font             |
 
 ## How theming works
 
@@ -54,5 +54,10 @@ tokens (like `odds-up`, `live`) only when a color carries meaning, not for one-o
   theme's `--mb-ring`), labelled icon-only buttons.
 - **Nothing product-specific here.** No odds, bets or games. Those belong in
   `apps/web/src/features/*`. Belongs here: anything the backoffice could also use.
+- `Carousel` (Embla): compose `Carousel` > `CarouselContent` > `CarouselItem`, plus
+  `CarouselPrevious/Next` (pass a translated `label`). Build custom indicators with
+  `useCarousel()` (`selectedIndex`, `slideCount`, `scrollTo`, `api`…). Arrow keys work out of the box.
+- Animation tokens: `animate-progress` fills an element left→right once over
+  `--progress-duration` (set inline). Respect `motion-reduce:` variants.
 - Utilities: `tabular` (tabular numerals, for odds, balances and timers) and `bg-glow` (primary-tinted hero
   glow) are defined in `src/styles/index.css`.

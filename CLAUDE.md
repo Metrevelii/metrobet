@@ -119,11 +119,15 @@ isolated so it can be swapped later without touching components:
 - `apps/api/CLAUDE.md`: NestJS modules, database, config
 - `packages/ui/CLAUDE.md`: design tokens, themes, component rules
 - `packages/contracts/CLAUDE.md`: shared schemas
+- `apps/web/src/features/promotions/CLAUDE.md`: promo slider, promotion pages
+- `apps/api/src/modules/promotions/CLAUDE.md`: promotions API, live/schedule rules
 
 ## Roadmap
 
 1. ✅ Monorepo scaffold, tooling, CLAUDE.md files
 2. ✅ Design system foundation (tokens, Midnight Pro theme, primitives) + web/backoffice shells
+   2a. ✅ Promotions: promo slider on home/section pages, `/promotions` list and detail pages, API
+   (in-memory). Backoffice management comes with the database
 3. ⏳ Casino: lobby, categories/providers, game tile, game launcher (mock aggregator)
 4. ⏳ Sportsbook: sports/leagues/events, odds button, bet slip, live (mock odds feed)
 5. ⏳ Crash games section
