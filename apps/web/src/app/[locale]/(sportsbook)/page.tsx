@@ -1,8 +1,23 @@
 import { Badge, Skeleton } from '@metrobet/ui';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
 
 import { Section } from '@/components/shared/section';
+import { categoryHref, GameRow, getLobby } from '@/features/casino';
 import { PromotionsSlider } from '@/features/promotions';
+
+async function PopularGames() {
+  const [lobby, t] = await Promise.all([getLobby(), getTranslations('Home')]);
+  const popular = lobby.sections.find((section) => section.category === 'popular');
+  if (!popular) return null;
+  return (
+    <GameRow
+      title={t('popularGames')}
+      games={popular.games}
+      viewAllHref={categoryHref('popular')}
+    />
+  );
+}
 
 export default async function HomePage() {
   const t = await getTranslations('Home');
@@ -26,13 +41,9 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      <Section title={t('popularGames')} action={{ href: '/casino', label: t('viewAll') }}>
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-          {Array.from({ length: 6 }, (_, i) => (
-            <Skeleton key={i} className="aspect-3/4 rounded-lg" />
-          ))}
-        </div>
-      </Section>
+      <Suspense fallback={<Skeleton className="h-72 rounded-lg" />}>
+        <PopularGames />
+      </Suspense>
     </div>
   );
 }

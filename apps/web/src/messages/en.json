@@ -34,7 +34,9 @@
     "viewAll": "View all"
   },
   "Common": {
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "previous": "Previous",
+    "next": "Next"
   },
   "Promotions": {
     "title": "Promotions",
@@ -65,5 +67,51 @@
     "title": "Page not found",
     "description": "This page doesn't exist or is no longer available.",
     "back": "Back to home"
+  },
+  "Casino": {
+    "lobby": "Lobby",
+    "favorites": "Favorites",
+    "recentlyPlayed": "Recently played",
+    "providers": "Providers",
+    "allProviders": "All providers",
+    "provider": "Provider",
+    "searchPlaceholder": "Search games",
+    "searchTitle": "Results for “{query}”",
+    "searchHint": "Type at least 2 characters",
+    "noResults": "No games found",
+    "noResultsHint": "Try another name or browse the categories.",
+    "gamesCount": "{count, plural, one {# game} other {# games}}",
+    "loadMore": "Load more",
+    "showing": "Showing {shown} of {total}",
+    "viewAll": "View all",
+    "play": "Play",
+    "demo": "Demo",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "favoritesEmpty": "No favorites yet",
+    "favoritesHint": "Tap the heart on any game to keep it here.",
+    "categories": {
+      "popular": "Popular",
+      "new": "New",
+      "slots": "Slots",
+      "jackpots": "Jackpots",
+      "crash": "Crash",
+      "table": "Table games"
+    },
+    "tags": {
+      "new": "New",
+      "hot": "Hot",
+      "jackpot": "Jackpot"
+    },
+    "launcher": {
+      "back": "Back",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen",
+      "demoMode": "Demo mode",
+      "realMoneyNote": "Playing with demo credits. Real-money play opens after sign-up.",
+      "unavailable": "This game can't be opened right now",
+      "unavailableHint": "Please try again in a moment or pick another game.",
+      "rtp": "RTP {value}%"
+    }
   }
 }

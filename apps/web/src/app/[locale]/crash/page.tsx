@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
 
-import { ComingSoon } from '@/components/shared/coming-soon';
+import { GameGridSkeleton, GamesListing } from '@/features/casino';
 import { PromotionsSlider } from '@/features/promotions';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,7 +15,10 @@ export default async function CrashPage() {
   return (
     <div className="flex flex-col gap-6">
       <PromotionsSlider placement="crash" />
-      <ComingSoon title={t('crash')} />
+      <h1 className="text-2xl font-bold">{t('crash')}</h1>
+      <Suspense fallback={<GameGridSkeleton />}>
+        <GamesListing query={{ category: 'crash' }} />
+      </Suspense>
     </div>
   );
 }

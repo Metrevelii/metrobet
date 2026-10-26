@@ -34,7 +34,9 @@
     "viewAll": "ყველა"
   },
   "Common": {
-    "comingSoon": "მალე"
+    "comingSoon": "მალე",
+    "previous": "წინა",
+    "next": "შემდეგი"
   },
   "Promotions": {
     "title": "აქციები",
@@ -65,5 +67,51 @@
     "title": "გვერდი ვერ მოიძებნა",
     "description": "ეს გვერდი არ არსებობს ან აღარ არის ხელმისაწვდომი.",
     "back": "მთავარზე დაბრუნება"
+  },
+  "Casino": {
+    "lobby": "ლობი",
+    "favorites": "რჩეულები",
+    "recentlyPlayed": "ბოლოს ნათამაშები",
+    "providers": "პროვაიდერები",
+    "allProviders": "ყველა პროვაიდერი",
+    "provider": "პროვაიდერი",
+    "searchPlaceholder": "თამაშების ძებნა",
+    "searchTitle": "შედეგები: „{query}“",
+    "searchHint": "შეიყვანეთ მინიმუმ 2 სიმბოლო",
+    "noResults": "თამაშები ვერ მოიძებნა",
+    "noResultsHint": "სცადეთ სხვა სახელი ან დაათვალიერეთ კატეგორიები.",
+    "gamesCount": "{count, plural, other {# თამაში}}",
+    "loadMore": "მეტის ჩვენება",
+    "showing": "ნაჩვენებია {shown} / {total}",
+    "viewAll": "ყველა",
+    "play": "თამაში",
+    "demo": "დემო",
+    "addFavorite": "რჩეულებში დამატება",
+    "removeFavorite": "რჩეულებიდან წაშლა",
+    "favoritesEmpty": "რჩეულები ჯერ არ გაქვთ",
+    "favoritesHint": "დააჭირეთ გულს ნებისმიერ თამაშზე, რომ აქ შეინახოთ.",
+    "categories": {
+      "popular": "პოპულარული",
+      "new": "ახალი",
+      "slots": "სლოტები",
+      "jackpots": "ჯეკპოტები",
+      "crash": "ქრაში",
+      "table": "სამაგიდო თამაშები"
+    },
+    "tags": {
+      "new": "ახალი",
+      "hot": "ცხელი",
+      "jackpot": "ჯეკპოტი"
+    },
+    "launcher": {
+      "back": "უკან",
+      "fullscreen": "სრული ეკრანი",
+      "exitFullscreen": "სრული ეკრანიდან გასვლა",
+      "demoMode": "დემო რეჟიმი",
+      "realMoneyNote": "თამაშობთ დემო კრედიტებით. რეალურ ფულზე თამაში ხელმისაწვდომი იქნება რეგისტრაციის შემდეგ.",
+      "unavailable": "თამაშის გახსნა ახლა ვერ ხერხდება",
+      "unavailableHint": "სცადეთ ცოტა ხანში ან აირჩიეთ სხვა თამაში.",
+      "rtp": "RTP {value}%"
+    }
   }
 }

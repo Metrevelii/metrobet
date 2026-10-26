@@ -9,8 +9,9 @@ Next.js 16 App Router, React 19, next-intl, `@metrobet/ui`. Runs on port 3000.
 ```
 src/
   app/[locale]/        all routes; layout.tsx is the root layout (html/body)
-    page.tsx           home
-    sports/ live/ casino/ crash/
+    (sportsbook)/      home, sports/, live/: its layout adds the betslip rail
+    casino/ crash/ promotions/   full-width pages (no betslip)
+  app/api/revalidate/  on-demand cache revalidation (called by the api)
   components/
     layout/            AppShell, Header, SideNav, BottomNav, BetslipPanel, LocaleSwitcher, Logo, NavItems
     shared/            app-level reusable blocks (EmptyState, Section, ComingSoon)
@@ -31,7 +32,8 @@ stay thin: they fetch/compose and render feature components.
 
 - **mobile**: sticky header, content, fixed `BottomNav` (content has bottom padding for it)
 - **lg (≥1024px)**: adds the left `SideNav`
-- **xl (≥1280px)**: adds the right `BetslipPanel` rail (sticky)
+- **xl (≥1280px)**: betting pages (the `(sportsbook)` route group) add the sticky `BetslipPanel`
+  rail; casino/crash/promotions use the full width
 
 Header tabs, side nav and bottom nav all render from `MAIN_NAV` in `config/navigation.ts`.
 Add a section once there (`bottomNav: false` keeps it out of the 5-slot mobile bar). Active state

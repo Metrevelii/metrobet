@@ -6,6 +6,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
   DATABASE_URL: z.url(),
+  /** Public origin of this API (links handed to browsers, e.g. mock game URLs). */
+  API_PUBLIC_URL: z.url().default('http://localhost:4000'),
   CORS_ORIGINS: z
     .string()
     .default('http://localhost:3000')

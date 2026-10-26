@@ -34,7 +34,9 @@
     "viewAll": "Все"
   },
   "Common": {
-    "comingSoon": "Скоро"
+    "comingSoon": "Скоро",
+    "previous": "Назад",
+    "next": "Вперёд"
   },
   "Promotions": {
     "title": "Акции",
@@ -65,5 +67,51 @@
     "title": "Страница не найдена",
     "description": "Эта страница не существует или больше недоступна.",
     "back": "На главную"
+  },
+  "Casino": {
+    "lobby": "Лобби",
+    "favorites": "Избранное",
+    "recentlyPlayed": "Недавно сыгранные",
+    "providers": "Провайдеры",
+    "allProviders": "Все провайдеры",
+    "provider": "Провайдер",
+    "searchPlaceholder": "Поиск игр",
+    "searchTitle": "Результаты по запросу «{query}»",
+    "searchHint": "Введите минимум 2 символа",
+    "noResults": "Игры не найдены",
+    "noResultsHint": "Попробуйте другое название или выберите категорию.",
+    "gamesCount": "{count, plural, one {# игра} few {# игры} many {# игр} other {# игры}}",
+    "loadMore": "Показать ещё",
+    "showing": "Показано {shown} из {total}",
+    "viewAll": "Все",
+    "play": "Играть",
+    "demo": "Демо",
+    "addFavorite": "Добавить в избранное",
+    "removeFavorite": "Убрать из избранного",
+    "favoritesEmpty": "В избранном пока пусто",
+    "favoritesHint": "Нажмите на сердечко у любой игры, чтобы сохранить её здесь.",
+    "categories": {
+      "popular": "Популярные",
+      "new": "Новые",
+      "slots": "Слоты",
+      "jackpots": "Джекпоты",
+      "crash": "Краш",
+      "table": "Настольные игры"
+    },
+    "tags": {
+      "new": "Новая",
+      "hot": "Хит",
+      "jackpot": "Джекпот"
+    },
+    "launcher": {
+      "back": "Назад",
+      "fullscreen": "Полный экран",
+      "exitFullscreen": "Выйти из полноэкранного режима",
+      "demoMode": "Демо-режим",
+      "realMoneyNote": "Игра на демо-кредиты. Игра на реальные деньги станет доступна после регистрации.",
+      "unavailable": "Игру сейчас не удаётся открыть",
+      "unavailableHint": "Попробуйте чуть позже или выберите другую игру.",
+      "rtp": "RTP {value}%"
+    }
   }
 }

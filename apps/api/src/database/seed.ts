@@ -1,31 +1,37 @@
 /**
- * Inserts the demo catalogue. Idempotent: existing slugs are left untouched.
- * Run with `pnpm --filter @metrobet/api db:seed` (after db:migrate).
+ * Seeds demo data: promotions (idempotent by slug) and the casino catalogue (synced from the
+ * bound aggregator). Run with `pnpm --filter @metrobet/api db:seed` after db:migrate.
+ * Boots the Nest context so seeding reuses the real services.
  */
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { NestFactory } from '@nestjs/core';
 
+import { AppModule } from '../app.module.js';
+import { CasinoSyncService } from '../modules/casino/casino-sync.service.js';
+import { promotions } from '../modules/promotions/promotions.schema.js';
 import { PROMOTIONS_SEED } from '../modules/promotions/promotions.seed.js';
-import * as schema from './schema/index.js';
+import { type Database, DRIZZLE } from './database.tokens.js';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const db = drizzle(pool, { schema, casing: 'snake_case' });
+const app = await NestFactory.createApplicationContext(AppModule, { logger: ['warn', 'error'] });
 
-const rows = PROMOTIONS_SEED.map(({ id: _id, image, startsAt, endsAt, ...promotion }) => ({
-  ...promotion,
-  imageDesktop: image.desktop,
-  imageMobile: image.mobile,
-  startsAt: startsAt ? new Date(startsAt) : null,
-  endsAt: endsAt ? new Date(endsAt) : null,
-}));
+try {
+  const db = app.get<Database>(DRIZZLE);
+  const inserted = await db
+    .insert(promotions)
+    .values(
+      PROMOTIONS_SEED.map(({ id: _id, image, startsAt, endsAt, ...promotion }) => ({
+        ...promotion,
+        imageDesktop: image.desktop,
+        imageMobile: image.mobile,
+        startsAt: startsAt ? new Date(startsAt) : null,
+        endsAt: endsAt ? new Date(endsAt) : null,
+      })),
+    )
+    .onConflictDoNothing({ target: promotions.slug })
+    .returning({ slug: promotions.slug });
+  console.warn(`Promotions: ${inserted.length} inserted (existing slugs kept)`);
 
-const inserted = await db
-  .insert(schema.promotions)
-  .values(rows)
-  .onConflictDoNothing({ target: schema.promotions.slug })
-  .returning({ slug: schema.promotions.slug });
-
-console.warn(
-  `Seeded ${inserted.length} promotion(s): ${inserted.map((row) => row.slug).join(', ') || 'none (already present)'}`,
-);
-await pool.end();
+  const casino = await app.get(CasinoSyncService).sync();
+  console.warn(`Casino: ${casino.providers} providers, ${casino.games} games synced`);
+} finally {
+  await app.close();
+}

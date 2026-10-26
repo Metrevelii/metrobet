@@ -56,7 +56,7 @@ docker compose up -d        # postgres + redis (OrbStack/Docker)
 #   shared secrets must match: ADMIN_API_KEY (api ↔ backoffice),
 #   WEB_REVALIDATE_SECRET (api) = REVALIDATE_SECRET (web)
 pnpm --filter @metrobet/api db:migrate   # apply SQL migrations
-pnpm --filter @metrobet/api db:seed      # demo promotions (idempotent)
+pnpm --filter @metrobet/api db:seed      # demo promotions + casino catalogue sync (idempotent)
 
 pnpm dev                    # all apps (turbo builds contracts first)
 pnpm --filter @metrobet/web dev
@@ -128,6 +128,8 @@ isolated so it can be swapped later without touching components:
 - `apps/web/src/features/promotions/CLAUDE.md`: promo slider, promotion pages
 - `apps/api/src/modules/promotions/CLAUDE.md`: promotions API, admin endpoints, live/schedule rules
 - `apps/backoffice/src/features/promotions/CLAUDE.md`: promotions management screens
+- `apps/api/src/modules/casino/CLAUDE.md`: game catalogue, aggregator port, mock aggregator
+- `apps/web/src/features/casino/CLAUDE.md`: casino lobby, listings, favorites, launcher
 
 ## Roadmap
 
@@ -136,7 +138,8 @@ isolated so it can be swapped later without touching components:
    2a. ✅ Promotions: promo slider on home/section pages, `/promotions` list and detail pages
    2b. ✅ Postgres + Drizzle, audit log, media uploads, backoffice promotions management (list with
    drag-to-reorder/toggle/delete, editor with live preview), instant site revalidation
-3. ⏳ Casino: lobby, categories/providers, game tile, game launcher (mock aggregator)
+3. ✅ Casino: lobby, categories, providers, search, favorites/recent, demo launcher (mock
+   aggregator synced into Postgres). Crash page lists crash games
 4. ⏳ Sportsbook: sports/leagues/events, odds button, bet slip, live (mock odds feed)
 5. ⏳ Crash games section
 6. ⏳ Backoffice screens (players, bets, games, sportsbook management, audit log)

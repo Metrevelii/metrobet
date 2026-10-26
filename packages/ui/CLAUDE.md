@@ -12,12 +12,14 @@ so there is no build step.
 | `@metrobet/ui/styles.css` | the only stylesheet an app imports (Tailwind + tokens + theme)        |
 | `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font |
 
-Components: `Alert`, `AlertDialog*`, `Badge`, `Button`, `Card*`, `Carousel*`, `HeroBanner`,
+Components: `Alert`, `AlertDialog*`, `Badge`, `Button`, `Card*`, `Carousel*`, `Chip`, `HeroBanner`,
 `Input`, `Label`, `NativeSelect`, `Skeleton`, `Switch`, `Tabs*`, `Textarea`.
 
 - `HeroBanner`: artwork + scrim + badge/title/subtitle/action. `layout`: `responsive` (site),
   `desktop` / `mobile` (fixed, e.g. backoffice previews). Aspect classes in `heroBannerAspect`.
   The site's promo slider and the backoffice preview both render it, so they never drift.
+- `Chip`: pill filter/toggle (`selected`); as a button it sets `aria-pressed`, with `asChild` it
+  styles links (set `aria-current`). Used by casino categories and backoffice pickers.
 - Form controls show the error style via `aria-invalid` (the backoffice `Field` sets it).
 
 ## How theming works

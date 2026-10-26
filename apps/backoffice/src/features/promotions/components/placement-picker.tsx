@@ -1,7 +1,7 @@
 'use client';
 
 import { PROMOTION_PLACEMENTS, type PromotionPlacement } from '@metrobet/contracts';
-import { cn } from '@metrobet/ui';
+import { Chip } from '@metrobet/ui';
 import { Check } from 'lucide-react';
 
 import { PLACEMENT_LABELS } from '../form-state';
@@ -28,21 +28,10 @@ export function PlacementPicker({ value, onChange, error }: PlacementPickerProps
         {PROMOTION_PLACEMENTS.map((placement) => {
           const selected = value.includes(placement);
           return (
-            <button
-              key={placement}
-              type="button"
-              aria-pressed={selected}
-              onClick={() => toggle(placement)}
-              className={cn(
-                'inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors',
-                selected
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-              )}
-            >
-              {selected && <Check className="size-3.5" />}
+            <Chip key={placement} selected={selected} onClick={() => toggle(placement)}>
+              {selected && <Check />}
               {PLACEMENT_LABELS[placement]}
-            </button>
+            </Chip>
           );
         })}
       </div>
