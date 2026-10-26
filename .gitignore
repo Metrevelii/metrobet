@@ -1,0 +1,42 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# turbo
+.turbo/
+
+# env: commit only the templates (.env.example), never real values
+.env
+.env.*
+!.env.example
+
+# secrets & credentials
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+secrets/
+credentials*.json
+service-account*.json
+.npmrc.local
+
+# logs & coverage
+*.log
+coverage/
+
+# os / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

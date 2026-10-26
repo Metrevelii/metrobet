@@ -1,0 +1,39 @@
+/*
+ * Single stylesheet entry for every app: `@import '@metrobet/ui/styles.css';`
+ * Swap the theme import below to change the whole design.
+ */
+@import 'tailwindcss';
+@import './tokens.css';
+@import '../themes/midnight-pro.css';
+
+@source '../';
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+/* Odds, balances and timers must not jitter when digits change. */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Soft primary-tinted glow for hero and promo surfaces. */
+@utility bg-glow {
+  background-image: radial-gradient(
+    120% 120% at 0% 0%,
+    color-mix(in oklab, var(--color-primary) 18%, transparent),
+    transparent 60%
+  );
+}

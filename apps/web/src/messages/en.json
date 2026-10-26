@@ -1,0 +1,41 @@
+{
+  "Metadata": {
+    "title": "Metrobet: Sports betting, Casino & Crash games",
+    "description": "Live sports betting with the best odds, thousands of slots and crash games."
+  },
+  "Nav": {
+    "home": "Home",
+    "sports": "Sports",
+    "live": "Live",
+    "casino": "Casino",
+    "crash": "Crash",
+    "betslip": "Betslip"
+  },
+  "Header": {
+    "login": "Log in",
+    "register": "Sign up",
+    "search": "Search teams, leagues, games"
+  },
+  "Locale": {
+    "label": "Language",
+    "ka": "ქართული",
+    "en": "English",
+    "ru": "Русский"
+  },
+  "Betslip": {
+    "title": "Betslip",
+    "empty": "Your betslip is empty",
+    "emptyHint": "Tap on odds to add selections"
+  },
+  "Home": {
+    "heroTitle": "Sports, casino and crash in one place",
+    "heroSubtitle": "Top odds, live betting and thousands of games.",
+    "heroCta": "Start playing",
+    "liveNow": "Live now",
+    "popularGames": "Popular games",
+    "viewAll": "View all"
+  },
+  "Common": {
+    "comingSoon": "Coming soon"
+  }
+}

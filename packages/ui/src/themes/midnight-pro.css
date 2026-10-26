@@ -1,0 +1,90 @@
+/*
+ * Theme: Midnight Pro (default).
+ *
+ * Near-black navy surfaces, electric-lime primary, green/red odds movement.
+ * Every theme must define the full `--mb-*` set below for both modes.
+ * To change the design, add a new file next to this one and switch the
+ * import in ../styles/index.css. See packages/ui/CLAUDE.md.
+ */
+
+:root,
+[data-mode='dark'] {
+  color-scheme: dark;
+
+  --mb-background: #0b0e14;
+  --mb-foreground: #e8ecf4;
+  --mb-card: #141925;
+  --mb-popover: #1a2030;
+  --mb-muted: #1c2333;
+  --mb-muted-foreground: #8b93a7;
+  --mb-accent: #222a3c;
+  --mb-border: #232b3d;
+  --mb-input: #2a3347;
+  --mb-ring: #c6ff3d;
+
+  --mb-primary: #c6ff3d;
+  --mb-primary-hover: #d4ff6b;
+  --mb-primary-foreground: #0b0e14;
+  --mb-secondary: #1c2333;
+
+  --mb-success: #2ee59d;
+  --mb-warning: #ffb020;
+  --mb-info: #4da3ff;
+  --mb-destructive: #ff4d5e;
+  --mb-on-status: #0b0e14;
+
+  --mb-odds-up: #2ee59d;
+  --mb-odds-down: #ff4d5e;
+  --mb-live: #ff3b4e;
+
+  --mb-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --mb-shadow-md: 0 4px 16px rgb(0 0 0 / 0.45);
+  --mb-shadow-lg: 0 12px 40px rgb(0 0 0 / 0.55);
+  --mb-shadow-glow: 0 0 24px rgb(198 255 61 / 0.35);
+}
+
+[data-mode='light'] {
+  color-scheme: light;
+
+  --mb-background: #f4f6fa;
+  --mb-foreground: #0b0e14;
+  --mb-card: #ffffff;
+  --mb-popover: #ffffff;
+  --mb-muted: #ebeef4;
+  --mb-muted-foreground: #5b6478;
+  --mb-accent: #e3e7ef;
+  --mb-border: #dce1ea;
+  --mb-input: #cfd5e0;
+  --mb-ring: #7db000;
+
+  --mb-primary: #b5f03a;
+  --mb-primary-hover: #a5e021;
+  --mb-primary-foreground: #0b0e14;
+  --mb-secondary: #ebeef4;
+
+  --mb-success: #0fa968;
+  --mb-warning: #d98a00;
+  --mb-info: #1f7ae0;
+  --mb-destructive: #e5293c;
+  --mb-on-status: #ffffff;
+
+  --mb-odds-up: #0fa968;
+  --mb-odds-down: #e5293c;
+  --mb-live: #e5293c;
+
+  --mb-shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06);
+  --mb-shadow-md: 0 4px 16px rgb(16 24 40 / 0.08);
+  --mb-shadow-lg: 0 12px 40px rgb(16 24 40 / 0.12);
+  --mb-shadow-glow: 0 0 24px rgb(125 176 0 / 0.3);
+}
+
+:root {
+  --mb-radius-sm: 6px;
+  --mb-radius-md: 10px;
+  --mb-radius-lg: 14px;
+  --mb-radius-xl: 20px;
+
+  /* Font variables are provided by @metrobet/ui/fonts (next/font). */
+  --mb-font-sans: var(--font-brand), var(--font-georgian), ui-sans-serif, system-ui, sans-serif;
+  --mb-font-mono: var(--font-brand-mono), ui-monospace, monospace;
+}

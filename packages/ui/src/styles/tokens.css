@@ -1,0 +1,67 @@
+/*
+ * Design-token contract.
+ *
+ * Maps the semantic `--mb-*` variables (defined by the active theme in ../themes)
+ * to Tailwind utilities such as `bg-card`, `text-muted-foreground`, `rounded-lg`.
+ * This file is design-agnostic: changing the look means changing the theme file,
+ * never this one. Names follow shadcn/ui conventions so its components drop in.
+ */
+
+@custom-variant dark (&:where([data-mode='dark'], [data-mode='dark'] *));
+@custom-variant light (&:where([data-mode='light'], [data-mode='light'] *));
+
+/* Remove Tailwind's default palette so only semantic colors can be used. */
+@theme {
+  --color-*: initial;
+}
+
+@theme inline {
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #fff;
+  --color-black: #000;
+
+  --color-background: var(--mb-background);
+  --color-foreground: var(--mb-foreground);
+  --color-card: var(--mb-card);
+  --color-card-foreground: var(--mb-foreground);
+  --color-popover: var(--mb-popover);
+  --color-popover-foreground: var(--mb-foreground);
+  --color-muted: var(--mb-muted);
+  --color-muted-foreground: var(--mb-muted-foreground);
+  --color-accent: var(--mb-accent);
+  --color-accent-foreground: var(--mb-foreground);
+  --color-border: var(--mb-border);
+  --color-input: var(--mb-input);
+  --color-ring: var(--mb-ring);
+
+  --color-primary: var(--mb-primary);
+  --color-primary-hover: var(--mb-primary-hover);
+  --color-primary-foreground: var(--mb-primary-foreground);
+  --color-secondary: var(--mb-secondary);
+  --color-secondary-foreground: var(--mb-foreground);
+
+  --color-success: var(--mb-success);
+  --color-warning: var(--mb-warning);
+  --color-info: var(--mb-info);
+  --color-destructive: var(--mb-destructive);
+  --color-on-status: var(--mb-on-status);
+
+  /* Domain tokens */
+  --color-odds-up: var(--mb-odds-up);
+  --color-odds-down: var(--mb-odds-down);
+  --color-live: var(--mb-live);
+
+  --radius-sm: var(--mb-radius-sm);
+  --radius-md: var(--mb-radius-md);
+  --radius-lg: var(--mb-radius-lg);
+  --radius-xl: var(--mb-radius-xl);
+
+  --shadow-sm: var(--mb-shadow-sm);
+  --shadow-md: var(--mb-shadow-md);
+  --shadow-lg: var(--mb-shadow-lg);
+  --shadow-glow: var(--mb-shadow-glow);
+
+  --font-sans: var(--mb-font-sans);
+  --font-mono: var(--mb-font-mono);
+}
