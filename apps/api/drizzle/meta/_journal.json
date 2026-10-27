@@ -29,6 +29,27 @@
       "when": 1793090197725,
       "tag": "0003_clammy_bloodaxe",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793112957775,
+      "tag": "0004_promo_blocks_enrollments",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793112958158,
+      "tag": "0005_drop_promo_content_terms",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793113931654,
+      "tag": "0006_activity_wheel_rewards",
+      "breakpoints": true
     }
   ]
 }

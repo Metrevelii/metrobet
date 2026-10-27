@@ -26,7 +26,7 @@ export async function createTestApp() {
   await app.init();
 
   const db = app.get<Database>(DRIZZLE);
-  const reset = () => db.execute(sql`TRUNCATE promotions, audit_log`);
+  const reset = () => db.execute(sql`TRUNCATE promotions, audit_log CASCADE`);
 
   /** Creates a staff member with `role` and returns Authorization headers for their session. */
   let staffCount = 0;

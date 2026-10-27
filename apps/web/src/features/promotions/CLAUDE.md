@@ -58,6 +58,45 @@ off, so autoplay is off too. Don't add a separate `setInterval`.
 
 `/promotions/[slug]` is not prerendered per slug (promotions change at runtime), so the page
 awaits `params` inside `<Suspense>`. Because of streaming, an unknown/expired slug renders the
-not-found UI with `noindex` but an HTTP 200. Acceptable for now. `content` is split into
-paragraphs on blank lines and `terms` into list items on newlines. The CTA is hidden when
-`ctaHref` is null.
+not-found UI with `noindex` but an HTTP 200. Acceptable for now. The banner CTA is hidden when
+`ctaHref` is null. Below the banner, `PromoBlocks` renders the page's blocks in order.
+
+## Blocks (`components/blocks/`)
+
+| Block       | Renderer         | Notes                                                |
+| ----------- | ---------------- | ---------------------------------------------------- |
+| `richText`  | `RichTextBlock`  | optional heading; paragraphs split on blank lines    |
+| `steps`     | `StepsBlock`     | numbered cards, up to 6                              |
+| `countdown` | `CountdownBlock` | client `Countdown` to `endsAt`; dashes on the server |
+| `prizes`    | `PrizesBlock`    | first 3 rows highlighted                             |
+| `faq`       | `FaqBlock`       | native `<details>`, no JS                            |
+| `terms`     | `TermsBlock`     | one rule per line + "valid until"                    |
+| `optIn`     | `OptInBlock`     | join card; player state streams in (see below)       |
+
+`promo-blocks.tsx` is the single `switch` over block types; TypeScript makes it exhaustive.
+
+**Opt-in:** `OptInBlock` puts `OptInStatus` in its own `<Suspense>` (request-time: reads the
+session cookie via `getEnrollment()`). `OptInButton` (client) shows "Log in to join" (→
+`/login?next=…`), "Join" (Server Action `enrollInPromotion` in `actions.ts`), or "You're in". The
+cached promotion itself never contains player data.
+
+**Wheel:** `WheelBlock` (server) loads the game name (`getGame` from casino) and
+`getWheelState()`, then renders `PromoWheel` (client). Spinning calls the `spinWheel` action;
+the **server picks the segment**, the client only animates (`rotationFor`: 5 extra turns, lands
+within the segment's middle 60%, 5 s, instant with reduced motion) and applies the new state when
+the animation ends. `WheelGraphic` is plain SVG with theme `fill-*` classes. In development the
+block shows **"Dev: simulate a bet"** (`simulateBet` action → `POST /api/dev/activity/casino-bet`
+with one step's amount on the free-spins game). Joining via `OptInButton` calls
+`router.refresh()` so mechanic blocks re-read the player's state.
+
+## Adding a block type
+
+1. Contracts (`promotions/blocks.ts`): add to `PROMO_BLOCK_TYPES`, a schema, a view schema and a
+   `localizePromoBlock` case (+ any cross-field rule in `promotionInputSchema`).
+2. Site: a renderer in `components/blocks/` + a case in `promo-blocks.tsx` (+ messages in all
+   three locales for any fixed UI text).
+3. Backoffice: `BLOCK_LABELS` + `newBlock` in `form-state.ts`, `BLOCK_ICONS` / `BLOCK_FIELDS`
+   (and `ITEM_FIELDS` for lists) in `page-builder.tsx`.
+
+No migration is needed: blocks live in one `jsonb` column. Interactive blocks also need a
+mechanic in the API (see "Engine" in `apps/api/src/modules/promotions/CLAUDE.md`).

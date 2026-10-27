@@ -1,5 +1,10 @@
 import type { Locale, Promotion, PromotionCard, PromotionDetail } from '@metrobet/contracts';
-import { getPromotionStatus, localize } from '@metrobet/contracts';
+import {
+  getPromotionStatus,
+  localize,
+  localizePromoBlock,
+  requiresOptIn,
+} from '@metrobet/contracts';
 
 /** Active and inside its schedule window at `now` (ms). */
 export function isLive(promotion: Promotion, now: number): boolean {
@@ -22,7 +27,7 @@ export function toCard(promotion: Promotion, locale: Locale): PromotionCard {
 export function toDetail(promotion: Promotion, locale: Locale): PromotionDetail {
   return {
     ...toCard(promotion, locale),
-    content: localize(promotion.content, locale),
-    terms: localize(promotion.terms, locale),
+    requiresOptIn: requiresOptIn(promotion.blocks),
+    blocks: promotion.blocks.map((block) => localizePromoBlock(block, locale)),
   };
 }

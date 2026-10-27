@@ -74,6 +74,47 @@
       "sports": "Sports",
       "crash": "Crash",
       "general": "Bonus"
+    },
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec",
+      "ended": "This promotion has ended"
+    },
+    "optIn": {
+      "join": "Join",
+      "joining": "Joining…",
+      "joined": "You're in",
+      "login": "Log in to join",
+      "error": "Couldn't join. Please try again."
+    },
+    "wheel": {
+      "unit": "FS",
+      "earnRule": "Every {amount} wagered on {games} = 1 spin.",
+      "prizeRule": "Every segment wins free spins on {game}.",
+      "login": "Log in to spin",
+      "joinFirst": "Join the promotion above to start earning spins.",
+      "spinsAvailable": "Spins available",
+      "progressLabel": "Progress to your next spin",
+      "toNextSpin": "Wager {amount} more for your next spin",
+      "spin": "Spin",
+      "spinning": "Spinning…",
+      "won": "You won {count, plural, one {# free spin} other {# free spins}} on {game}!",
+      "wins": "Your wins",
+      "winItem": "{count, plural, one {# free spin} other {# free spins}}",
+      "simulate": "Dev: simulate a {amount} bet",
+      "gameTypes": {
+        "slot": "slots",
+        "crash": "crash games",
+        "table": "table games"
+      },
+      "errors": {
+        "signedOut": "Your session ended. Log in again to spin.",
+        "notEligible": "Join the promotion first.",
+        "noSpins": "No spins left. Keep playing to earn more.",
+        "failed": "Couldn't spin. Please try again."
+      }
     }
   },
   "Errors": {

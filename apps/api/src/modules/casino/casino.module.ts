@@ -32,6 +32,6 @@ import { WebModule } from '../web/web.module.js';
       ) => (config.get('CASINO_AGGREGATOR', { infer: true }) === 'public-demos' ? demos : mock),
     },
   ],
-  exports: [CasinoSyncService],
+  exports: [CasinoService, CasinoSyncService],
 })
 export class CasinoModule {}

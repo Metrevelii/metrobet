@@ -13,9 +13,8 @@ const input = (slug: string, overrides: Partial<PromotionInput> = {}): Promotion
   subtitle: text('subtitle'),
   ctaLabel: text('cta'),
   ctaHref: null,
-  content: text('content'),
-  terms: text('terms'),
   image: { desktop: '/promotions/a-desktop.svg', mobile: '/promotions/a-mobile.svg' },
+  blocks: [{ id: 'terms', type: 'terms', body: text('terms') }],
   placements: ['home', 'casino'],
   isActive: true,
   startsAt: null,
@@ -123,6 +122,69 @@ describe('promotions (e2e)', () => {
 
     await http().get('/api/promotions/off?locale=en').expect(404);
     await http().get('/api/promotions?locale=de').expect(400);
+  });
+
+  const sendBlocks = (blocks: unknown[], overrides: Partial<PromotionInput> = {}) =>
+    http()
+      .post('/api/admin/promotions')
+      .set(ADMIN_HEADERS)
+      .send({ ...input('blocks'), ...overrides, blocks });
+
+  it('validates page blocks', async () => {
+    const optIn = { id: 'join', type: 'optIn', title: text('join'), body: text('body') };
+    const { body } = await sendBlocks([{ id: 'x', type: 'no-such-block' }]).expect(400);
+    expect(body.issues[0].path).toBe('blocks.0.type');
+    await sendBlocks([optIn, { ...optIn, id: 'join-2' }]).expect(400);
+    await sendBlocks([{ id: 'c', type: 'countdown', title: text('ends') }]).expect(400);
+    await sendBlocks([{ id: 'c', type: 'countdown', title: text('ends') }], {
+      endsAt: '2099-01-01T00:00:00.000Z',
+    }).expect(201);
+  });
+
+  it('lets signed-in players opt in to live promotions that ask for it', async () => {
+    const optIn = { id: 'join', type: 'optIn' as const, title: text('join'), body: text('body') };
+    await create(input('tournament', { blocks: [optIn] }));
+    await create(input('plain'));
+
+    const { body: detail } = await http().get('/api/promotions/tournament?locale=en').expect(200);
+    expect(detail).toMatchObject({
+      requiresOptIn: true,
+      blocks: [{ id: 'join', type: 'optIn', title: 'join en', body: 'body en' }],
+    });
+
+    await http().post('/api/promotions/tournament/enrollment').expect(401);
+
+    const { body: registered } = await http()
+      .post('/api/auth/register')
+      .send({
+        identifier: `promo-${Date.now()}@example.com`,
+        password: 'Str0ng!Passw0rd',
+        dateOfBirth: '1990-01-01',
+        acceptTerms: true,
+        locale: 'en',
+      })
+      .expect(201);
+    const player = { authorization: `Bearer ${registered.session.token}` };
+
+    const { body: before } = await http()
+      .get('/api/promotions/tournament/enrollment')
+      .set(player)
+      .expect(200);
+    expect(before).toEqual({ enrolled: false, enrolledAt: null });
+
+    const { body: joined } = await http()
+      .post('/api/promotions/tournament/enrollment')
+      .set(player)
+      .expect(200);
+    expect(joined.enrolled).toBe(true);
+    const { body: again } = await http()
+      .post('/api/promotions/tournament/enrollment')
+      .set(player)
+      .expect(200);
+    expect(again).toEqual(joined);
+
+    await http().post('/api/promotions/plain/enrollment').set(player).expect(400);
+    await http().post('/api/promotions/missing/enrollment').set(player).expect(404);
   });
 
   describe('media upload', () => {

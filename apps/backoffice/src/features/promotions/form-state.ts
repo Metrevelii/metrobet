@@ -2,11 +2,15 @@ import {
   LOCALES,
   type Locale,
   type LocalizedText,
+  type PromoBlock,
+  type PromoBlockOf,
+  type PromoBlockType,
   type Promotion,
   type PromotionCategory,
   type PromotionInput,
   type PromotionPlacement,
   type PromotionStatus,
+  toMinor,
 } from '@metrobet/contracts';
 
 export const CATEGORY_LABELS: Record<PromotionCategory, string> = {
@@ -37,19 +41,77 @@ export const STATUS_LABELS: Record<PromotionStatus, string> = {
   inactive: 'Off',
 };
 
-export const LOCALIZED_FIELDS = ['title', 'subtitle', 'ctaLabel', 'content', 'terms'] as const;
+export const LOCALIZED_FIELDS = ['title', 'subtitle', 'ctaLabel'] as const;
 export type LocalizedField = (typeof LOCALIZED_FIELDS)[number];
 
+/** Page builder menu: label + one-line description per block type, in menu order. */
+export const BLOCK_LABELS: Record<PromoBlockType, { label: string; description: string }> = {
+  optIn: { label: 'Opt-in', description: 'Join button. Players must join to take part.' },
+  countdown: { label: 'Countdown', description: 'Time left until the end date.' },
+  steps: { label: 'Steps', description: 'How to take part, up to 6 steps.' },
+  richText: { label: 'Text', description: 'Paragraphs with an optional heading.' },
+  prizes: { label: 'Prizes', description: 'Places or tiers and what they win.' },
+  faq: { label: 'FAQ', description: 'Questions and answers.' },
+  terms: { label: 'Terms', description: 'Terms & conditions, one rule per line.' },
+  wheel: { label: 'Prize wheel', description: 'Spins earned by wagering; wins free spins.' },
+};
+
+/** Draft blocks: a rich-text heading is always a LocalizedText here ('' everywhere = none). */
+export type PromoBlockDraft =
+  | Exclude<PromoBlock, { type: 'richText' }>
+  | (Omit<PromoBlockOf<'richText'>, 'title'> & { title: LocalizedText });
+
 /** Form state: like PromotionInput, but with input-friendly strings for optional values. */
-export type PromotionDraft = Omit<PromotionInput, 'ctaHref' | 'startsAt' | 'endsAt'> & {
+export type PromotionDraft = Omit<PromotionInput, 'ctaHref' | 'startsAt' | 'endsAt' | 'blocks'> & {
   ctaHref: string;
   /** `YYYY-MM-DDTHH:mm` in the browser's time zone (datetime-local), or ''. */
   startsAt: string;
   endsAt: string;
+  blocks: PromoBlockDraft[];
 };
 
-const emptyText = (): LocalizedText =>
+export const emptyText = (): LocalizedText =>
   Object.fromEntries(LOCALES.map((locale) => [locale, ''])) as LocalizedText;
+
+const isEmptyText = (text: LocalizedText) => LOCALES.every((locale) => !text[locale].trim());
+
+/** Empty list item for blocks that have items. */
+export const BLOCK_ITEMS = {
+  steps: () => ({ title: emptyText(), text: emptyText() }),
+  prizes: () => ({ label: emptyText(), prize: emptyText() }),
+  faq: () => ({ question: emptyText(), answer: emptyText() }),
+};
+export type BlockWithItems = keyof typeof BLOCK_ITEMS;
+
+export function newBlock(type: PromoBlockType): PromoBlockDraft {
+  const id = crypto.randomUUID();
+  switch (type) {
+    case 'richText':
+      return { id, type, title: emptyText(), body: emptyText() };
+    case 'steps':
+    case 'prizes':
+    case 'faq':
+      return { id, type, title: emptyText(), items: [BLOCK_ITEMS[type]()] } as PromoBlockDraft;
+    case 'countdown':
+      return { id, type, title: emptyText() };
+    case 'terms':
+      return { id, type, body: emptyText() };
+    case 'optIn':
+      return { id, type, title: emptyText(), body: emptyText() };
+    case 'wheel':
+      return {
+        id,
+        type,
+        title: emptyText(),
+        earn: { stepAmount: toMinor(50), gameTypes: ['slot'] },
+        freeSpinsGame: '',
+        segments: [5, 10, 5, 20, 5, 10, 5, 50].map((freeSpins) => ({
+          freeSpins,
+          weight: Math.round(1000 / freeSpins),
+        })),
+      };
+  }
+}
 
 export function emptyDraft(): PromotionDraft {
   return {
@@ -59,9 +121,8 @@ export function emptyDraft(): PromotionDraft {
     subtitle: emptyText(),
     ctaLabel: emptyText(),
     ctaHref: '',
-    content: emptyText(),
-    terms: emptyText(),
     image: { desktop: '', mobile: '' },
+    blocks: [newBlock('richText'), newBlock('terms')],
     placements: ['home'],
     isActive: false,
     startsAt: '',
@@ -91,6 +152,9 @@ export function draftFromPromotion({
     ctaHref: promotion.ctaHref ?? '',
     startsAt: toLocalInput(promotion.startsAt),
     endsAt: toLocalInput(promotion.endsAt),
+    blocks: promotion.blocks.map((block) =>
+      block.type === 'richText' ? { ...block, title: block.title ?? emptyText() } : block,
+    ),
   };
 }
 
@@ -100,6 +164,9 @@ export function draftToInput(draft: PromotionDraft): PromotionInput {
     ctaHref: draft.ctaHref.trim() || null,
     startsAt: fromLocalInput(draft.startsAt),
     endsAt: fromLocalInput(draft.endsAt),
+    blocks: draft.blocks.map((block) =>
+      block.type === 'richText' && isEmptyText(block.title) ? { ...block, title: null } : block,
+    ),
   };
 }
 

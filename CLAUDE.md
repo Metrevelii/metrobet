@@ -128,7 +128,9 @@ isolated so it can be swapped later without touching components:
 - `packages/ui/CLAUDE.md`: design tokens, themes, component rules
 - `packages/contracts/CLAUDE.md`: shared schemas
 - `apps/web/src/features/promotions/CLAUDE.md`: promo slider, promotion pages
-- `apps/api/src/modules/promotions/CLAUDE.md`: promotions API, admin endpoints, live/schedule rules
+- `apps/api/src/modules/promotions/CLAUDE.md`: promotions API, admin endpoints, live/schedule rules,
+  promo engine (mechanic plugins, wheel, rewards)
+- `apps/api/src/modules/activity/CLAUDE.md`: activity bus (player bets → promotions), dev bet endpoint
 - `apps/backoffice/src/features/promotions/CLAUDE.md`: promotions management screens
 - `apps/api/src/modules/casino/CLAUDE.md`: game catalogue, aggregator port, mock aggregator
 - `apps/web/src/features/casino/CLAUDE.md`: Slots lobby, listings, favorites, launcher
@@ -151,13 +153,18 @@ isolated so it can be swapped later without touching components:
    development only**. Crash page lists crash games
 4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
    betslip (singles/accumulator, odds changes). Free deterministic simulated feed
-5. ⏳ Crash games section
-6. ⏳ Backoffice screens (players, bets, games, sportsbook management, audit log)
-7. 🟡 Auth ✅ (players: email or phone, 25+, code verification, password reset; staff accounts
+5. 🟡 Promo engine (adjarabet-style promotions as data + plugins, not a branch per promo):
+   ✅ page blocks (text, steps, countdown, prizes, FAQ, terms, opt-in) + backoffice page builder +
+   player opt-in. ✅ activity bus + mechanic plugins + **prize wheel** (spins from wager
+   checkpoints, free-spin rewards). ⏳ symbol collection, leaderboards, more instant-win skins,
+   calendar/raffle/cashback, templates/clone, per-promo theme
+6. ⏳ Crash games section
+7. ⏳ Backoffice screens (players, bets, games, sportsbook management, audit log)
+8. 🟡 Auth ✅ (players: email or phone, 25+, code verification, password reset; staff accounts
    with roles replace the shared admin key). ⏳ KYC, wallet/ledger, payments (TBC/BoG), real
    provider integrations
 
-Until step 7, frontends run on **mock data and mock providers**. Keep mocks behind the same
+Until step 8, frontends run on **mock data and mock providers**. Keep mocks behind the same
 interfaces the real integrations will use, so swapping them changes no UI code.
 
 ## Gotchas

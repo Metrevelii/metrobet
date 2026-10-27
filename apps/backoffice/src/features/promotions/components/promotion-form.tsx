@@ -22,13 +22,12 @@ import {
   NativeSelect,
   Switch,
   Tabs,
-  TabsContent,
   TabsList,
   TabsTrigger,
-  Textarea,
 } from '@metrobet/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ExternalLink } from 'lucide-react';
 import { type ReactNode, useState, useTransition } from 'react';
 
 import { type FieldErrors, toFieldErrors } from '@metrobet/contracts';
@@ -44,24 +43,34 @@ import {
   type PromotionDraft,
   slugify,
 } from '../form-state';
+import { siteUrl } from '@/lib/media';
+
 import { BannerPreview } from './banner-preview';
 import { ImageField } from './image-field';
+import { PageBuilder } from './page-builder';
 import { PlacementPicker } from './placement-picker';
 import { StatusBadge } from './status-badge';
 
-const LOCALIZED_INPUTS: { field: LocalizedField; label: string; multiline?: string }[] = [
+const LOCALIZED_INPUTS: { field: LocalizedField; label: string }[] = [
   { field: 'title', label: 'Title' },
   { field: 'subtitle', label: 'Subtitle' },
   { field: 'ctaLabel', label: 'Button label' },
-  { field: 'content', label: 'Page content', multiline: 'Separate paragraphs with a blank line.' },
-  { field: 'terms', label: 'Terms & conditions', multiline: 'One rule per line.' },
 ];
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex-wrap justify-between">
         <CardTitle>{title}</CardTitle>
+        {action}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">{children}</CardContent>
     </Card>
@@ -92,6 +101,22 @@ export function PromotionForm({ promotion }: { promotion?: Promotion }) {
 
   const localeHasErrors = (lang: Locale) =>
     Object.keys(errors).some((key) => key.endsWith(`.${lang}`));
+
+  // One language switch, shown in both Content and Page, edits every localized field.
+  const localeTabs = (
+    <Tabs value={locale} onValueChange={(value) => setLocale(value as Locale)}>
+      <TabsList>
+        {LOCALES.map((lang) => (
+          <TabsTrigger key={lang} value={lang}>
+            {LOCALE_LABELS[lang]}
+            {localeHasErrors(lang) && (
+              <span className="size-1.5 rounded-full bg-destructive" aria-label="has errors" />
+            )}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
+  );
 
   const submit = () => {
     const input = draftToInput(draft);
@@ -174,46 +199,46 @@ export function PromotionForm({ promotion }: { promotion?: Promotion }) {
         </Section>
 
         <Section title="Content">
-          <Tabs value={locale} onValueChange={(value) => setLocale(value as Locale)}>
-            <TabsList>
-              {LOCALES.map((lang) => (
-                <TabsTrigger key={lang} value={lang}>
-                  {LOCALE_LABELS[lang]}
-                  {localeHasErrors(lang) && (
-                    <span
-                      className="size-1.5 rounded-full bg-destructive"
-                      aria-label="has errors"
-                    />
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {LOCALES.map((lang) => (
-              <TabsContent key={lang} value={lang} className="mt-4 flex flex-col gap-4" lang={lang}>
-                {LOCALIZED_INPUTS.map(({ field, label, multiline }) => {
-                  const props = {
-                    value: draft[field][lang],
-                    onChange: (event: { target: { value: string } }) =>
-                      setLocalized(field, lang, event.target.value),
-                  };
-                  return (
-                    <Field
-                      key={field}
-                      label={label}
-                      error={errors[`${field}.${lang}`]}
-                      hint={multiline}
-                    >
-                      {multiline ? (
-                        <Textarea rows={field === 'content' ? 6 : 4} {...props} />
-                      ) : (
-                        <Input {...props} />
-                      )}
-                    </Field>
-                  );
-                })}
-              </TabsContent>
+          {localeTabs}
+          <div className="flex flex-col gap-4" lang={locale}>
+            {LOCALIZED_INPUTS.map(({ field, label }) => (
+              <Field key={field} label={label} error={errors[`${field}.${locale}`]}>
+                <Input
+                  value={draft[field][locale]}
+                  onChange={(event) => setLocalized(field, locale, event.target.value)}
+                />
+              </Field>
             ))}
-          </Tabs>
+          </div>
+        </Section>
+
+        <Section
+          title="Page"
+          action={
+            promotion && (
+              <Button variant="link" size="sm" asChild>
+                <a
+                  href={siteUrl(`/promotions/${promotion.slug}`, locale)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View on site <ExternalLink />
+                </a>
+              </Button>
+            )
+          }
+        >
+          <p className="text-sm text-muted-foreground">
+            The promotion page below the banner, top to bottom. Saved changes show on the site
+            within seconds.
+          </p>
+          {localeTabs}
+          <PageBuilder
+            blocks={draft.blocks}
+            onChange={(blocks) => set('blocks', blocks)}
+            locale={locale}
+            errors={errors}
+          />
         </Section>
 
         <Section title="Artwork">
@@ -301,7 +326,8 @@ export function PromotionForm({ promotion }: { promotion?: Promotion }) {
         <div className="flex items-end gap-3">
           <BannerPreview draft={draft} locale={locale} layout="mobile" className="w-1/2" />
           <p className="flex-1 text-xs text-muted-foreground">
-            Desktop and mobile as they appear in the site slider. Switch the language in Content.
+            Desktop and mobile as they appear in the site slider. Switch the language in Content or
+            Page.
           </p>
         </div>
       </aside>

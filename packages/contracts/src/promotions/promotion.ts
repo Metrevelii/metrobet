@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import { localizedTextSchema } from '../common/localized.js';
 import { localeSchema } from '../common/locale.js';
+import { slugSchema } from '../common/slug.js';
+import { PROMO_BLOCKS_MAX, promoBlockSchema, promoBlockViewSchema } from './blocks.js';
 
 /** Product area a promotion belongs to; drives the badge and filtering. */
 export const PROMOTION_CATEGORIES = ['casino', 'sports', 'crash', 'general'] as const;
@@ -13,20 +15,13 @@ export const PROMOTION_PLACEMENTS = ['home', 'sports', 'live', 'casino', 'crash'
 export const promotionPlacementSchema = z.enum(PROMOTION_PLACEMENTS);
 export type PromotionPlacement = z.infer<typeof promotionPlacementSchema>;
 
-export const slugSchema = z
-  .string()
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and dashes');
-
 /** Text-free artwork: copy is rendered as HTML on top, so one image serves every locale. */
 export const promotionImageSchema = z.object({
   desktop: z.string().min(1, 'Upload an image'),
   mobile: z.string().min(1, 'Upload an image'),
 });
 
-/**
- * Full promotion as stored and edited in the backoffice.
- * `content` paragraphs are separated by blank lines; `terms` has one rule per line.
- */
+/** Full promotion as stored and edited in the backoffice. `blocks` is its page, top to bottom. */
 export const promotionSchema = z.object({
   id: z.string(),
   slug: slugSchema,
@@ -36,9 +31,8 @@ export const promotionSchema = z.object({
   ctaLabel: localizedTextSchema,
   /** Where the CTA goes. Null means the promotion's own page. */
   ctaHref: z.string().nullable(),
-  content: localizedTextSchema,
-  terms: localizedTextSchema,
   image: promotionImageSchema,
+  blocks: z.array(promoBlockSchema),
   placements: z.array(promotionPlacementSchema),
   sortOrder: z.number().int(),
   isActive: z.boolean(),
@@ -71,11 +65,31 @@ export const promotionInputSchema = promotionSchema
       .regex(/^(\/|https:\/\/)/, 'Must start with / or https://')
       .nullable(),
     placements: z.array(promotionPlacementSchema).min(1, 'Pick at least one placement'),
+    blocks: z.array(promoBlockSchema).max(PROMO_BLOCKS_MAX),
   })
-  .refine(
-    ({ startsAt, endsAt }) => !startsAt || !endsAt || Date.parse(endsAt) > Date.parse(startsAt),
-    { path: ['endsAt'], message: 'End must be after start' },
-  );
+  .superRefine(({ startsAt, endsAt, blocks }, ctx) => {
+    if (startsAt && endsAt && Date.parse(endsAt) <= Date.parse(startsAt)) {
+      ctx.addIssue({ code: 'custom', path: ['endsAt'], message: 'End must be after start' });
+    }
+    const ids = new Set<string>();
+    let optIns = 0;
+    blocks.forEach((item, index) => {
+      if (ids.has(item.id)) {
+        ctx.addIssue({ code: 'custom', path: ['blocks', index], message: 'Duplicate block id' });
+      }
+      ids.add(item.id);
+      if (item.type === 'countdown' && !endsAt) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['blocks', index],
+          message: 'A countdown needs an end date (Schedule)',
+        });
+      }
+      if (item.type === 'optIn' && (optIns += 1) > 1) {
+        ctx.addIssue({ code: 'custom', path: ['blocks', index], message: 'Only one opt-in block' });
+      }
+    });
+  });
 export type PromotionInput = z.infer<typeof promotionInputSchema>;
 
 export const promotionActiveInputSchema = z.object({ isActive: z.boolean() });
@@ -100,8 +114,9 @@ export type PromotionCard = z.infer<typeof promotionCardSchema>;
 
 /** Promotion page payload, already localized by the API. */
 export const promotionDetailSchema = promotionCardSchema.extend({
-  content: z.string(),
-  terms: z.string(),
+  /** Players must opt in (the page has an opt-in block). */
+  requiresOptIn: z.boolean(),
+  blocks: z.array(promoBlockViewSchema),
 });
 export type PromotionDetail = z.infer<typeof promotionDetailSchema>;
 
@@ -115,3 +130,10 @@ export const promotionDetailQuerySchema = z.object({
   locale: localeSchema,
 });
 export type PromotionDetailQuery = z.infer<typeof promotionDetailQuerySchema>;
+
+/** The signed-in player's opt-in state for one promotion. */
+export const promotionEnrollmentSchema = z.object({
+  enrolled: z.boolean(),
+  enrolledAt: z.iso.datetime().nullable(),
+});
+export type PromotionEnrollment = z.infer<typeof promotionEnrollmentSchema>;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { localeSchema } from '../common/locale.js';
-import { slugSchema } from '../promotions/promotion.js';
+import { slugSchema } from '../common/slug.js';
 
 export const GAME_TYPES = ['slot', 'crash', 'table'] as const;
 export const gameTypeSchema = z.enum(GAME_TYPES);

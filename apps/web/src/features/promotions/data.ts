@@ -4,11 +4,16 @@ import {
   promotionCardSchema,
   type PromotionDetail,
   promotionDetailSchema,
+  type PromotionEnrollment,
+  promotionEnrollmentSchema,
   type PromotionPlacement,
+  type WheelState,
+  wheelStateSchema,
 } from '@metrobet/contracts';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { ApiError, apiGet } from '@/lib/api';
+import { clientHeaders, getSessionToken } from '@/lib/session';
 
 /** Revalidate this tag when promotions change in the backoffice. */
 export const PROMOTIONS_CACHE_TAG = 'promotions';
@@ -55,5 +60,44 @@ export async function getPromotion(locale: Locale, slug: string): Promise<Promot
     }
     cacheLife('seconds');
     throw error;
+  }
+}
+
+/**
+ * The signed-in player's opt-in state, or null when signed out (or the API failed: the join
+ * button then still renders and the action reports any error). Request-time: inside <Suspense>.
+ */
+export async function getEnrollment(slug: string): Promise<PromotionEnrollment | null> {
+  const token = await getSessionToken();
+  if (!token) return null;
+  try {
+    return await apiGet(
+      `promotions/${encodeURIComponent(slug)}/enrollment`,
+      promotionEnrollmentSchema,
+      {},
+      { token, headers: await clientHeaders() },
+    );
+  } catch (error) {
+    if (!(error instanceof ApiError && error.status === 401))
+      console.error('[promotions] Failed to load enrollment', error);
+    return null;
+  }
+}
+
+/** The signed-in player's progress on a wheel block, or null when signed out / unavailable. */
+export async function getWheelState(slug: string, blockId: string): Promise<WheelState | null> {
+  const token = await getSessionToken();
+  if (!token) return null;
+  try {
+    return await apiGet(
+      `promotions/${encodeURIComponent(slug)}/wheels/${encodeURIComponent(blockId)}`,
+      wheelStateSchema,
+      {},
+      { token, headers: await clientHeaders() },
+    );
+  } catch (error) {
+    if (!(error instanceof ApiError && error.status === 401))
+      console.error('[promotions] Failed to load wheel', error);
+    return null;
   }
 }

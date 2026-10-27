@@ -22,4 +22,8 @@ export abstract class PromotionsRepository {
   /** `ids` must contain every promotion exactly once, in the new order. */
   abstract reorder(ids: string[]): Promise<void>;
   abstract delete(id: string): Promise<Promotion | null>;
+  /** When the player opted in to the promotion, or null if they have not. */
+  abstract findEnrollment(promotionId: string, playerId: string): Promise<Date | null>;
+  /** Idempotent: enrolling again keeps the original date. Returns the enrollment date. */
+  abstract enroll(promotionId: string, playerId: string): Promise<Date>;
 }

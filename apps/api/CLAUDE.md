@@ -22,6 +22,7 @@ src/
                          health · promotions · audit (audit_log) · media (uploads)
                          · web (revalidates the player site's cache) · auth (sessions, guards)
                          · players · staff · notifications (codes; dev outbox)
+                         · activity (bus of player bets; promotions subscribe)
                        later: auth, wallet, sportsbook, casino, bonus, risk
 test/                  e2e specs (*.e2e-spec.ts) against a real `metrobet_test` database
 drizzle/               generated SQL migrations (commit them)

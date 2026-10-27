@@ -1,11 +1,16 @@
 import type { Promotion, PromotionInput } from '@metrobet/contracts';
 import { Inject, Injectable } from '@nestjs/common';
-import { asc, eq, max } from 'drizzle-orm';
+import { and, asc, eq, max } from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { isUniqueViolation } from '../../database/errors.js';
 import { PromotionSlugTakenError, PromotionsRepository } from './promotions.repository.js';
-import { type NewPromotionRow, type PromotionRow, promotions } from './promotions.schema.js';
+import {
+  type NewPromotionRow,
+  type PromotionRow,
+  promotionEnrollments,
+  promotions,
+} from './promotions.schema.js';
 
 const SORT_STEP = 10;
 
@@ -24,9 +29,8 @@ function toPromotion({
     subtitle: row.subtitle,
     ctaLabel: row.ctaLabel,
     ctaHref: row.ctaHref,
-    content: row.content,
-    terms: row.terms,
     image: { desktop: imageDesktop, mobile: imageMobile },
+    blocks: row.blocks,
     placements: row.placements,
     sortOrder: row.sortOrder,
     isActive: row.isActive,
@@ -113,6 +117,27 @@ export class DrizzlePromotionsRepository extends PromotionsRepository {
   async delete(id: string) {
     const [row] = await this.db.delete(promotions).where(eq(promotions.id, id)).returning();
     return row ? toPromotion(row) : null;
+  }
+
+  async findEnrollment(promotionId: string, playerId: string) {
+    const [row] = await this.db
+      .select({ enrolledAt: promotionEnrollments.enrolledAt })
+      .from(promotionEnrollments)
+      .where(
+        and(
+          eq(promotionEnrollments.promotionId, promotionId),
+          eq(promotionEnrollments.playerId, playerId),
+        ),
+      );
+    return row?.enrolledAt ?? null;
+  }
+
+  async enroll(promotionId: string, playerId: string) {
+    await this.db
+      .insert(promotionEnrollments)
+      .values({ promotionId, playerId })
+      .onConflictDoNothing();
+    return (await this.findEnrollment(promotionId, playerId))!;
   }
 
   private async translateErrors<T>(slug: string, run: () => Promise<T>): Promise<T> {

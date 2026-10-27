@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 
 import { type Env, validateEnv } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
+import { ActivityModule } from './modules/activity/activity.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CasinoModule } from './modules/casino/casino.module.js';
 import { HealthModule } from './modules/health/health.module.js';
@@ -29,6 +30,7 @@ import { StaffModule } from './modules/staff/staff.module.js';
         { ttl: 60_000, limit: config.get('AUTH_RATE_LIMIT', { infer: true }) },
       ],
     }),
+    ActivityModule,
     AuthModule,
     NotificationsModule,
     CasinoModule,

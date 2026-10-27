@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 
 import { AuditService } from '../audit/audit.service.js';
+import { CasinoService } from '../casino/casino.service.js';
 import { WebRevalidationService } from '../web/web-revalidation.service.js';
 import { PromotionSlugTakenError, PromotionsRepository } from './promotions.repository.js';
 
@@ -22,6 +23,7 @@ export class AdminPromotionsService {
     @Inject(PromotionsRepository) private readonly repository: PromotionsRepository,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(WebRevalidationService) private readonly web: WebRevalidationService,
+    @Inject(CasinoService) private readonly casino: CasinoService,
   ) {}
 
   list(): Promise<Promotion[]> {
@@ -33,6 +35,7 @@ export class AdminPromotionsService {
   }
 
   async create(actor: string, input: PromotionInput): Promise<Promotion> {
+    await this.checkFreeSpinGames(input);
     const created = await this.withSlugConflict(() => this.repository.create(input));
     await this.changed(actor, 'create', created.id, null, created);
     return created;
@@ -40,6 +43,7 @@ export class AdminPromotionsService {
 
   async update(actor: string, id: string, input: PromotionInput): Promise<Promotion> {
     const before = await this.get(id);
+    await this.checkFreeSpinGames(input);
     const after = this.orNotFound(
       id,
       await this.withSlugConflict(() => this.repository.update(id, input)),
@@ -74,6 +78,22 @@ export class AdminPromotionsService {
   async delete(actor: string, id: string): Promise<void> {
     const deleted = this.orNotFound(id, await this.repository.delete(id));
     await this.changed(actor, 'delete', id, deleted, null);
+  }
+
+  /** Free spins are a slot feature: each wheel must point at an existing slot game. */
+  private async checkFreeSpinGames({ blocks }: PromotionInput) {
+    const issues: { path: string; message: string }[] = [];
+    for (const [index, block] of blocks.entries()) {
+      if (block.type !== 'wheel') continue;
+      const game = await this.casino.getGame(block.freeSpinsGame).catch(() => null);
+      if (game?.type !== 'slot') {
+        issues.push({
+          path: `blocks.${index}.freeSpinsGame`,
+          message: game ? 'Free spins need a slot game' : 'No game with this slug',
+        });
+      }
+    }
+    if (issues.length > 0) throw new BadRequestException({ message: 'Validation failed', issues });
   }
 
   private async changed(

@@ -1,6 +1,8 @@
 'use server';
 
 import {
+  type GameCard,
+  gamePageSchema,
   MEDIA_MAX_BYTES,
   mediaUploadResponseSchema,
   type Promotion,
@@ -10,7 +12,7 @@ import {
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
-import { AdminApiError, adminFetch } from '@/lib/admin-api';
+import { AdminApiError, adminFetch, API_URL } from '@/lib/admin-api';
 import { type ActionResult, toFieldErrors } from '@metrobet/contracts';
 
 const LIST_PATH = '/promotions';
@@ -99,4 +101,24 @@ export async function uploadPromotionImage(formData: FormData): Promise<ActionRe
     });
     return url;
   });
+}
+
+/** Slot games matching `query` (name), for the wheel's free-spins game picker. */
+export async function searchSlotGames(query: unknown): Promise<GameCard[]> {
+  const search = z.string().trim().min(2).max(50).safeParse(query);
+  if (!search.success) return [];
+  const url = new URL(`${API_URL}/casino/games`);
+  url.search = new URLSearchParams({
+    type: 'slot',
+    search: search.data,
+    pageSize: '20',
+  }).toString();
+  try {
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) return [];
+    return gamePageSchema.parse(await response.json()).items;
+  } catch (error) {
+    console.error('[promotions] Game search failed', error);
+    return [];
+  }
 }

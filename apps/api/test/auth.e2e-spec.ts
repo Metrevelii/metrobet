@@ -33,7 +33,7 @@ describe('auth (e2e)', () => {
   beforeAll(async () => {
     ctx = await createTestApp();
   });
-  beforeEach(() => ctx.db.execute(sql`TRUNCATE players, sessions, verification_codes`));
+  beforeEach(() => ctx.db.execute(sql`TRUNCATE players, sessions, verification_codes CASCADE`));
   afterAll(() => ctx?.app.close());
 
   it('registers with email, signs in, verifies the contact and signs out', async () => {

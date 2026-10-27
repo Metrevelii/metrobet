@@ -1,3 +1,4 @@
+export * from './activity/activity.js';
 export * from './auth/auth.js';
 export * from './auth/identifier.js';
 export * from './casino/casino.js';
@@ -6,7 +7,11 @@ export * from './common/errors.js';
 export * from './common/forms.js';
 export * from './common/health.js';
 export * from './common/locale.js';
+export * from './common/money.js';
+export * from './common/slug.js';
 export * from './common/localized.js';
 export * from './media/media.js';
+export * from './promotions/blocks.js';
 export * from './promotions/promotion.js';
+export * from './promotions/wheel.js';
 export * from './sportsbook/sportsbook.js';
