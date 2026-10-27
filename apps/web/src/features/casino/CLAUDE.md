@@ -1,10 +1,17 @@
 # Casino (web)
 
-Shown to players as **Slots** (slot games only): lobby (`/slots`), categories
-(`/slots/[category]`: popular, new, jackpots), providers (`/slots/providers/[provider]`), search
-(`/slots/search?q=`), favorites (`/slots/favorites`), launcher (`/slots/play/[game]`). Old
-`/casino/*` URLs redirect (next.config). The `/crash` page (`type: 'crash'`) and the home
-"Popular games" row reuse the feature. Slot pages always pass `type: 'slot'` to listings.
+Shown to players as **Slots** (slot games only), organised like adjarabet:
+
+- **Provider tabs** (`ProviderTabs`): "All" (`/slots`) + one tab per provider that has slots
+  (`/slots/providers/[provider]`), with game counts, biggest catalogue first. Built from the
+  catalogue, so a newly synced provider (e.g. EGT via the aggregator) gets a tab automatically.
+- **Category chips** inside the current tab: Popular (default) / New / Jackpots as `?category=`
+  (`slotsHref({ provider, category })`), plus Favorites (`/slots/favorites`, all providers).
+- Search (`/slots/search?q=`), launcher (`/slots/play/[game]`). Old `/casino/*` and
+  `/slots/<category>` URLs redirect (next.config).
+
+The `/crash` page (`type: 'crash'`) and the home "Popular games" row reuse the feature. Slot pages
+always pass `type: 'slot'` to listings.
 
 ## Data
 

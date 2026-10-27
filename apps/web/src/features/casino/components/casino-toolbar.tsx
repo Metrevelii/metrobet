@@ -1,20 +1,27 @@
 import { getProviders } from '../data';
 import { CasinoSearch } from './casino-search';
-import { type CasinoSection, CategoryNav } from './category-nav';
-import { ProviderFilter } from './provider-filter';
+import { type CasinoChip, CategoryNav } from './category-nav';
+import { ProviderTabs } from './provider-tabs';
 
-type CasinoToolbarProps = { active?: CasinoSection; provider?: string; query?: string };
+export type CasinoToolbarProps = {
+  /** Active provider tab: `all`, a provider slug, or null (favorites, search). */
+  tab: string | null;
+  chip?: CasinoChip;
+  query?: string;
+};
 
-/** Search, provider filter and category chips shared by every casino page. */
-export async function CasinoToolbar({ active, provider, query }: CasinoToolbarProps) {
+/** Provider tabs, category chips and search, shared by every Slots page. */
+export async function CasinoToolbar({ tab, chip, query }: CasinoToolbarProps) {
   const providers = await getProviders();
   return (
-    <div className="flex flex-col gap-3">
-      <div className="grid gap-3 sm:grid-cols-[1fr_16rem]">
-        <CasinoSearch defaultValue={query} />
-        <ProviderFilter providers={providers} value={provider} />
+    <div className="flex flex-col gap-4">
+      <ProviderTabs providers={providers} active={tab} />
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <CategoryNav active={chip} provider={tab && tab !== 'all' ? tab : undefined} />
+        <div className="md:w-72">
+          <CasinoSearch defaultValue={query} />
+        </div>
       </div>
-      <CategoryNav active={active} />
     </div>
   );
 }

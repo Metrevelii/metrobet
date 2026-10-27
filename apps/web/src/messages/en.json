@@ -87,7 +87,6 @@
     "back": "Back to home"
   },
   "Casino": {
-    "lobby": "Lobby",
     "favorites": "Favorites",
     "recentlyPlayed": "Recently played",
     "providers": "Providers",
@@ -127,7 +126,8 @@
       "unavailable": "This game can't be opened right now",
       "unavailableHint": "Please try again in a moment or pick another game.",
       "rtp": "RTP {value}%"
-    }
+    },
+    "allGames": "All"
   },
   "Sports": {
     "sports": {

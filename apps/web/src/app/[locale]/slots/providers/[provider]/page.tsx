@@ -2,7 +2,13 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
-import { CasinoPage, GameGridSkeleton, GamesListing, getProviders } from '@/features/casino';
+import {
+  CasinoPage,
+  categoryParam,
+  GameGridSkeleton,
+  GamesListing,
+  getProviders,
+} from '@/features/casino';
 
 type Props = PageProps<'/[locale]/slots/providers/[provider]'>;
 
@@ -16,22 +22,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return provider ? { title: provider.name } : {};
 }
 
-async function ProviderGames({ params }: Pick<Props, 'params'>) {
-  const provider = await findProvider(params);
+/** A provider tab: that provider's slots, filtered by the category chip. */
+async function ProviderSlots({ params, searchParams }: Props) {
+  const [provider, category] = await Promise.all([
+    findProvider(params),
+    searchParams.then((query) => categoryParam(query.category)),
+  ]);
   if (!provider) notFound();
   return (
-    <CasinoPage provider={provider.slug} title={provider.name}>
-      <Suspense fallback={<GameGridSkeleton />}>
-        <GamesListing query={{ type: 'slot', provider: provider.slug }} />
+    <CasinoPage tab={provider.slug} chip={category}>
+      <h1 className="sr-only">{provider.name}</h1>
+      <Suspense key={category} fallback={<GameGridSkeleton />}>
+        <GamesListing query={{ type: 'slot', provider: provider.slug, category }} />
       </Suspense>
     </CasinoPage>
   );
 }
 
-export default function CasinoProviderPage({ params }: Props) {
+export default function ProviderPage(props: Props) {
   return (
     <Suspense fallback={<GameGridSkeleton />}>
-      <ProviderGames params={params} />
+      <ProviderSlots {...props} />
     </Suspense>
   );
 }

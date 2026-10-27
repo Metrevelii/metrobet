@@ -20,7 +20,11 @@ async function SearchResults({ searchParams }: Pick<Props, 'searchParams'>) {
   const t = await getTranslations('Casino');
 
   return (
-    <CasinoPage query={query} title={query.length >= 2 ? t('searchTitle', { query }) : undefined}>
+    <CasinoPage
+      tab={null}
+      query={query}
+      title={query.length >= 2 ? t('searchTitle', { query }) : undefined}
+    >
       {query.length >= 2 ? (
         <Suspense key={query} fallback={<GameGridSkeleton />}>
           <GamesListing query={{ type: 'slot', search: query }} />

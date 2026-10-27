@@ -87,7 +87,6 @@
     "back": "მთავარზე დაბრუნება"
   },
   "Casino": {
-    "lobby": "ლობი",
     "favorites": "რჩეულები",
     "recentlyPlayed": "ბოლოს ნათამაშები",
     "providers": "პროვაიდერები",
@@ -127,7 +126,8 @@
       "unavailable": "თამაშის გახსნა ახლა ვერ ხერხდება",
       "unavailableHint": "სცადეთ ცოტა ხანში ან აირჩიეთ სხვა თამაში.",
       "rtp": "RTP {value}%"
-    }
+    },
+    "allGames": "ყველა"
   },
   "Sports": {
     "sports": {

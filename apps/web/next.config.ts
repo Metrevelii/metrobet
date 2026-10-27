@@ -21,9 +21,19 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowLocalIP: process.env.IMAGES_ALLOW_LOCAL_IP === 'true',
   },
-  /** "Casino" was renamed "Slots": keep old links working. */
+  /** "Casino" was renamed "Slots", and categories became a `?category=` filter: keep old links working. */
   async redirects() {
     return [
+      {
+        source: '/slots/:category(new|jackpots|popular)',
+        destination: '/slots?category=:category',
+        permanent: true,
+      },
+      {
+        source: '/:locale(en|ru|ka)/slots/:category(new|jackpots|popular)',
+        destination: '/:locale/slots?category=:category',
+        permanent: true,
+      },
       { source: '/casino/:path*', destination: '/slots/:path*', permanent: true },
       {
         source: '/:locale(en|ru|ka)/casino/:path*',

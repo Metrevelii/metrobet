@@ -87,7 +87,6 @@
     "back": "На главную"
   },
   "Casino": {
-    "lobby": "Лобби",
     "favorites": "Избранное",
     "recentlyPlayed": "Недавно сыгранные",
     "providers": "Провайдеры",
@@ -127,7 +126,8 @@
       "unavailable": "Игру сейчас не удаётся открыть",
       "unavailableHint": "Попробуйте чуть позже или выберите другую игру.",
       "rtp": "RTP {value}%"
-    }
+    },
+    "allGames": "Все"
   },
   "Sports": {
     "sports": {

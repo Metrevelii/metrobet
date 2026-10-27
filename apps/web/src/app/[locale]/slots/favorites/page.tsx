@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function CasinoFavoritesPage() {
   const t = await getTranslations('Casino');
   return (
-    <CasinoPage active="favorites" title={t('favorites')}>
+    <CasinoPage tab={null} chip="favorites" title={t('favorites')}>
       <FavoritesGrid />
     </CasinoPage>
   );
