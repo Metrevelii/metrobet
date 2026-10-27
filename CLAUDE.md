@@ -53,10 +53,12 @@ pnpm install
 docker compose up -d        # postgres + redis (OrbStack/Docker)
 # env files (gitignored; copy from the .env.example next to each):
 #   apps/api/.env, apps/web/.env.local, apps/backoffice/.env.local
-#   shared secrets must match: ADMIN_API_KEY (api ↔ backoffice),
-#   WEB_REVALIDATE_SECRET (api) = REVALIDATE_SECRET (web)
+#   shared secret must match: WEB_REVALIDATE_SECRET (api) = REVALIDATE_SECRET (web)
 pnpm --filter @metrobet/api db:migrate   # apply SQL migrations
-pnpm --filter @metrobet/api db:seed      # demo promotions + casino catalogue sync (idempotent)
+pnpm --filter @metrobet/api db:seed      # demo promotions, casino sync, dev admin (idempotent)
+# backoffice login: admin@metrobet.local / SEED_ADMIN_PASSWORD from apps/api/.env
+# more staff: STAFF_EMAIL=… STAFF_NAME=… STAFF_ROLE=marketing STAFF_PASSWORD=… pnpm --filter @metrobet/api staff:create
+# dev codes (verification, password reset): API log or GET http://localhost:4000/api/dev/outbox
 
 pnpm dev                    # all apps (turbo builds contracts first)
 pnpm --filter @metrobet/web dev
@@ -132,6 +134,9 @@ isolated so it can be swapped later without touching components:
 - `apps/web/src/features/casino/CLAUDE.md`: casino lobby, listings, favorites, launcher
 - `apps/api/src/modules/sportsbook/CLAUDE.md`: odds feed port, simulated feed, store, Socket.IO
 - `apps/web/src/features/sportsbook/CLAUDE.md`: sports pages, live odds, betslip
+- `apps/api/src/modules/auth/CLAUDE.md`: sessions, guards, roles, codes, rate limits
+- `apps/api/src/modules/players/CLAUDE.md`: player accounts and auth endpoints
+- `apps/web/src/features/auth/CLAUDE.md`: login/register/verify/reset pages
 
 ## Roadmap
 
@@ -146,16 +151,18 @@ isolated so it can be swapped later without touching components:
    betslip (singles/accumulator, odds changes). Free deterministic simulated feed
 5. ⏳ Crash games section
 6. ⏳ Backoffice screens (players, bets, games, sportsbook management, audit log)
-7. ⏳ **Last:** auth, KYC, wallet/ledger, payments (TBC/BoG), real provider integrations
+7. 🟡 Auth ✅ (players: email or phone, 25+, code verification, password reset; staff accounts
+   with roles replace the shared admin key). ⏳ KYC, wallet/ledger, payments (TBC/BoG), real
+   provider integrations
 
 Until step 7, frontends run on **mock data and mock providers**. Keep mocks behind the same
 interfaces the real integrations will use, so swapping them changes no UI code.
 
 ## Gotchas
 
-- **Admin API protection is temporary**: `/api/admin/*` accepts a shared `ADMIN_API_KEY`
-  (sent only server-side by the backoffice). Audit actor is `backoffice:shared-key`. Replace with
-  staff auth + RBAC in roadmap step 7. Never expose the key to the browser (`NEXT_PUBLIC_*`).
+- **Auth**: players and staff use opaque bearer sessions kept in httpOnly cookies by the web
+  apps (never exposed to browser JS). Staff routes require `StaffAuthGuard` + `@Roles()`.
+  See `apps/api/src/modules/auth/CLAUDE.md`.
 - **TypeScript is pinned to ~6.0**: TS 7 (native) is out, but NestJS CLI 12 and
   typescript-eslint require < 6.1. Revisit when they support 7.
 - **pnpm 12 blocks dependency build scripts** unless listed under `allowBuilds` in

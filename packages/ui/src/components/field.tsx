@@ -1,10 +1,11 @@
 'use client';
 
-import { cn, Label } from '@metrobet/ui';
-import { cloneElement, type ReactElement, useId } from 'react';
+import { cn } from '../lib/cn';
+import { Label } from './label';
+import { cloneElement, type ReactElement, type ReactNode, useId } from 'react';
 
 type FieldProps = {
-  label: string;
+  label: ReactNode;
   error?: string;
   hint?: string;
   className?: string;

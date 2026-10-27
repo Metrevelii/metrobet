@@ -10,6 +10,7 @@ import type { Env } from './config/env.js';
 export function configureApp(app: NestExpressApplication) {
   const config = app.get<ConfigService<Env, true>>(ConfigService);
 
+  app.set('trust proxy', config.get('TRUST_PROXY', { infer: true }));
   app.setGlobalPrefix('api');
   const origins = config.get('CORS_ORIGINS', { infer: true });
   app.enableCors({ origin: origins, credentials: true });

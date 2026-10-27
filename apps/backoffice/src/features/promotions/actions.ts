@@ -11,10 +11,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 import { AdminApiError, adminFetch } from '@/lib/admin-api';
-import { type FieldErrors, toFieldErrors } from '@/lib/form-errors';
-
-export type ActionResult<T = void> =
-  { ok: true; data: T } | { ok: false; error: string; fieldErrors?: FieldErrors };
+import { type ActionResult, toFieldErrors } from '@metrobet/contracts';
 
 const LIST_PATH = '/promotions';
 

@@ -3,7 +3,8 @@ export const E2E_ENV = {
   // Separate database so e2e runs never touch dev data. CI overrides it via E2E_DATABASE_URL.
   DATABASE_URL:
     process.env.E2E_DATABASE_URL ?? 'postgres://metrobet:metrobet@localhost:5432/metrobet_test',
-  ADMIN_API_KEY: 'e2e-admin-key-0123456789abcdef0123456789abcdef',
+  AUTH_RATE_LIMIT: '1000',
+  SPORTSBOOK_FEED: 'simulated',
   WEB_REVALIDATE_SECRET: 'e2e-revalidate-secret-0123456789abcdef01234567',
   MEDIA_DIR: '.e2e-uploads',
 };

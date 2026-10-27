@@ -20,7 +20,8 @@ src/
   common/              guards (AdminKeyGuard), pipes (ZodValidationPipe)
   modules/<name>/      one folder per bounded context:
                          health · promotions · audit (audit_log) · media (uploads)
-                         · web (revalidates the player site's cache)
+                         · web (revalidates the player site's cache) · auth (sessions, guards)
+                         · players · staff · notifications (codes; dev outbox)
                        later: auth, wallet, sportsbook, casino, bonus, risk
 test/                  e2e specs (*.e2e-spec.ts) against a real `metrobet_test` database
 drizzle/               generated SQL migrations (commit them)
@@ -52,8 +53,8 @@ drizzle/               generated SQL migrations (commit them)
 
 ## Admin endpoints
 
-- Everything under `/api/admin/*` uses `@UseGuards(AdminKeyGuard)` (temporary shared key, header
-  `x-admin-key`). Attribute changes to `ADMIN_KEY_ACTOR` until staff accounts exist.
+- Everything under `/api/admin/*` uses `@UseGuards(StaffAuthGuard)` + `@Roles(...)` and records
+  `staffActor(staff)` as the audit actor (see `modules/auth/CLAUDE.md`).
 - Every admin mutation must `AuditService.record()` (before/after) and, if it changes what the
   player site shows, call `WebRevalidationService.revalidate(tag)`.
 - Media: `POST /api/admin/media/:folder` (multipart `file`). Type is checked by magic bytes

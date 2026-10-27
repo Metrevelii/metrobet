@@ -1,6 +1,8 @@
 import { apiErrorSchema } from '@metrobet/contracts';
 import type { z } from 'zod';
 
+import { getStaffToken } from './session';
+
 const API_URL = (process.env.API_URL ?? 'http://localhost:4000/api').replace(/\/$/, '');
 
 export class AdminApiError extends Error {
@@ -13,14 +15,8 @@ export class AdminApiError extends Error {
   }
 }
 
-function adminKey(): string {
-  const key = process.env.ADMIN_API_KEY;
-  if (!key) throw new Error('ADMIN_API_KEY is not set (see apps/backoffice/.env.example)');
-  return key;
-}
-
 /**
- * Server-only call to /api/admin/* with the shared admin key. Parses success bodies with
+ * Server-only call to /api/admin/* as the signed-in staff member (session cookie → bearer). Parses success bodies with
  * `schema` (or returns undefined for 204) and throws AdminApiError with the API's message.
  */
 export async function adminFetch<T extends z.ZodType>(
@@ -29,13 +25,14 @@ export async function adminFetch<T extends z.ZodType>(
   init: RequestInit = {},
 ): Promise<z.infer<T>> {
   const isJson = init.body !== undefined && !(init.body instanceof FormData);
+  const token = await getStaffToken();
   const response = await fetch(`${API_URL}/admin/${path.replace(/^\//, '')}`, {
     ...init,
     cache: 'no-store',
     headers: {
       accept: 'application/json',
       ...(isJson && { 'content-type': 'application/json' }),
-      'x-admin-key': adminKey(),
+      ...(token && { authorization: `Bearer ${token}` }),
       ...init.headers,
     },
   });

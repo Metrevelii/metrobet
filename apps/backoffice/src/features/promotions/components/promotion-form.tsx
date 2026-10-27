@@ -16,6 +16,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Field,
   Input,
   Label,
   NativeSelect,
@@ -30,8 +31,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useState, useTransition } from 'react';
 
-import { Field } from '@/components/field';
-import { type FieldErrors, toFieldErrors } from '@/lib/form-errors';
+import { type FieldErrors, toFieldErrors } from '@metrobet/contracts';
 
 import { savePromotion } from '../actions';
 import {

@@ -11,7 +11,7 @@ Public:
 | GET    | `/api/promotions?locale=ka&placement=home` | `PromotionCard[]`        |
 | GET    | `/api/promotions/:slug?locale=ka`          | `PromotionDetail` or 404 |
 
-Admin (`x-admin-key`, see `AdminKeyGuard`), all bodies validated with contracts schemas:
+Admin (staff session, roles `admin`/`marketing`), all bodies validated with contracts schemas:
 
 | Method | Path                               | Body             | Notes                            |
 | ------ | ---------------------------------- | ---------------- | -------------------------------- |

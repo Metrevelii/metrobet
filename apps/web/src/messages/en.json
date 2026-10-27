@@ -42,7 +42,8 @@
     "suspended": "Suspended",
     "comboSameEvent": "An accumulator can't contain two selections from the same event",
     "open": "Open betslip",
-    "count": "{count, plural, one {# selection} other {# selections}}"
+    "count": "{count, plural, one {# selection} other {# selections}}",
+    "bettingSoon": "Betting opens once deposits are available"
   },
   "Home": {
     "liveNow": "Live now",
@@ -184,6 +185,82 @@
       "home_away": "12",
       "draw_away": "X2",
       "drawLong": "Draw"
+    }
+  },
+  "Auth": {
+    "login": {
+      "title": "Log in",
+      "subtitle": "Welcome back to Metrobet",
+      "submit": "Log in",
+      "forgot": "Forgot password?",
+      "noAccount": "New to Metrobet?",
+      "register": "Create an account"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join in under a minute",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "login": "Log in",
+      "terms": "I am at least 25 years old and accept the terms and conditions and the responsible gaming policy."
+    },
+    "verify": {
+      "title": "Confirm your account",
+      "subtitle": "We sent a 6-digit code to {contact}",
+      "submit": "Confirm",
+      "resend": "Send a new code",
+      "resent": "A new code is on its way",
+      "later": "Do it later",
+      "done": "Your account is confirmed",
+      "continue": "Continue"
+    },
+    "forgot": {
+      "title": "Reset password",
+      "subtitle": "Enter your email or mobile number and we'll send you a code",
+      "send": "Send code",
+      "codeSent": "If an account exists, we sent a code to {contact}",
+      "newPassword": "New password",
+      "submit": "Set new password",
+      "done": "Password changed. Please log in.",
+      "back": "Back to log in"
+    },
+    "fields": {
+      "identifier": "Email or mobile number",
+      "identifierHint": "e.g. name@mail.com or 555 12 34 56",
+      "password": "Password",
+      "passwordHint": "At least 8 characters with a letter and a number",
+      "dateOfBirth": "Date of birth",
+      "code": "Verification code"
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "account": {
+      "menu": "Account",
+      "verify": "Confirm account",
+      "unverified": "Not confirmed",
+      "logout": "Log out"
+    },
+    "errors": {
+      "invalidCredentials": "Wrong email/phone or password",
+      "accountBlocked": "This account can't sign in. Please contact support.",
+      "accountExists": "An account with this email or phone already exists",
+      "invalidCode": "The code is wrong or has expired",
+      "tooManyRequests": "Too many attempts. Please wait a minute and try again.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "validation": {
+      "identifierRequired": "Enter your email or mobile number",
+      "identifierInvalid": "Enter a valid email or mobile number",
+      "passwordRequired": "Enter your password",
+      "passwordMin": "Use at least 8 characters",
+      "passwordMax": "Use at most 128 characters",
+      "passwordLetter": "Include at least one letter",
+      "passwordNumber": "Include at least one number",
+      "dateOfBirthRequired": "Enter your date of birth",
+      "dateOfBirthTooYoung": "You must be at least 25 years old",
+      "dateOfBirthInvalid": "Enter a valid date of birth",
+      "codeInvalid": "Enter the 6-digit code",
+      "termsRequired": "Please accept the terms to continue"
     }
   }
 }

@@ -1,6 +1,9 @@
-import { Button } from '@metrobet/ui';
+import { Button, Skeleton } from '@metrobet/ui';
 import { Search } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
+
+import { HeaderAccount } from '@/features/auth';
 
 import { HeaderTabs } from './header-tabs';
 import { LocaleSwitcher } from './locale-switcher';
@@ -18,10 +21,9 @@ export async function Header() {
             <Search />
           </Button>
           <LocaleSwitcher className="hidden sm:flex" />
-          <Button variant="ghost" size="sm">
-            {t('login')}
-          </Button>
-          <Button size="sm">{t('register')}</Button>
+          <Suspense fallback={<Skeleton className="h-8 w-36 rounded-md" />}>
+            <HeaderAccount />
+          </Suspense>
         </div>
       </div>
     </header>

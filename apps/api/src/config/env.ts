@@ -13,8 +13,13 @@ const envSchema = z.object({
     .default('http://localhost:3000')
     .transform((value) => value.split(',').map((origin) => origin.trim())),
 
-  /** Temporary shared key for /api/admin/* until staff auth lands (roadmap step 7). */
-  ADMIN_API_KEY: secret,
+  /** Requests per minute per client on auth routes (login, register, codes). */
+  AUTH_RATE_LIMIT: z.coerce.number().int().positive().default(10),
+  /**
+   * Express "trust proxy": which hops may set X-Forwarded-For. The web apps call the API
+   * server-side and forward the player's IP, so they must be trusted (loopback in dev).
+   */
+  TRUST_PROXY: z.string().default('loopback'),
 
   /** Uploaded files: stored under MEDIA_DIR, publicly served at MEDIA_PUBLIC_URL. */
   MEDIA_DIR: z.string().default('uploads'),

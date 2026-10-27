@@ -6,13 +6,16 @@ Next.js 16 App Router + `@metrobet/ui`. Runs on port 3001. English only (no i18n
 
 ```
 src/
-  app/                 routes (dashboard at /, /promotions, /promotions/new, /promotions/[id])
-  components/          backoffice-only components (Sidebar, PageHeader, Field)
+  app/(app)/           signed-in area (layout: sidebar + RequireStaff): dashboard, promotions…
+  app/login/           staff sign-in
+  proxy.ts             no session cookie → /login (fast path; the API validates everything)
+  components/          backoffice-only components (Sidebar, PageHeader)
+  features/auth/       login form/actions, getCurrentStaff, RequireStaff
   config/navigation.ts BACKOFFICE_NAV: single source for the sidebar
   features/<area>/     promotions (done) → see its CLAUDE.md; later players, bets, sportsbook…
   hooks/use-now.ts     current time after mount (keeps time-dependent UI out of static HTML)
-  lib/admin-api.ts     adminFetch(): server-only calls to /api/admin/* with the admin key
-  lib/form-errors.ts   Zod issues → { 'title.ka': message }
+  lib/admin-api.ts     adminFetch(): server-only calls to /api/admin/* with the staff session
+  lib/session.ts       mb_staff httpOnly cookie (SameSite=strict) + forwarded client headers
   lib/media.ts         resolveMediaUrl(): previews site-relative artwork from the web origin
 ```
 
@@ -23,15 +26,16 @@ src/
 - **Writes:** Server Actions in feature `actions.ts` (`'use server'`). They re-validate input
   with the contracts schema, call the API, `revalidatePath()` the list, and return
   `ActionResult` (`{ ok, data } | { ok: false, error, fieldErrors }`). Never throw to the client.
-- The admin key lives only in server env (`ADMIN_API_KEY`); client components never call the
-  API directly.
+- Staff sign in at `/login`; the session token lives in the httpOnly `mb_staff` cookie and is
+  sent as a bearer token by `adminFetch`. Client components never call the API directly.
+- Roles are enforced by the API (403); hide UI the role can't use when building new screens.
 - Optimistic UI for list operations (toggle/reorder/delete), with rollback on failure.
 - Anything time-dependent (statuses like live/expired) uses `useNow()`; dates shown to staff are
   formatted in `Asia/Tbilisi`.
 
 ## Env (`.env.local`, see `.env.example`)
 
-`API_URL`, `ADMIN_API_KEY` (= api's), `NEXT_PUBLIC_WEB_URL` (player site origin for previews).
+`API_URL`, `NEXT_PUBLIC_WEB_URL` (player site origin for previews).
 
 ## Planned scope
 

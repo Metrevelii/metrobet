@@ -1,11 +1,14 @@
 'use client';
 
-import { cn } from '@metrobet/ui';
+import type { StaffProfile } from '@metrobet/contracts';
+import { Badge, cn } from '@metrobet/ui';
+import { LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Suspense } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Suspense, useTransition } from 'react';
 
 import { BACKOFFICE_NAV, type NavItem } from '@/config/navigation';
+import { logout } from '@/features/auth/actions';
 
 const isActive = (pathname: string, href: string) =>
   href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
@@ -39,7 +42,35 @@ function ActiveLinks() {
   ));
 }
 
-export function Sidebar() {
+function StaffFooter({ staff }: { staff: StaffProfile }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  return (
+    <div className="mt-auto flex items-center gap-2 border-t pt-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 px-2">
+        <span className="truncate text-sm font-semibold">{staff.name}</span>
+        <Badge className="self-start">{staff.role}</Badge>
+      </div>
+      <button
+        type="button"
+        aria-label="Sign out"
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            await logout();
+            router.push('/login');
+            router.refresh();
+          })
+        }
+        className="flex size-9 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+      >
+        <LogOut className="size-4" />
+      </button>
+    </div>
+  );
+}
+
+export function Sidebar({ staff }: { staff: StaffProfile | null }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-6 border-r bg-card p-4 md:flex">
       <div className="px-2 text-lg font-black tracking-tight">
@@ -56,6 +87,7 @@ export function Sidebar() {
           <ActiveLinks />
         </Suspense>
       </nav>
+      {staff && <StaffFooter staff={staff} />}
     </aside>
   );
 }

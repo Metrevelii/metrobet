@@ -15,6 +15,8 @@ import { ArrowRight, Ticket, X } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 
 import { EmptyState } from '@/components/shared/empty-state';
+import { useSignedIn } from '@/features/auth/session-store';
+import { Link } from '@/i18n/navigation';
 
 import { marketLabel, selectionLabel } from '../labels';
 import { peekSelection, useSelectionsSignature } from '../realtime/live-store';
@@ -131,6 +133,7 @@ export function Betslip() {
   const t = useTranslations('Betslip');
   const format = useFormatter();
   const slip = useBetslip();
+  const signedIn = useSignedIn();
   const ids = slip?.items.map((item) => item.selectionId) ?? [];
   useSelectionsSignature(ids);
 
@@ -232,7 +235,15 @@ export function Betslip() {
           </Button>
         )}
         <p className="text-center text-xs text-muted-foreground">
-          {anySuspended ? t('suspended') : t('loginToBet')}
+          {anySuspended ? (
+            t('suspended')
+          ) : signedIn ? (
+            t('bettingSoon')
+          ) : (
+            <Link href="/login" className="font-semibold text-primary hover:underline">
+              {t('loginToBet')}
+            </Link>
+          )}
         </p>
       </div>
     </div>

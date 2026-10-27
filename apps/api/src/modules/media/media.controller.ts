@@ -16,13 +16,14 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { AdminKeyGuard } from '../../common/guards/admin-key.guard.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+import { Roles, StaffAuthGuard } from '../auth/auth.guards.js';
 import { MediaStorage } from './media-storage.js';
 import { sniffImageExtension } from './sniff-image.js';
 
 @Controller('admin/media')
-@UseGuards(AdminKeyGuard)
+@UseGuards(StaffAuthGuard)
+@Roles('marketing')
 export class MediaController {
   constructor(@Inject(MediaStorage) private readonly storage: MediaStorage) {}
 

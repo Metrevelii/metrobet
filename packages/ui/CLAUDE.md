@@ -12,8 +12,8 @@ so there is no build step.
 | `@metrobet/ui/styles.css` | the only stylesheet an app imports (Tailwind + tokens + theme)        |
 | `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font |
 
-Components: `Alert`, `AlertDialog*`, `Badge`, `Button`, `Card*`, `Carousel*`, `Chip`, `HeroBanner`,
-`Input`, `Label`, `NativeSelect`, `Sheet*` (bottom sheet), `Skeleton`, `Switch`, `Tabs*`, `Textarea`.
+Components: `Alert`, `AlertDialog*`, `Badge`, `Button`, `Card*`, `Carousel*`, `Checkbox`, `Chip`,
+`DropdownMenu*`, `Field` (label + control + hint/error, wires aria), `HeroBanner`, `Input`, `Label`, `NativeSelect`, `PasswordInput`, `Sheet*` (bottom sheet), `Skeleton`, `Switch`, `Tabs*`, `Textarea`.
 
 - `HeroBanner`: artwork + scrim + badge/title/subtitle/action. `layout`: `responsive` (site),
   `desktop` / `mobile` (fixed, e.g. backoffice previews). Aspect classes in `heroBannerAspect`.

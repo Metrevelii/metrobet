@@ -2,7 +2,7 @@ import type { Promotion, PromotionInput } from '@metrobet/contracts';
 import request from 'supertest';
 
 import { auditLog } from '../src/modules/audit/audit.schema.js';
-import { ADMIN_HEADERS, createTestApp } from './create-app.js';
+import { createTestApp } from './create-app.js';
 
 const text = (value: string) => ({ ka: `${value} ka`, en: `${value} en`, ru: `${value} ru` });
 
@@ -29,18 +29,27 @@ describe('promotions (e2e)', () => {
   const create = (body: PromotionInput) =>
     http().post('/api/admin/promotions').set(ADMIN_HEADERS).send(body).expect(201);
 
+  let ADMIN_HEADERS: Record<string, string>;
+
   beforeAll(async () => {
     ctx = await createTestApp();
+    ADMIN_HEADERS = await ctx.staffHeaders('marketing');
   });
   beforeEach(() => ctx.reset());
   afterAll(() => ctx?.app.close());
 
   describe('admin auth', () => {
-    it('rejects requests without the admin key', () =>
+    it('rejects requests without a staff session', () =>
       http().get('/api/admin/promotions').expect(401));
 
-    it('rejects a wrong admin key', () =>
-      http().get('/api/admin/promotions').set('x-admin-key', 'nope').expect(401));
+    it('rejects an invalid token', () =>
+      http().get('/api/admin/promotions').set('authorization', 'Bearer nope').expect(401));
+
+    it('rejects staff whose role may not manage promotions', async () =>
+      http()
+        .get('/api/admin/promotions')
+        .set(await ctx.staffHeaders('support'))
+        .expect(403));
   });
 
   it('creates promotions in display order, audits and revalidates', async () => {
@@ -53,6 +62,7 @@ describe('promotions (e2e)', () => {
 
     const audit = await ctx.db.select().from(auditLog);
     expect(audit.map((entry) => entry.action)).toEqual(['promotion.create', 'promotion.create']);
+    expect(audit[0]!.actor).toMatch(/^staff:/);
     expect(ctx.revalidate).toHaveBeenCalledWith('promotions');
   });
 
