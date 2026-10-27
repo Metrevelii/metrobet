@@ -24,7 +24,7 @@ export function GameGridSkeleton({ count = 12 }: { count?: number }) {
     <div className="@container">
       <div className={GAME_GRID}>
         {Array.from({ length: count }, (_, i) => (
-          <Skeleton key={i} className="aspect-3/4 rounded-lg" />
+          <Skeleton key={i} className="aspect-square rounded-lg" />
         ))}
       </div>
     </div>

@@ -38,7 +38,7 @@ const TYPE_MOTIFS: Record<Exclude<GameType, 'slot'>, string> = {
     '<circle cx="150" cy="165" r="78" fill="none" stroke="url(#accent)" stroke-width="14" stroke-dasharray="20 12"/><circle cx="150" cy="165" r="46" fill="url(#accent)"/><circle cx="150" cy="165" r="18" fill="#0b0e14" opacity=".5"/>',
 };
 
-/** Deterministic 300×400 tile art for a mock game: gradient, motif, title. */
+/** Deterministic 300×300 square tile art for a mock game: gradient, motif, title. */
 export function renderMockThumbnail(provider: MockProvider, title: string): string {
   const h = hash(title);
   const [from, to] = provider.palette;
@@ -46,25 +46,25 @@ export function renderMockThumbnail(provider: MockProvider, title: string): stri
     provider.type === 'slot' ? SLOT_MOTIFS[h % SLOT_MOTIFS.length]! : TYPE_MOTIFS[provider.type];
   const angle = h % 360;
   const lines = wrap(title);
-  const titleY = 330 - (lines.length - 1) * 30;
+  const titleY = 250 - (lines.length - 1) * 26;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
 <defs>
 <linearGradient id="bg" gradientTransform="rotate(${angle} .5 .5)"><stop offset="0" stop-color="${to}"/><stop offset="1" stop-color="#0b0e14"/></linearGradient>
 <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient>
-<radialGradient id="glow" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="${from}" stop-opacity=".55"/><stop offset="1" stop-color="${from}" stop-opacity="0"/></radialGradient>
-<linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#0b0e14" stop-opacity="0"/><stop offset="1" stop-color="#0b0e14" stop-opacity=".9"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".36" r=".5"><stop offset="0" stop-color="${from}" stop-opacity=".55"/><stop offset="1" stop-color="${from}" stop-opacity="0"/></radialGradient>
+<linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset=".45" stop-color="#0b0e14" stop-opacity="0"/><stop offset="1" stop-color="#0b0e14" stop-opacity=".9"/></linearGradient>
 </defs>
-<rect width="300" height="400" fill="url(#bg)"/>
-<rect width="300" height="400" fill="url(#glow)"/>
-${motif}
-<rect width="300" height="400" fill="url(#fade)"/>
+<rect width="300" height="300" fill="url(#bg)"/>
+<rect width="300" height="300" fill="url(#glow)"/>
+<g transform="translate(45 -8) scale(.7)">${motif}</g>
+<rect width="300" height="300" fill="url(#fade)"/>
 ${lines
   .map(
     (line, i) =>
-      `<text x="150" y="${titleY + i * 30}" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="26" fill="#fff">${escapeXml(line.toUpperCase())}</text>`,
+      `<text x="150" y="${titleY + i * 26}" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="23" fill="#fff">${escapeXml(line.toUpperCase())}</text>`,
   )
   .join('\n')}
-<text x="150" y="380" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#fff" fill-opacity=".7">${escapeXml(provider.name.toUpperCase())}</text>
+<text x="150" y="285" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#fff" fill-opacity=".7">${escapeXml(provider.name.toUpperCase())}</text>
 </svg>`;
 }

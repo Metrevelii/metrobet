@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 
 import { CasinoPage, GameGridSkeleton, GamesListing } from '@/features/casino';
 
-type Props = PageProps<'/[locale]/casino/[category]'>;
+type Props = PageProps<'/[locale]/slots/[category]'>;
 
 export function generateStaticParams() {
   return CASINO_CATEGORIES.map((category) => ({ category }));
@@ -28,7 +28,7 @@ async function CategoryView({ params }: Pick<Props, 'params'>) {
   return (
     <CasinoPage active={category} title={t(`categories.${category}`)}>
       <Suspense fallback={<GameGridSkeleton />}>
-        <GamesListing query={{ category }} />
+        <GamesListing query={{ type: 'slot', category }} />
       </Suspense>
     </CasinoPage>
   );

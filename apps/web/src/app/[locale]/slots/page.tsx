@@ -16,7 +16,7 @@ import { Link } from '@/i18n/navigation';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Nav');
-  return { title: t('casino') };
+  return { title: t('slots') };
 }
 
 async function LobbyRows() {
@@ -61,7 +61,7 @@ function LobbySkeleton() {
       <Skeleton className="h-6 w-40" />
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 xl:grid-cols-6">
         {Array.from({ length: 6 }, (__, i) => (
-          <Skeleton key={i} className="aspect-3/4 rounded-lg max-sm:[&:nth-child(n+4)]:hidden" />
+          <Skeleton key={i} className="aspect-square rounded-lg max-sm:[&:nth-child(n+4)]:hidden" />
         ))}
       </div>
     </div>
@@ -72,7 +72,7 @@ export default async function CasinoLobbyPage() {
   const t = await getTranslations('Nav');
   return (
     <CasinoPage active="lobby" top={<PromotionsSlider placement="casino" />}>
-      <h1 className="sr-only">{t('casino')}</h1>
+      <h1 className="sr-only">{t('slots')}</h1>
       <RecentlyPlayedRow />
       <Suspense fallback={<LobbySkeleton />}>
         <LobbyRows />

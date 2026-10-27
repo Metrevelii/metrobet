@@ -25,6 +25,12 @@ const envSchema = z.object({
   MEDIA_DIR: z.string().default('uploads'),
   MEDIA_PUBLIC_URL: z.url().default('http://localhost:4000/media'),
 
+  /**
+   * Game source: `mock` (fictional studios) or `pragmatic-demo` (real Pragmatic slots via their
+   * public demo launcher; DEVELOPMENT ONLY, rejected in production).
+   */
+  CASINO_AGGREGATOR: z.enum(['mock', 'pragmatic-demo']).default('mock'),
+
   /** `simulated` runs the built-in odds feed; `off` disables it (e.g. in tests that don't need it). */
   SPORTSBOOK_FEED: z.enum(['simulated', 'off']).default('simulated'),
 
@@ -33,11 +39,19 @@ const envSchema = z.object({
   WEB_REVALIDATE_SECRET: secret,
 });
 
+const guardedEnvSchema = envSchema.refine(
+  (env) => !(env.NODE_ENV === 'production' && env.CASINO_AGGREGATOR === 'pragmatic-demo'),
+  {
+    path: ['CASINO_AGGREGATOR'],
+    message: 'pragmatic-demo is for development only; production needs a contracted aggregator',
+  },
+);
+
 export type Env = z.infer<typeof envSchema>;
 
 /** Used by ConfigModule: fails fast on boot when the environment is invalid. */
 export function validateEnv(config: Record<string, unknown>): Env {
-  const result = envSchema.safeParse(config);
+  const result = guardedEnvSchema.safeParse(config);
   if (!result.success) {
     throw new Error(`Invalid environment:\n${z.prettifyError(result.error)}`);
   }

@@ -1,8 +1,10 @@
 # Casino (web)
 
-Lobby (`/casino`), categories (`/casino/[category]`), providers (`/casino/providers/[provider]`),
-search (`/casino/search?q=`), favorites (`/casino/favorites`), game launcher
-(`/casino/play/[game]`). The `/crash` page and the home "Popular games" row reuse it.
+Shown to players as **Slots** (slot games only): lobby (`/slots`), categories
+(`/slots/[category]`: popular, new, jackpots), providers (`/slots/providers/[provider]`), search
+(`/slots/search?q=`), favorites (`/slots/favorites`), launcher (`/slots/play/[game]`). Old
+`/casino/*` URLs redirect (next.config). The `/crash` page (`type: 'crash'`) and the home
+"Popular games" row reuse the feature. Slot pages always pass `type: 'slot'` to listings.
 
 ## Data
 
@@ -16,14 +18,14 @@ search (`/casino/search?q=`), favorites (`/casino/favorites`), game launcher
 
 ## Components
 
-| Component                | Notes                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `CasinoPage`             | Frame: optional top block, toolbar (search, provider select, chips), title    |
-| `GameTile`               | 3:4 art, tag badges, favorite (sibling of the link, not nested), play overlay |
-| `GameGrid` / `GAME_GRID` | Columns by **container** width (`@container`), not viewport                   |
-| `GameRow`                | Carousel row with header, "View all", arrows                                  |
-| `GamesListing`           | Count + `LoadMoreGrid` for any query; handles empty / outage states           |
-| `GameFrame`              | Launcher: toolbar (back, favorite, full screen) + sandboxed iframe            |
+| Component                | Notes                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `CasinoPage`             | Frame: optional top block, toolbar (search, provider select, chips), title       |
+| `GameTile`               | square art, tag badges, favorite (sibling of the link, not nested), play overlay |
+| `GameGrid` / `GAME_GRID` | Columns by **container** width (`@container`), not viewport                      |
+| `GameRow`                | Carousel row with header, "View all", arrows                                     |
+| `GamesListing`           | Count + `LoadMoreGrid` for any query; handles empty / outage states              |
+| `GameFrame`              | Launcher: toolbar (back, favorite, full screen) + sandboxed iframe               |
 
 ## Launcher rules
 
@@ -34,5 +36,6 @@ search (`/casino/search?q=`), favorites (`/casino/favorites`), game launcher
 
 ## Thumbnails
 
-`next/image` with `unoptimized` for SVG (mock art). Real aggregator art is raster: add its host
-to `images.remotePatterns` in `next.config.ts`.
+Square tiles. `next/image` with `unoptimized` for SVG (mock art); raster art is optimized and
+its host must be in `images.remotePatterns` (`common-static.ppgames.net` is allowed for the dev
+Pragmatic demo adapter; add the contracted aggregator's CDN when it lands).

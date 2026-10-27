@@ -7,7 +7,7 @@
     "home": "Home",
     "sports": "Sports",
     "live": "Live",
-    "casino": "Casino",
+    "slots": "Slots",
     "crash": "Crash",
     "promotions": "Promotions",
     "betslip": "Betslip"
@@ -111,10 +111,7 @@
     "categories": {
       "popular": "Popular",
       "new": "New",
-      "slots": "Slots",
-      "jackpots": "Jackpots",
-      "crash": "Crash",
-      "table": "Table games"
+      "jackpots": "Jackpots"
     },
     "tags": {
       "new": "New",

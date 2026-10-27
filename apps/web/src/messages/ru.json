@@ -7,7 +7,7 @@
     "home": "Главная",
     "sports": "Спорт",
     "live": "Лайв",
-    "casino": "Казино",
+    "slots": "Слоты",
     "crash": "Краш",
     "promotions": "Акции",
     "betslip": "Купон"
@@ -111,10 +111,7 @@
     "categories": {
       "popular": "Популярные",
       "new": "Новые",
-      "slots": "Слоты",
-      "jackpots": "Джекпоты",
-      "crash": "Краш",
-      "table": "Настольные игры"
+      "jackpots": "Джекпоты"
     },
     "tags": {
       "new": "Новая",

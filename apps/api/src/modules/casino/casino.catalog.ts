@@ -1,24 +1,29 @@
-import type { CasinoCategory, GameCard, GameDetail, GamePage, Provider } from '@metrobet/contracts';
+import type {
+  CasinoCategory,
+  GameCard,
+  GameDetail,
+  GamePage,
+  GameType,
+  Provider,
+} from '@metrobet/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, arrayContains, asc, count, desc, eq, ilike, type SQL } from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { casinoGames, casinoProviders } from './casino.schema.js';
 
-/** How each lobby category selects and orders games. Single source for lobby and listings. */
+/** How each category selects and orders games. Single source for lobby and listings. */
 const CATEGORY_RULES: Record<CasinoCategory, { where?: SQL; orderBy: SQL[] }> = {
   popular: { orderBy: [desc(casinoGames.popularity)] },
   new: { where: arrayContains(casinoGames.tags, ['new']), orderBy: [desc(casinoGames.releasedAt)] },
-  slots: { where: eq(casinoGames.type, 'slot'), orderBy: [desc(casinoGames.popularity)] },
   jackpots: {
     where: arrayContains(casinoGames.tags, ['jackpot']),
     orderBy: [desc(casinoGames.popularity)],
   },
-  crash: { where: eq(casinoGames.type, 'crash'), orderBy: [desc(casinoGames.popularity)] },
-  table: { where: eq(casinoGames.type, 'table'), orderBy: [desc(casinoGames.popularity)] },
 };
 
 export type GameFilter = {
+  type?: GameType;
   category?: CasinoCategory;
   provider?: string;
   search?: string;
@@ -45,7 +50,7 @@ const toCard = ({ providerSlug, providerName, ...row }: CardRow): GameCard => ({
 
 const escapeLike = (value: string) => value.replace(/[\\%_]/g, (char) => `\\${char}`);
 
-/** Read side of the casino catalogue. Only active games of active providers are ever visible. */
+/** Read side of the casino catalogue. Only active + available games of active + available providers are visible. */
 @Injectable()
 export class CasinoCatalog {
   constructor(@Inject(DRIZZLE) private readonly db: Database) {}
@@ -89,7 +94,8 @@ export class CasinoCatalog {
     return { ...toCard(card), externalId, rtp, volatility };
   }
 
-  async listProviders(): Promise<Provider[]> {
+  /** Providers with at least one visible game (optionally of one type). */
+  async listProviders(type?: GameType): Promise<Provider[]> {
     return this.db
       .select({
         slug: casinoProviders.slug,
@@ -99,17 +105,25 @@ export class CasinoCatalog {
       .from(casinoProviders)
       .innerJoin(
         casinoGames,
-        and(eq(casinoGames.providerId, casinoProviders.id), eq(casinoGames.isActive, true)),
+        and(
+          eq(casinoGames.providerId, casinoProviders.id),
+          eq(casinoGames.isActive, true),
+          eq(casinoGames.isAvailable, true),
+          type ? eq(casinoGames.type, type) : undefined,
+        ),
       )
-      .where(eq(casinoProviders.isActive, true))
+      .where(and(eq(casinoProviders.isActive, true), eq(casinoProviders.isAvailable, true)))
       .groupBy(casinoProviders.id)
       .orderBy(asc(casinoProviders.name));
   }
 
-  private where({ category, provider, search, slug }: GameFilter): SQL | undefined {
+  private where({ type, category, provider, search, slug }: GameFilter): SQL | undefined {
     return and(
       eq(casinoGames.isActive, true),
+      eq(casinoGames.isAvailable, true),
       eq(casinoProviders.isActive, true),
+      eq(casinoProviders.isAvailable, true),
+      type ? eq(casinoGames.type, type) : undefined,
       category && CATEGORY_RULES[category].where,
       provider ? eq(casinoProviders.slug, provider) : undefined,
       search ? ilike(casinoGames.name, `%${escapeLike(search)}%`) : undefined,

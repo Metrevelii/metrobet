@@ -7,6 +7,7 @@ import {
   type GameLaunchRequest,
   type GameLaunchResponse,
   type GamePage,
+  type GameType,
   gameListQuerySchema,
   type Provider,
 } from '@metrobet/contracts';
@@ -31,16 +32,17 @@ export class CasinoService {
     @Inject(GameAggregator) private readonly aggregator: GameAggregator,
   ) {}
 
-  /** One row per category (empty categories are left out) plus the provider list. */
+  /** Slots lobby: one row per category (empty ones left out) plus providers that have slots. */
   async lobby(): Promise<CasinoLobby> {
     const [sections, providers] = await Promise.all([
       Promise.all(
         CASINO_CATEGORIES.map(async (category) => ({
           category,
-          games: (await this.catalog.listGames({ category }, 1, LOBBY_ROW_SIZE)).items,
+          games: (await this.catalog.listGames({ type: 'slot', category }, 1, LOBBY_ROW_SIZE))
+            .items,
         })),
       ),
-      this.catalog.listProviders(),
+      this.catalog.listProviders('slot'),
     ]);
     return { sections: sections.filter((section) => section.games.length > 0), providers };
   }
@@ -53,8 +55,8 @@ export class CasinoService {
     return this.catalog.listGames(filter, page, pageSize);
   }
 
-  listProviders(): Promise<Provider[]> {
-    return this.catalog.listProviders();
+  listProviders(type?: GameType): Promise<Provider[]> {
+    return this.catalog.listProviders(type);
   }
 
   async getGame(slug: string): Promise<GameDetail> {

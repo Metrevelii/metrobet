@@ -51,11 +51,12 @@ export async function getGames(query: GameListQuery): Promise<GamePage | null> {
   }
 }
 
+/** Providers that have slots (the Slots toolbar and provider pages). */
 export async function getProviders(): Promise<Provider[]> {
   'use cache';
   cacheTag(CASINO_CACHE_TAG);
   try {
-    const providers = await apiGet('casino/providers', providerSchema.array());
+    const providers = await apiGet('casino/providers', providerSchema.array(), { type: 'slot' });
     cacheLife('minutes');
     return providers;
   } catch (error) {

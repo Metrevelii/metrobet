@@ -5,6 +5,8 @@ import {
   gameLaunchRequestSchema,
   type GameLaunchResponse,
   type GamePage,
+  type GameType,
+  gameTypeSchema,
   gameListQuerySchema,
   type Provider,
   slugSchema,
@@ -48,8 +50,11 @@ export class CasinoController {
     return this.casino.launch(gameSlug, request);
   }
 
+  /** Providers with visible games; `?type=slot` limits to providers that have slots. */
   @Get('providers')
-  providers(): Promise<Provider[]> {
-    return this.casino.listProviders();
+  providers(
+    @Query('type', new ZodValidationPipe(gameTypeSchema.optional())) type?: GameType,
+  ): Promise<Provider[]> {
+    return this.casino.listProviders(type);
   }
 }

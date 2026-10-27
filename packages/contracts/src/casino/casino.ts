@@ -13,10 +13,11 @@ export const gameTagSchema = z.enum(GAME_TAGS);
 export type GameTag = z.infer<typeof gameTagSchema>;
 
 /**
- * Lobby categories. Curated by rules on the server (see the api casino module), not stored
- * per game: popular = by popularity, new/jackpots = by tag, slots/table/crash = by type.
+ * Slots lobby categories. Curated by rules on the server (see the api casino module), not stored
+ * per game: popular = by popularity, new / jackpots = by tag. Listings can also filter by `type`
+ * (the Crash page lists `type: 'crash'`).
  */
-export const CASINO_CATEGORIES = ['popular', 'new', 'slots', 'jackpots', 'crash', 'table'] as const;
+export const CASINO_CATEGORIES = ['popular', 'new', 'jackpots'] as const;
 export const casinoCategorySchema = z.enum(CASINO_CATEGORIES);
 export type CasinoCategory = z.infer<typeof casinoCategorySchema>;
 
@@ -49,6 +50,7 @@ export const lobbySectionSchema = z.object({
   category: casinoCategorySchema,
   games: z.array(gameCardSchema),
 });
+/** The slots lobby: a row per category (slot games only) and providers that have slots. */
 export const casinoLobbySchema = z.object({
   sections: z.array(lobbySectionSchema),
   providers: z.array(providerSchema),
@@ -58,6 +60,7 @@ export type CasinoLobby = z.infer<typeof casinoLobbySchema>;
 export const GAMES_PAGE_SIZE = 24;
 
 export const gameListQuerySchema = z.object({
+  type: gameTypeSchema.optional(),
   category: casinoCategorySchema.optional(),
   provider: slugSchema.optional(),
   search: z.string().trim().min(2).max(50).optional(),

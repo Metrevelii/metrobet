@@ -9,4 +9,4 @@ export { GamesUnavailable } from './components/games-unavailable';
 export { LoadMoreGrid } from './components/load-more-grid';
 export { RecentlyPlayedRow } from './components/recently-played-row';
 export { CASINO_CACHE_TAG, getGame, getGames, getLobby, getProviders, launchGame } from './data';
-export { categoryHref, gameHref, providerHref } from './links';
+export { categoryHref, gameHref, providerHref, SLOTS_HREF } from './links';

@@ -20,7 +20,10 @@ export const casinoProviders = pgTable('casino_providers', {
   externalId: text().notNull().unique('casino_providers_external_id_unique'),
   slug: text().notNull().unique('casino_providers_slug_unique'),
   name: text().notNull(),
+  /** Staff curation: hide a whole provider. */
   isActive: boolean().notNull().default(true),
+  /** Aggregator-owned: false when the provider is no longer in the feed. */
+  isAvailable: boolean().notNull().default(true),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true })
     .notNull()
@@ -48,7 +51,10 @@ export const casinoGames = pgTable(
     /** Higher = more popular. From the aggregator for now, later from our own play stats. */
     popularity: integer().notNull().default(0),
     releasedAt: timestamp({ withTimezone: true }).notNull(),
+    /** Staff curation: hide a game. Kept across syncs. */
     isActive: boolean().notNull().default(true),
+    /** Aggregator-owned: false when the game is no longer in the feed. Visible = active AND available. */
+    isAvailable: boolean().notNull().default(true),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true })
       .notNull()

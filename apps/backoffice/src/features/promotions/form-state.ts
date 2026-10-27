@@ -20,7 +20,7 @@ export const PLACEMENT_LABELS: Record<PromotionPlacement, string> = {
   home: 'Home',
   sports: 'Sports',
   live: 'Live',
-  casino: 'Casino',
+  casino: 'Slots',
   crash: 'Crash',
 };
 

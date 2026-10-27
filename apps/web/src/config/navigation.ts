@@ -14,7 +14,7 @@ export const MAIN_NAV = [
   { href: '/', labelKey: 'home', icon: House, bottomNav: true },
   { href: '/sports', labelKey: 'sports', icon: Trophy, bottomNav: true },
   { href: '/live', labelKey: 'live', icon: Radio, bottomNav: true },
-  { href: '/casino', labelKey: 'casino', icon: Cherry, bottomNav: true },
+  { href: '/slots', labelKey: 'slots', icon: Cherry, bottomNav: true },
   { href: '/crash', labelKey: 'crash', icon: Plane, bottomNav: true },
   { href: '/promotions', labelKey: 'promotions', icon: Gift, bottomNav: false },
 ] as const satisfies readonly NavItem[];

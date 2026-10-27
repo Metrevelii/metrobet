@@ -17,7 +17,7 @@ export default async function CrashPage() {
       <PromotionsSlider placement="crash" />
       <h1 className="text-2xl font-bold">{t('crash')}</h1>
       <Suspense fallback={<GameGridSkeleton />}>
-        <GamesListing query={{ category: 'crash' }} />
+        <GamesListing query={{ type: 'crash' }} />
       </Suspense>
     </div>
   );

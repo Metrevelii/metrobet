@@ -26,7 +26,7 @@ export function GameTile({ game, sizes = '(min-width: 1280px) 200px, 33vw' }: Ga
   const t = useTranslations('Casino');
   return (
     <div className="group/tile relative flex flex-col gap-2">
-      <div className="relative aspect-3/4 overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
         <Image
           src={game.thumbnail}
           alt=""

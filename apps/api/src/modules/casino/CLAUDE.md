@@ -1,18 +1,30 @@
 # Casino module (api)
 
-Game catalogue, lobby, search and game launch. Games come from one **aggregator** (not chosen
-yet: Slotegrator / SoftSwiss / Hub88…) behind the `GameAggregator` port. Today it's bound to
-`MockGameAggregator`.
+Game catalogue, slots lobby, search and game launch. Games come from one **aggregator** (not
+chosen yet: Slotegrator / SoftSwiss / Hub88…) behind the `GameAggregator` port. Players see the
+catalogue as **Slots** (slot games only); crash games are listed on the Crash page.
+
+## Adapters (`CASINO_AGGREGATOR`)
+
+| Value            | What                                                                                                                                                                                          |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mock` (default) | `MockGameAggregator`: fictional studios, generated art, our own demo page                                                                                                                     |
+| `pragmatic-demo` | `PragmaticDemoAggregator`: 40 real Pragmatic Play slots via Pragmatic's **public free-demo launcher** + mock crash/table games. **Development only**: env validation refuses it in production |
+
+Showing a provider's games publicly requires an agreement (in Georgia, certified content via a
+licensed supplier). Production must use the contracted aggregator, which also provides official
+demo mode. After switching the value: restart the API and run `db:seed` (re-syncs the catalogue
+and refreshes the site cache).
 
 ## Endpoints (public)
 
-| Method | Path                                                       | Returns                                      |
-| ------ | ---------------------------------------------------------- | -------------------------------------------- |
-| GET    | `/api/casino/lobby`                                        | `CasinoLobby` (row per category + providers) |
-| GET    | `/api/casino/games?category&provider&search&page&pageSize` | `GamePage`                                   |
-| GET    | `/api/casino/games/:slug`                                  | `GameDetail`                                 |
-| POST   | `/api/casino/games/:slug/launch`                           | `{ url }`; body `{ mode, locale }`           |
-| GET    | `/api/casino/providers`                                    | `Provider[]` with game counts                |
+| Method | Path                                                            | Returns                                                            |
+| ------ | --------------------------------------------------------------- | ------------------------------------------------------------------ |
+| GET    | `/api/casino/lobby`                                             | `CasinoLobby`: slots only, row per category + providers with slots |
+| GET    | `/api/casino/games?type&category&provider&search&page&pageSize` | `GamePage`                                                         |
+| GET    | `/api/casino/games/:slug`                                       | `GameDetail`                                                       |
+| POST   | `/api/casino/games/:slug/launch`                                | `{ url }`; body `{ mode, locale }`                                 |
+| GET    | `/api/casino/providers?type`                                    | `Provider[]` with game counts                                      |
 
 `mode: 'real'` returns 401 until player auth + wallet exist (roadmap step 7).
 
@@ -23,11 +35,14 @@ aggregator ──sync (CasinoSyncService)──▶ casino_providers / casino_gam
 ```
 
 - **Sync** upserts by `externalId`. Aggregator-owned fields are refreshed; our curation fields
-  (`isActive`, `slug`) are kept. Runs in `db:seed`; later a scheduled job + backoffice button.
+  (`isActive`, `slug`) are kept. Games/providers missing from the feed get `isAvailable = false`
+  (aggregator-owned), so switching adapters hides old games without losing curation. Visible =
+  `isActive AND isAvailable`. After a sync the site's `casino` cache tag is revalidated. Runs in
+  `db:seed`; later a scheduled job + backoffice button.
 - **Categories are rules, not data** (`CATEGORY_RULES` in `casino.catalog.ts`): popular = by
-  popularity, new/jackpots = by tag, slots/table/crash = by type. Lobby and listings both use
-  them. Add a category: contracts `CASINO_CATEGORIES` + a rule + web translations.
-- Only active games of active providers are ever visible (one `where()` helper).
+  popularity, new/jackpots = by tag. Game kind is the separate `type` filter (slot/crash/table).
+  Add a category: contracts `CASINO_CATEGORIES` + a rule + web translations.
+- Only active + available games of active + available providers are visible (one `where()`).
 - Search is `ILIKE` with LIKE wildcards escaped. Fine for a few thousand games; move to
   `pg_trgm` / full-text when the real catalogue lands.
 

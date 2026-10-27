@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { Link } from '@/i18n/navigation';
 
-import { categoryHref } from '../links';
+import { categoryHref, SLOTS_HREF } from '../links';
 
 export type CasinoSection = 'lobby' | 'favorites' | CasinoCategory;
 
@@ -13,13 +13,13 @@ export type CasinoSection = 'lobby' | 'favorites' | CasinoCategory;
 export function CategoryNav({ active }: { active?: CasinoSection }) {
   const t = useTranslations('Casino');
   const items: { key: CasinoSection; href: string; label: string; icon?: typeof Heart }[] = [
-    { key: 'lobby', href: '/casino', label: t('lobby'), icon: LayoutGrid },
+    { key: 'lobby', href: SLOTS_HREF, label: t('lobby'), icon: LayoutGrid },
     ...CASINO_CATEGORIES.map((category) => ({
       key: category,
       href: categoryHref(category),
       label: t(`categories.${category}`),
     })),
-    { key: 'favorites', href: '/casino/favorites', label: t('favorites'), icon: Heart },
+    { key: 'favorites', href: `${SLOTS_HREF}/favorites`, label: t('favorites'), icon: Heart },
   ];
 
   return (

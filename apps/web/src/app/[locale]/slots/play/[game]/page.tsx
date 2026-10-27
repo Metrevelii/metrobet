@@ -6,10 +6,10 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { EmptyState } from '@/components/shared/empty-state';
-import { GameFrame, getGame, launchGame } from '@/features/casino';
+import { GameFrame, getGame, launchGame, SLOTS_HREF } from '@/features/casino';
 import { Link } from '@/i18n/navigation';
 
-type Props = PageProps<'/[locale]/casino/play/[game]'>;
+type Props = PageProps<'/[locale]/slots/play/[game]'>;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const game = await getGame((await params).game);
@@ -32,7 +32,7 @@ async function Launcher({ params }: Pick<Props, 'params'>) {
           description={t('unavailableHint')}
         />
         <Button variant="secondary" asChild>
-          <Link href="/casino">{t('back')}</Link>
+          <Link href={SLOTS_HREF}>{t('back')}</Link>
         </Button>
       </Card>
     );

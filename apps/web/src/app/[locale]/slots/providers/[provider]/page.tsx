@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 
 import { CasinoPage, GameGridSkeleton, GamesListing, getProviders } from '@/features/casino';
 
-type Props = PageProps<'/[locale]/casino/providers/[provider]'>;
+type Props = PageProps<'/[locale]/slots/providers/[provider]'>;
 
 async function findProvider(params: Props['params']) {
   const { provider } = await params;
@@ -22,7 +22,7 @@ async function ProviderGames({ params }: Pick<Props, 'params'>) {
   return (
     <CasinoPage provider={provider.slug} title={provider.name}>
       <Suspense fallback={<GameGridSkeleton />}>
-        <GamesListing query={{ provider: provider.slug }} />
+        <GamesListing query={{ type: 'slot', provider: provider.slug }} />
       </Suspense>
     </CasinoPage>
   );

@@ -1,9 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { sql } from 'drizzle-orm';
+import { inArray, not, sql } from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
+import { WebRevalidationService } from '../web/web-revalidation.service.js';
 import { GameAggregator } from './aggregator/game-aggregator.js';
 import { casinoGames, casinoProviders } from './casino.schema.js';
+
+/** Must match CASINO_CACHE_TAG in apps/web/src/features/casino/data.ts. */
+export const CASINO_CACHE_TAG = 'casino';
 
 const slugify = (value: string) =>
   value
@@ -14,7 +18,8 @@ const slugify = (value: string) =>
 
 /**
  * Upserts the aggregator catalogue into our tables (by external id). Aggregator-owned fields are
- * refreshed; our curation fields (isActive, slug) are kept. Run via `db:seed` / later a cron.
+ * refreshed and anything missing from the feed is marked unavailable; our curation fields
+ * (isActive, slug) are kept. Run via `db:seed` / later a cron.
  */
 @Injectable()
 export class CasinoSyncService {
@@ -23,6 +28,7 @@ export class CasinoSyncService {
   constructor(
     @Inject(DRIZZLE) private readonly db: Database,
     @Inject(GameAggregator) private readonly aggregator: GameAggregator,
+    @Inject(WebRevalidationService) private readonly web: WebRevalidationService,
   ) {}
 
   async sync(): Promise<{ providers: number; games: number }> {
@@ -31,7 +37,7 @@ export class CasinoSyncService {
       this.aggregator.listGames(),
     ]);
 
-    return this.db.transaction(async (tx) => {
+    const result = await this.db.transaction(async (tx) => {
       const providerRows = await tx
         .insert(casinoProviders)
         .values(
@@ -39,7 +45,7 @@ export class CasinoSyncService {
         )
         .onConflictDoUpdate({
           target: casinoProviders.externalId,
-          set: { name: sql`excluded.name` },
+          set: { name: sql`excluded.name`, isAvailable: true },
         })
         .returning({
           id: casinoProviders.id,
@@ -57,7 +63,7 @@ export class CasinoSyncService {
         if (usedSlugs.has(slug)) slug = `${slug}-${provider.slug}`;
         usedSlugs.add(slug);
         const { providerExternalId: _provider, ...fields } = game;
-        return [{ ...fields, providerId: provider.id, slug }];
+        return [{ ...fields, providerId: provider.id, slug, isAvailable: true }];
       });
 
       await tx
@@ -76,12 +82,27 @@ export class CasinoSyncService {
             popularity: sql`excluded.popularity`,
             releasedAt: sql`excluded.released_at`,
             providerId: sql`excluded.provider_id`,
+            isAvailable: true,
           },
         });
 
-      const result = { providers: providerRows.length, games: gameValues.length };
-      this.logger.log(`Synced ${result.providers} providers, ${result.games} games`);
-      return result;
+      // Whatever the feed no longer contains is hidden (e.g. after switching aggregators).
+      const gameIds = gameValues.map((game) => game.externalId);
+      const providerIds = providers.map((provider) => provider.externalId);
+      await tx
+        .update(casinoGames)
+        .set({ isAvailable: false })
+        .where(not(inArray(casinoGames.externalId, gameIds)));
+      await tx
+        .update(casinoProviders)
+        .set({ isAvailable: false })
+        .where(not(inArray(casinoProviders.externalId, providerIds)));
+
+      return { providers: providerRows.length, games: gameValues.length };
     });
+    this.logger.log(`Synced ${result.providers} providers, ${result.games} games`);
+    // The player site caches the catalogue; refresh it now that it changed.
+    await this.web.revalidate(CASINO_CACHE_TAG);
+    return result;
   }
 }

@@ -131,7 +131,7 @@ isolated so it can be swapped later without touching components:
 - `apps/api/src/modules/promotions/CLAUDE.md`: promotions API, admin endpoints, live/schedule rules
 - `apps/backoffice/src/features/promotions/CLAUDE.md`: promotions management screens
 - `apps/api/src/modules/casino/CLAUDE.md`: game catalogue, aggregator port, mock aggregator
-- `apps/web/src/features/casino/CLAUDE.md`: casino lobby, listings, favorites, launcher
+- `apps/web/src/features/casino/CLAUDE.md`: Slots lobby, listings, favorites, launcher
 - `apps/api/src/modules/sportsbook/CLAUDE.md`: odds feed port, simulated feed, store, Socket.IO
 - `apps/web/src/features/sportsbook/CLAUDE.md`: sports pages, live odds, betslip
 - `apps/api/src/modules/auth/CLAUDE.md`: sessions, guards, roles, codes, rate limits
@@ -145,8 +145,10 @@ isolated so it can be swapped later without touching components:
    2a. ✅ Promotions: promo slider on home/section pages, `/promotions` list and detail pages
    2b. ✅ Postgres + Drizzle, audit log, media uploads, backoffice promotions management (list with
    drag-to-reorder/toggle/delete, editor with live preview), instant site revalidation
-3. ✅ Casino: lobby, categories, providers, search, favorites/recent, demo launcher (mock
-   aggregator synced into Postgres). Crash page lists crash games
+3. ✅ Slots (casino catalogue, slot games only): lobby, categories, providers, search,
+   favorites/recent, launcher. Mock aggregator by default; `CASINO_AGGREGATOR=pragmatic-demo`
+   loads 40 real Pragmatic Play demo slots for **local development only**. Crash page lists
+   crash games
 4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
    betslip (singles/accumulator, odds changes). Free deterministic simulated feed
 5. ⏳ Crash games section

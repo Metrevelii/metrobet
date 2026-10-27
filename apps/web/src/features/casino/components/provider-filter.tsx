@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 
 import { useRouter } from '@/i18n/navigation';
 
-import { providerHref } from '../links';
+import { providerHref, SLOTS_HREF } from '../links';
 
 export function ProviderFilter({ providers, value }: { providers: Provider[]; value?: string }) {
   const t = useTranslations('Casino');
@@ -16,7 +16,7 @@ export function ProviderFilter({ providers, value }: { providers: Provider[]; va
       aria-label={t('provider')}
       value={value ?? ''}
       onChange={(event) =>
-        router.push(event.target.value ? providerHref(event.target.value) : '/casino')
+        router.push(event.target.value ? providerHref(event.target.value) : SLOTS_HREF)
       }
     >
       <option value="">{t('allProviders')}</option>

@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { CasinoPage, GameGridSkeleton, GamesListing } from '@/features/casino';
 
-type Props = PageProps<'/[locale]/casino/search'>;
+type Props = PageProps<'/[locale]/slots/search'>;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Casino');
@@ -23,7 +23,7 @@ async function SearchResults({ searchParams }: Pick<Props, 'searchParams'>) {
     <CasinoPage query={query} title={query.length >= 2 ? t('searchTitle', { query }) : undefined}>
       {query.length >= 2 ? (
         <Suspense key={query} fallback={<GameGridSkeleton />}>
-          <GamesListing query={{ search: query }} />
+          <GamesListing query={{ type: 'slot', search: query }} />
         </Suspense>
       ) : (
         <Card>

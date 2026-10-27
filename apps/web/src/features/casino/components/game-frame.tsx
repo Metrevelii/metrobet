@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 
 import { addRecentlyPlayed } from '../game-lists';
+import { SLOTS_HREF } from '../links';
 import { FavoriteButton } from './favorite-button';
 
 type GameFrameProps = { game: GameDetail; url: string };
@@ -40,7 +41,7 @@ export function GameFrame({ game, url }: GameFrameProps) {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
-          <Link href="/casino" aria-label={t('back')}>
+          <Link href={SLOTS_HREF} aria-label={t('back')}>
             <ChevronLeft />
           </Link>
         </Button>
