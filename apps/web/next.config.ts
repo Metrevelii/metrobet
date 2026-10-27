@@ -10,8 +10,9 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   images: {
     remotePatterns: [
-      // Pragmatic Play covers (dev-only demo adapter: CASINO_AGGREGATOR=pragmatic-demo in the api).
+      // Provider covers for the dev-only public demo adapter (CASINO_AGGREGATOR=public-demos in the api).
       { protocol: 'https', hostname: 'common-static.ppgames.net', pathname: '/game_pic/**' },
+      { protocol: 'https', hostname: 'bgaming.com', pathname: '/wp-content/uploads/**' },
       {
         protocol: media.protocol === 'https:' ? 'https' : 'http',
         hostname: media.hostname,

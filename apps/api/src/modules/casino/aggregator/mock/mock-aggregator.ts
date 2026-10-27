@@ -32,6 +32,11 @@ export class MockGameAggregator extends GameAggregator {
     this.baseUrl = `${config.get('API_PUBLIC_URL', { infer: true }).replace(/\/$/, '')}/api/casino/mock`;
   }
 
+  /** Generated cover art for a game without an official image (served by MockAggregatorController). */
+  artUrl(title: string, studio: string) {
+    return `${this.baseUrl}/art/${encodeURIComponent(title)}.svg?studio=${encodeURIComponent(studio)}`;
+  }
+
   listProviders() {
     return Promise.resolve(MOCK_PROVIDERS.map(({ id, name }) => ({ externalId: id, name })));
   }

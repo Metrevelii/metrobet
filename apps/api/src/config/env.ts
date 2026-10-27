@@ -26,10 +26,10 @@ const envSchema = z.object({
   MEDIA_PUBLIC_URL: z.url().default('http://localhost:4000/media'),
 
   /**
-   * Game source: `mock` (fictional studios) or `pragmatic-demo` (real Pragmatic slots via their
-   * public demo launcher; DEVELOPMENT ONLY, rejected in production).
+   * Game source: `mock` (fictional studios) or `public-demos` (real slots from providers' free
+   * public demos: Pragmatic Play, BGaming; DEVELOPMENT ONLY, rejected in production).
    */
-  CASINO_AGGREGATOR: z.enum(['mock', 'pragmatic-demo']).default('mock'),
+  CASINO_AGGREGATOR: z.enum(['mock', 'public-demos']).default('mock'),
 
   /** `simulated` runs the built-in odds feed; `off` disables it (e.g. in tests that don't need it). */
   SPORTSBOOK_FEED: z.enum(['simulated', 'off']).default('simulated'),
@@ -40,10 +40,10 @@ const envSchema = z.object({
 });
 
 const guardedEnvSchema = envSchema.refine(
-  (env) => !(env.NODE_ENV === 'production' && env.CASINO_AGGREGATOR === 'pragmatic-demo'),
+  (env) => !(env.NODE_ENV === 'production' && env.CASINO_AGGREGATOR === 'public-demos'),
   {
     path: ['CASINO_AGGREGATOR'],
-    message: 'pragmatic-demo is for development only; production needs a contracted aggregator',
+    message: 'public-demos is for development only; production needs a contracted aggregator',
   },
 );
 

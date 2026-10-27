@@ -1,19 +1,9 @@
-import type { GameTag } from '@metrobet/contracts';
+import type { DemoGame, DemoSource } from './demo-source.js';
 
-type PragmaticSlot = [
-  symbol: string,
-  name: string,
-  tags: GameTag[],
-  volatility: 'low' | 'medium' | 'high',
-  popularity: number,
-];
+const COVERS = 'https://common-static.ppgames.net/game_pic/square/200';
 
-/**
- * Curated Pragmatic Play slots for the dev demo adapter. Symbols and names were checked against
- * Pragmatic's public demo launcher (its redirect returns the official name for each symbol), and
- * every symbol has a square cover on their CDN.
- */
-export const PRAGMATIC_SLOTS: PragmaticSlot[] = [
+/** [code, name, tags, volatility, popularity]. Verified against Pragmatic's public demo launcher. */
+const GAMES: [string, string, DemoGame['tags'], DemoGame['volatility'], number][] = [
   ['vs20olympgate', 'Gates of Olympus', ['hot'], 'high', 990],
   ['vs20olympx', 'Gates of Olympus 1000', ['new', 'hot'], 'high', 960],
   ['vs20fruitsw', 'Sweet Bonanza', ['hot'], 'medium', 985],
@@ -55,3 +45,30 @@ export const PRAGMATIC_SLOTS: PragmaticSlot[] = [
   ['vs10fruity2', 'Extra Juicy', [], 'high', 480],
   ['vs20wildpix', 'Wild Pixies', [], 'medium', 470],
 ];
+
+/** Pragmatic Play via their public free-demo launcher (`demogamesfree.pragmaticplay.net`). */
+export const pragmaticSource: DemoSource = {
+  providerId: 'pragmatic-play',
+  idPrefix: 'pragmatic',
+  providerName: 'Pragmatic Play',
+  games: GAMES.map(([code, name, tags, volatility, popularity]) => ({
+    code,
+    name,
+    tags,
+    volatility,
+    popularity,
+    rtp: 96.5,
+    cover: `${COVERS}/${code}.png`,
+  })),
+  launchUrl(code, locale) {
+    const url = new URL('https://demogamesfree.pragmaticplay.net/gs2c/openGame.do');
+    url.search = new URLSearchParams({
+      gameSymbol: code,
+      lang: locale,
+      cur: 'GEL',
+      jurisdiction: '99',
+      stylename: 'generic',
+    }).toString();
+    return url.toString();
+  },
+};

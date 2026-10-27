@@ -54,13 +54,21 @@ export class CasinoSyncService {
         });
       const providerByExternalId = new Map(providerRows.map((row) => [row.externalId, row]));
 
+      // Slugs are unique across all rows (including unavailable ones from earlier feeds).
+      const existing = await tx
+        .select({ externalId: casinoGames.externalId, slug: casinoGames.slug })
+        .from(casinoGames);
+      const slugOwner = new Map(existing.map((row) => [row.slug, row.externalId]));
+      const keptSlug = new Map(existing.map((row) => [row.externalId, row.slug]));
       const usedSlugs = new Set<string>();
       const gameValues = games.flatMap((game) => {
         const provider = providerByExternalId.get(game.providerExternalId);
         if (!provider) return [];
-        // Prefer the plain title; disambiguate with the provider when two studios share a name.
-        let slug = slugify(game.name);
-        if (usedSlugs.has(slug)) slug = `${slug}-${provider.slug}`;
+        // Keep an existing slug; otherwise prefer the plain title and disambiguate with the provider.
+        let slug = keptSlug.get(game.externalId) ?? slugify(game.name);
+        const owner = slugOwner.get(slug);
+        if (usedSlugs.has(slug) || (owner !== undefined && owner !== game.externalId))
+          slug = `${slug}-${provider.slug}`;
         usedSlugs.add(slug);
         const { providerExternalId: _provider, ...fields } = game;
         return [{ ...fields, providerId: provider.id, slug, isAvailable: true }];

@@ -6,15 +6,22 @@ catalogue as **Slots** (slot games only); crash games are listed on the Crash pa
 
 ## Adapters (`CASINO_AGGREGATOR`)
 
-| Value            | What                                                                                                                                                                                          |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mock` (default) | `MockGameAggregator`: fictional studios, generated art, our own demo page                                                                                                                     |
-| `pragmatic-demo` | `PragmaticDemoAggregator`: 40 real Pragmatic Play slots via Pragmatic's **public free-demo launcher** + mock crash/table games. **Development only**: env validation refuses it in production |
+| Value            | What                                                                                                                                                                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mock` (default) | `MockGameAggregator`: fictional studios, generated art, our own demo page                                                                                                                                                                                                 |
+| `public-demos`   | `PublicDemoAggregator`: real slots from providers' **free public demos**: Pragmatic Play (40, `demogamesfree.pragmaticplay.net`) and BGaming (22, `demo.bgaming-network.com`), plus mock crash/table games. **Development only**: env validation refuses it in production |
 
 Showing a provider's games publicly requires an agreement (in Georgia, certified content via a
 licensed supplier). Production must use the contracted aggregator, which also provides official
 demo mode. After switching the value: restart the API and run `db:seed` (re-syncs the catalogue
 and refreshes the site cache).
+
+**Adding a demo provider** (`aggregator/public-demos/`): create a `DemoSource` (provider id, a
+never-changing `idPrefix`, games, `launchUrl`), add it to `DEMO_SOURCES`, allow its cover host in
+the web `images.remotePatterns`. Verify every game code against the provider's own demo launcher;
+games without an official cover get generated art (`/api/casino/mock/art/:title.svg`). Checked
+and not usable (Oct 2026): EGT/Amusnet (demos disabled on their own site), Evoplay, Playson,
+Endorphina; Hacksaw needs their JS launcher + partner config.
 
 ## Endpoints (public)
 

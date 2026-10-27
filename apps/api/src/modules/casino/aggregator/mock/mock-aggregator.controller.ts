@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
 
 import type { Env } from '../../../../config/env.js';
+import { hash, MOCK_PROVIDERS } from './mock-catalog.js';
 import { findMockGame } from './mock-aggregator.js';
 import { renderMockDemoPage } from './mock-demo-page.js';
 import { renderMockThumbnail } from './mock-thumbnail.js';
@@ -21,14 +22,23 @@ export class MockAggregatorController {
   thumbnail(@Param('id') id: string, @Res() res: Response) {
     const game = findMockGame(id);
     if (!game) throw new NotFoundException();
-    res
-      .type('image/svg+xml')
-      .set({
-        'Cache-Control': 'public, max-age=86400',
-        'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
-        'X-Content-Type-Options': 'nosniff',
-      })
-      .send(renderMockThumbnail(game.provider, game.title));
+    this.sendSvg(res, renderMockThumbnail(game.provider, game.title));
+  }
+
+  /** Generated cover for any title (used for real demo games without an official image). */
+  @Get('art/:title.svg')
+  art(
+    @Param('title') title: string,
+    @Query('studio') studio: string | undefined,
+    @Res() res: Response,
+  ) {
+    const name = title.slice(0, 60);
+    const studioName = (studio ?? '').slice(0, 40);
+    const palette = MOCK_PROVIDERS[hash(name) % MOCK_PROVIDERS.length]!.palette;
+    this.sendSvg(
+      res,
+      renderMockThumbnail({ id: 'art', name: studioName, palette, type: 'slot', games: [] }, name),
+    );
   }
 
   @Get('play/:id')
@@ -51,5 +61,16 @@ export class MockAggregatorController {
           locale,
         }),
       );
+  }
+
+  private sendSvg(res: Response, svg: string) {
+    res
+      .type('image/svg+xml')
+      .set({
+        'Cache-Control': 'public, max-age=86400',
+        'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
+        'X-Content-Type-Options': 'nosniff',
+      })
+      .send(svg);
   }
 }

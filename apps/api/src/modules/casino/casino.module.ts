@@ -5,7 +5,7 @@ import type { Env } from '../../config/env.js';
 import { GameAggregator } from './aggregator/game-aggregator.js';
 import { MockAggregatorController } from './aggregator/mock/mock-aggregator.controller.js';
 import { MockGameAggregator } from './aggregator/mock/mock-aggregator.js';
-import { PragmaticDemoAggregator } from './aggregator/pragmatic-demo/pragmatic-demo-aggregator.js';
+import { PublicDemoAggregator } from './aggregator/public-demos/public-demo-aggregator.js';
 import { CasinoSyncService } from './casino-sync.service.js';
 import { CasinoCatalog } from './casino.catalog.js';
 import { CasinoController } from './casino.controller.js';
@@ -20,17 +20,16 @@ import { WebModule } from '../web/web.module.js';
     CasinoService,
     CasinoSyncService,
     MockGameAggregator,
-    PragmaticDemoAggregator,
+    PublicDemoAggregator,
     // CASINO_AGGREGATOR picks the adapter. Add the contracted aggregator here when signed.
     {
       provide: GameAggregator,
-      inject: [ConfigService, MockGameAggregator, PragmaticDemoAggregator],
+      inject: [ConfigService, MockGameAggregator, PublicDemoAggregator],
       useFactory: (
         config: ConfigService<Env, true>,
         mock: MockGameAggregator,
-        pragmatic: PragmaticDemoAggregator,
-      ) =>
-        config.get('CASINO_AGGREGATOR', { infer: true }) === 'pragmatic-demo' ? pragmatic : mock,
+        demos: PublicDemoAggregator,
+      ) => (config.get('CASINO_AGGREGATOR', { infer: true }) === 'public-demos' ? demos : mock),
     },
   ],
   exports: [CasinoSyncService],

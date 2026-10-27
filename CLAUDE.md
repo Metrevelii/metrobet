@@ -146,9 +146,9 @@ isolated so it can be swapped later without touching components:
    2b. ✅ Postgres + Drizzle, audit log, media uploads, backoffice promotions management (list with
    drag-to-reorder/toggle/delete, editor with live preview), instant site revalidation
 3. ✅ Slots (casino catalogue, slot games only): lobby, categories, providers, search,
-   favorites/recent, launcher. Mock aggregator by default; `CASINO_AGGREGATOR=pragmatic-demo`
-   loads 40 real Pragmatic Play demo slots for **local development only**. Crash page lists
-   crash games
+   favorites/recent, launcher, provider tabs (All + one per provider). Mock aggregator by default;
+   `CASINO_AGGREGATOR=public-demos` loads real Pragmatic Play + BGaming demo slots for **local
+   development only**. Crash page lists crash games
 4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
    betslip (singles/accumulator, odds changes). Free deterministic simulated feed
 5. ⏳ Crash games section
