@@ -17,6 +17,6 @@ export * from './promotions/promotion.js';
 export * from './promotions/wheel.js';
 export * from './sportsbook/sportsbook.js';
 export * from './wallet/wallet.js';
-export * from './originals/metro-jet.js';
+export * from './originals/crash.js';
 export * from './originals/originals.js';
 export * from './originals/supra-fortune.js';

@@ -6,7 +6,7 @@ export const E2E_ENV = {
   AUTH_RATE_LIMIT: '1000',
   // Same catalogue locally and in CI, whatever apps/api/.env says.
   CASINO_AGGREGATOR: 'mock',
-  ORIGINALS_JET_LOOP: 'off',
+  ORIGINALS_CRASH_LOOP: 'off',
   SPORTSBOOK_FEED: 'simulated',
   WEB_REVALIDATE_SECRET: 'e2e-revalidate-secret-0123456789abcdef01234567',
   GAME_WALLET_SECRET: 'e2e-game-wallet-secret-0123456789abcdef0123456',

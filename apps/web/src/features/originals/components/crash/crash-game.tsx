@@ -1,15 +1,24 @@
 'use client';
 
-import { JET_BET_SLOTS, type JetState, type OriginalLaunch } from '@metrobet/contracts';
+import {
+  CRASH_BET_SLOTS,
+  type CrashGame as CrashGameId,
+  type CrashRound,
+  type CrashState,
+  type OriginalLaunch,
+} from '@metrobet/contracts';
 import { cn, Skeleton } from '@metrobet/ui';
 import { ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import type { ComponentType } from 'react';
 
 import { useOriginalsSocket } from '../../use-originals-socket';
 import { GameShell, useMoney } from '../game-shell';
 import { BetPanel } from './bet-panel';
-import { JetStage } from './jet-stage';
-import { useJet } from './use-jet';
+import { useCrash } from './use-crash';
+
+/** What every crash game's picture receives: the round and the server clock offset. */
+export type CrashStageProps = { round: CrashRound; offset: number };
 
 const crashTone = (point: number) =>
   point >= 10
@@ -18,8 +27,8 @@ const crashTone = (point: number) =>
       ? 'bg-success/20 text-success'
       : 'bg-muted text-muted-foreground';
 
-function History({ history }: { history: JetState['history'] }) {
-  const t = useTranslations('Originals.jet');
+function History({ history }: { history: CrashState['history'] }) {
+  const t = useTranslations('Originals.crash');
   return (
     <ol className="flex gap-1.5 overflow-x-auto pb-1" aria-label={t('history')}>
       {history.map((item) => (
@@ -37,8 +46,8 @@ function History({ history }: { history: JetState['history'] }) {
   );
 }
 
-function LiveBets({ bets }: { bets: JetState['bets'] }) {
-  const t = useTranslations('Originals.jet');
+function LiveBets({ bets }: { bets: CrashState['bets'] }) {
+  const t = useTranslations('Originals.crash');
   const money = useMoney();
   const players = new Set(bets.map((bet) => bet.tag)).size;
   const total = bets.reduce((sum, bet) => sum + bet.amount, 0);
@@ -78,10 +87,11 @@ function LiveBets({ bets }: { bets: JetState['bets'] }) {
   );
 }
 
-function Fairness({ state }: { state: JetState }) {
-  const t = useTranslations('Originals.jet');
-  const last = state.round.seed ? state.round : null;
-  const previous = state.history[0];
+function Fairness({ state }: { state: CrashState }) {
+  const t = useTranslations('Originals.crash');
+  const revealed = state.round.seed
+    ? { number: state.round.number, crashPoint: state.round.crashPoint!, seed: state.round.seed }
+    : state.history[0];
   return (
     <details className="rounded-xl bg-muted/40 p-3 text-xs ring-1 ring-border">
       <summary className="flex cursor-pointer items-center gap-1.5 font-semibold text-muted-foreground">
@@ -89,21 +99,21 @@ function Fairness({ state }: { state: JetState }) {
         {t('fair')} · {t('round', { number: state.round.number })}
       </summary>
       <div className="mt-2 flex flex-col gap-2 break-all text-muted-foreground">
-        <p>{t('fairHint')}</p>
+        <p>{t('fairHint', { game: state.game })}</p>
         <p>
           <span className="font-semibold text-foreground">{t('seedHash')}:</span>{' '}
           {state.round.seedHash}
         </p>
-        {(last ?? previous) && (
+        {revealed && (
           <p>
             <span className="font-semibold text-foreground">
               {t('lastSeed', {
-                number: (last ?? previous)!.number,
-                point: (last?.crashPoint ?? previous!.crashPoint).toFixed(2),
+                number: revealed.number,
+                point: revealed.crashPoint.toFixed(2),
               })}
               :
             </span>{' '}
-            {last?.seed ?? previous!.seed}
+            {revealed.seed}
           </p>
         )}
       </div>
@@ -111,13 +121,21 @@ function Fairness({ state }: { state: JetState }) {
   );
 }
 
-/** Metro Jet: shared crash rounds, two bet panels, live bets and provably fair details. */
-export function MetroJet({ launch }: { launch: OriginalLaunch }) {
+type CrashGameProps = {
+  launch: OriginalLaunch;
+  game: CrashGameId;
+  title: string;
+  /** The game's picture; everything around it (bets, history, fairness) is shared. */
+  Stage: ComponentType<CrashStageProps>;
+};
+
+/** A crash game screen: history, the game's stage, two bet panels, live bets, fairness. */
+export function CrashGame({ launch, game, title, Stage }: CrashGameProps) {
   const connection = useOriginalsSocket(launch);
-  const { state, offset } = useJet(connection.socket);
+  const { state, offset } = useCrash(connection.socket, game);
 
   return (
-    <GameShell title="Metro Jet" mode={launch.mode} connection={connection}>
+    <GameShell title={title} mode={launch.mode} connection={connection}>
       {!state ? (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-7 w-full" />
@@ -128,9 +146,9 @@ export function MetroJet({ launch }: { launch: OriginalLaunch }) {
         <div className="grid gap-4 xl:grid-cols-[1fr_20rem]">
           <div className="flex min-w-0 flex-col gap-3">
             <History history={state.history} />
-            <JetStage round={state.round} offset={offset} />
+            <Stage round={state.round} offset={offset} />
             <div className="grid gap-3 md:grid-cols-2">
-              {JET_BET_SLOTS.map((slot) => (
+              {CRASH_BET_SLOTS.map((slot) => (
                 <BetPanel
                   key={slot}
                   slot={slot}

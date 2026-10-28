@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { GameWalletClient } from '../../common/game-wallet/game-wallet-client.js';
-import { MetroJetService } from './metro-jet/metro-jet.service.js';
+import { CrashService } from './crash/crash.service.js';
 import { OriginalsController } from './originals.controller.js';
 import { OriginalsAggregator } from './originals.aggregator.js';
 import { OriginalsGateway } from './originals.gateway.js';
@@ -21,7 +21,7 @@ import { OriginalsWallet } from './wallet/originals-wallet.js';
     OriginalsWallet,
     OriginalsAggregator,
     SupraFortuneService,
-    MetroJetService,
+    CrashService,
     OriginalsGateway,
   ],
   exports: [OriginalsAggregator],

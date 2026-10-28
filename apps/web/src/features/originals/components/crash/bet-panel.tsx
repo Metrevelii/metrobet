@@ -1,11 +1,11 @@
 'use client';
 
 import {
-  JET_MAX_BET,
-  JET_MIN_BET,
-  type JetMyBet,
-  type JetState,
-  jetMultiplierAt,
+  CRASH_MAX_BET,
+  CRASH_MIN_BET,
+  type CrashMyBet,
+  type CrashState,
+  crashMultiplierAt,
   ORIGINALS_WS,
   type OriginalsError,
   toMajor,
@@ -19,10 +19,10 @@ import type { Socket } from 'socket.io-client';
 
 import { request } from '../../use-originals-socket';
 import { useGameError, useMoney } from '../game-shell';
-import { useAnimationFrame } from './jet-stage';
+import { useAnimationFrame } from './use-animation-frame';
 
 const QUICK_AMOUNTS = [1, 2, 5, 10];
-const clampBet = (minor: number) => Math.min(JET_MAX_BET, Math.max(JET_MIN_BET, minor));
+const clampBet = (minor: number) => Math.min(CRASH_MAX_BET, Math.max(CRASH_MIN_BET, minor));
 /** Typed amount (₾) → valid bet in minor units (falls back to the minimum). */
 const parseBet = (text: string) => clampBet(toMinor(Number(text.replace(',', '.')) || 0));
 const showBet = (minor: number) => toMajor(minor).toFixed(2);
@@ -33,15 +33,15 @@ function CashoutLabel({
   startedAt,
   offset,
 }: {
-  bet: JetMyBet;
+  bet: CrashMyBet;
   startedAt: number;
   offset: number;
 }) {
-  const t = useTranslations('Originals.jet');
+  const t = useTranslations('Originals.crash');
   const money = useMoney();
   const amount = useRef<HTMLSpanElement>(null);
   useAnimationFrame(() => {
-    const multiplier = jetMultiplierAt(Date.now() + offset - startedAt);
+    const multiplier = crashMultiplierAt(Date.now() + offset - startedAt);
     if (amount.current) amount.current.textContent = money(Math.floor(bet.amount * multiplier));
   }, [bet, startedAt, offset]);
   return (
@@ -52,14 +52,14 @@ function CashoutLabel({
   );
 }
 
-type BetPanelProps = { slot: 0 | 1; state: JetState; offset: number; socket: Socket | null };
+type BetPanelProps = { slot: 0 | 1; state: CrashState; offset: number; socket: Socket | null };
 
 /**
  * One of the two bet panels. Bet → (betting) cancel → (flying) cash out. Outside the betting
  * window a bet is queued and sent when the next round opens. Optional auto cash-out.
  */
 export function BetPanel({ slot, state, offset, socket }: BetPanelProps) {
-  const t = useTranslations('Originals.jet');
+  const t = useTranslations('Originals.crash');
   const errorText = useGameError();
   const money = useMoney();
   const [amountText, setAmountText] = useState(showBet(1_00));
@@ -84,7 +84,8 @@ export function BetPanel({ slot, state, offset, socket }: BetPanelProps) {
       const ack = await request<unknown>(socket, event, payload);
       setError(ack.ok ? null : ack.code);
     });
-  const placeBet = () => send(ORIGINALS_WS.jetBet, { slot, amount, autoCashout });
+  const placeBet = () =>
+    send(ORIGINALS_WS.crashBet, { game: state.game, slot, amount, autoCashout });
 
   // A queued bet goes out as soon as its round opens for betting.
   const sendQueued = useEffectEvent(placeBet);
@@ -98,7 +99,7 @@ export function BetPanel({ slot, state, offset, socket }: BetPanelProps) {
       <Button
         className="h-16 w-full bg-warning text-on-status hover:bg-warning/90"
         disabled={pending}
-        onClick={() => send(ORIGINALS_WS.jetCashout, { slot })}
+        onClick={() => send(ORIGINALS_WS.crashCashout, { game: state.game, slot })}
       >
         <CashoutLabel bet={mine} startedAt={round.startedAt!} offset={offset} />
       </Button>
@@ -109,7 +110,7 @@ export function BetPanel({ slot, state, offset, socket }: BetPanelProps) {
         variant="destructive"
         className="h-16 w-full text-base font-bold"
         disabled={pending}
-        onClick={() => send(ORIGINALS_WS.jetCancel, { slot })}
+        onClick={() => send(ORIGINALS_WS.crashCancel, { game: state.game, slot })}
       >
         {t('cancel')}
       </Button>

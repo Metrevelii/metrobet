@@ -31,8 +31,8 @@ const envSchema = z.object({
    */
   CASINO_AGGREGATOR: z.enum(['mock', 'public-demos']).default('mock'),
 
-  /** `on` runs the Metro Jet round loop; `off` stops it (e2e tests step rounds by hand). */
-  ORIGINALS_JET_LOOP: z.enum(['on', 'off']).default('on'),
+  /** `on` runs the crash games' round loop; `off` stops it (e2e tests step rounds by hand). */
+  ORIGINALS_CRASH_LOOP: z.enum(['on', 'off']).default('on'),
 
   /** `simulated` runs the built-in odds feed; `off` disables it (e.g. in tests that don't need it). */
   SPORTSBOOK_FEED: z.enum(['simulated', 'off']).default('simulated'),

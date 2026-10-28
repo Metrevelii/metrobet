@@ -367,10 +367,8 @@
         "tamada": "Tamada"
       }
     },
-    "jet": {
-      "placeBets": "Place your bets",
+    "crash": {
       "startsIn": "Take-off in {seconds}s",
-      "flewAway": "Flew away!",
       "bet": "Bet",
       "betNext": "Bet next round",
       "cancel": "Cancel",
@@ -388,9 +386,17 @@
       "player": "Player {tag}",
       "fair": "Provably fair",
       "round": "Round {number}",
-      "fairHint": "Before every round we publish the SHA-256 hash of its secret seed. When the jet flies away, the seed is revealed: the crash point comes from HMAC-SHA256(seed, \"metro-jet:<round>\"), so you can check it was fixed in advance.",
+      "fairHint": "Before every round we publish the SHA-256 hash of its secret seed. At the crash the seed is revealed: the crash point comes from HMAC-SHA256(seed, \"{game}:N\") (N = round number), so you can check it was fixed in advance.",
       "seedHash": "Seed hash (this round)",
       "lastSeed": "Seed of round {number} ({point}×)"
+    },
+    "metroJet": {
+      "placeBets": "Place your bets",
+      "flewAway": "Flew away!"
+    },
+    "longshot": {
+      "preparing": "Reloading the ballista",
+      "crashed": "Burned!"
     }
   }
 }

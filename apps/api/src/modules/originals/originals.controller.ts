@@ -22,6 +22,16 @@ const ART: Record<OriginalGame, Art> = {
 <text x="470" y="170" font-size="110" text-anchor="middle" transform="rotate(-35 470 150)">✈️</text>
 <text x="160" y="260" font-size="84" font-weight="900" fill="#c6ff3d" font-family="system-ui,sans-serif">2.47×</text>`,
   },
+  longshot: {
+    title: ['LONG', 'SHOT'],
+    colors: ['#1d1640', '#07091a', '#c6ff3d'],
+    emblem: `<path d="M0 470 L0 420 L40 420 L40 400 L80 400 L80 420 L120 420 L120 400 L160 400 L160 420 L600 420 L600 470 Z" fill="#141a33"/>
+<g transform="translate(150 360) rotate(-32)"><rect x="0" y="-5" width="210" height="10" rx="4" fill="#8a6a4a"/>
+<path d="M205 -16 L250 0 L205 16 L214 0 Z" fill="#d6dde6"/><path d="M0 -5 L30 -5 L16 -20 L2 -20 Z M0 5 L30 5 L16 20 L2 20 Z" fill="#c6ff3d"/></g>
+<path d="M330 230 C 380 205 420 215 450 200" fill="none" stroke="#c6ff3d" stroke-opacity=".5" stroke-width="4" stroke-dasharray="10 12"/>
+<text x="470" y="215" font-size="150" text-anchor="middle">🐉</text>
+<circle cx="420" cy="225" r="46" fill="#ff7a1a" fill-opacity=".35"/>`,
+  },
 };
 
 function renderArt({ title, colors: [from, to, accent], emblem }: Art): string {

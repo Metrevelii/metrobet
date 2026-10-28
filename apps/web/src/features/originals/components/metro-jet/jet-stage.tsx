@@ -1,32 +1,24 @@
 'use client';
 
-import { type JetRound, jetMultiplierAt } from '@metrobet/contracts';
+import { crashMultiplierAt } from '@metrobet/contracts';
 import { cn } from '@metrobet/ui';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+
+import { useAnimationFrame } from '../crash/use-animation-frame';
+import type { CrashStageProps } from '../crash/crash-game';
 
 const POINTS = 48;
 const MIN_WINDOW_MS = 10_000;
-
-/** Calls `frame` on every animation frame while mounted. */
-export function useAnimationFrame(frame: () => void, deps: unknown[]) {
-  useEffect(() => {
-    let id = requestAnimationFrame(function loop() {
-      frame();
-      id = requestAnimationFrame(loop);
-    });
-    return () => cancelAnimationFrame(id);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- `frame` is recreated every render on purpose; deps say when to restart.
-  }, deps);
-}
 
 /**
  * The flight: an exponential curve with the jet at its tip and the live multiplier. Drawn with
  * refs on each animation frame (no React re-render per frame). The multiplier comes from the
  * shared formula and the server clock, so every viewer sees the same number.
  */
-export function JetStage({ round, offset }: { round: JetRound; offset: number }) {
-  const t = useTranslations('Originals.jet');
+export function JetStage({ round, offset }: CrashStageProps) {
+  const t = useTranslations('Originals.metroJet');
+  const tCrash = useTranslations('Originals.crash');
   const curve = useRef<SVGPathElement>(null);
   const area = useRef<SVGPathElement>(null);
   const jet = useRef<HTMLDivElement>(null);
@@ -39,12 +31,12 @@ export function JetStage({ round, offset }: { round: JetRound; offset: number })
     if (round.phase === 'betting') {
       const left = Math.max(0, round.bettingEndsAt - now);
       if (countdown.current)
-        countdown.current.textContent = t('startsIn', { seconds: (left / 1000).toFixed(1) });
+        countdown.current.textContent = tCrash('startsIn', { seconds: (left / 1000).toFixed(1) });
       if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, left / 6000)})`;
       return;
     }
     const elapsed = round.phase === 'flying' ? now - (round.startedAt ?? now) : null;
-    const shown = elapsed === null ? (round.crashPoint ?? 1) : jetMultiplierAt(elapsed);
+    const shown = elapsed === null ? (round.crashPoint ?? 1) : crashMultiplierAt(elapsed);
     if (multiplier.current) multiplier.current.textContent = `${shown.toFixed(2)}×`;
     if (elapsed === null) return;
 
@@ -52,7 +44,7 @@ export function JetStage({ round, offset }: { round: JetRound; offset: number })
     const top = Math.max(2, shown * 1.25);
     const point = (ms: number) => {
       const x = (ms / window) * 1000;
-      const y = 500 - ((jetMultiplierAt(ms) - 1) / (top - 1)) * 460;
+      const y = 500 - ((crashMultiplierAt(ms) - 1) / (top - 1)) * 460;
       return [x, y] as const;
     };
     const points = Array.from({ length: POINTS + 1 }, (_, i) => point((elapsed * i) / POINTS));

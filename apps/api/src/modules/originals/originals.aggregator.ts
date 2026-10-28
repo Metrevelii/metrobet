@@ -39,6 +39,17 @@ const GAMES: Record<
     popularity: 5000,
     releasedAt: new Date(Date.UTC(2026, 9, 29)),
   },
+  longshot: {
+    name: 'Longshot',
+    type: 'crash',
+    tags: ['new'],
+    rtp: 97,
+    volatility: 'high',
+    hasDemo: true,
+    hasRealMoney: true,
+    popularity: 4900,
+    releasedAt: new Date(Date.UTC(2026, 9, 30)),
+  },
 };
 
 /**

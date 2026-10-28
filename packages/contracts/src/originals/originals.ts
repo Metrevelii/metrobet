@@ -9,7 +9,7 @@ import { gameModeSchema } from '../casino/casino.js';
  * that talk to the game server over Socket.IO.
  */
 export const ORIGINALS_PROVIDER_ID = 'metrobet-originals';
-export const ORIGINAL_GAMES = ['supra-fortune', 'metro-jet'] as const;
+export const ORIGINAL_GAMES = ['supra-fortune', 'metro-jet', 'longshot'] as const;
 export const originalGameSchema = z.enum(ORIGINAL_GAMES);
 export type OriginalGame = z.infer<typeof originalGameSchema>;
 
@@ -58,18 +58,18 @@ export const ORIGINALS_WS = {
   balance: 'balance',
   /** client → server (ack): Supra Fortune spin `{ bet }` → `OriginalsAck<SupraSpinResult>`. */
   supraSpin: 'supra:spin',
-  /** client → server (ack): join Metro Jet → `JetState`. */
-  jetJoin: 'jet:join',
-  /** server → client: `JetState` for this viewer after each phase change. */
-  jetState: 'jet:state',
-  /** server → client: public bets of the current round (throttled). */
-  jetBets: 'jet:bets',
-  /** server → client: this viewer's bets changed (e.g. an auto cash-out). */
-  jetMine: 'jet:mine',
-  /** client → server (ack): place / cancel / cash out. */
-  jetBet: 'jet:bet',
-  jetCancel: 'jet:cancel',
-  jetCashout: 'jet:cashout',
+  /** client → server (ack): join a crash game `{ game }` → `CrashState`. */
+  crashJoin: 'crash:join',
+  /** server → client: `CrashState` for this viewer after each phase change of a joined game. */
+  crashState: 'crash:state',
+  /** server → client: public bets of a game's current round (throttled), `{ game, bets }`. */
+  crashBets: 'crash:bets',
+  /** server → client: this viewer's bets changed (e.g. an auto cash-out), `{ game, mine }`. */
+  crashMine: 'crash:mine',
+  /** client → server (ack): place / cancel / cash out, each with `game`. */
+  crashBet: 'crash:bet',
+  crashCancel: 'crash:cancel',
+  crashCashout: 'crash:cashout',
 } as const;
 
 export const ORIGINALS_ERRORS = [

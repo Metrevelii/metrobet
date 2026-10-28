@@ -1,12 +1,13 @@
 import type { AddressInfo } from 'node:net';
 
 import {
-  jetElapsedFor,
-  JET_BETTING_MS,
+  crashElapsedFor,
+  CRASH_BETTING_MS,
   ORIGINALS_WS,
   ORIGINALS_WS_NAMESPACE,
   type OriginalsAck,
   parseOriginalLaunch,
+  type CrashGame,
   type SupraSpinResult,
 } from '@metrobet/contracts';
 import { ConfigService } from '@nestjs/config';
@@ -20,9 +21,10 @@ import {
 } from '../src/common/game-wallet/game-wallet-client.js';
 import { CasinoSyncService } from '../src/modules/casino/casino-sync.service.js';
 import { gameRounds } from '../src/modules/game-wallet/game-wallet.schema.js';
-import { crashPointFor, seedHash } from '../src/modules/originals/metro-jet/metro-jet-fairness.js';
-import { jetBets, jetRounds } from '../src/modules/originals/metro-jet/metro-jet.schema.js';
-import { MetroJetService } from '../src/modules/originals/metro-jet/metro-jet.service.js';
+import { crashPointFor, seedHash } from '../src/modules/originals/crash/crash-fairness.js';
+import { crashBets, crashRounds } from '../src/modules/originals/crash/crash.schema.js';
+import type { CrashEngine } from '../src/modules/originals/crash/crash-engine.js';
+import { CrashService } from '../src/modules/originals/crash/crash.service.js';
 import { OriginalsModule } from '../src/modules/originals/originals.module.js';
 import { OriginalsWallet } from '../src/modules/originals/wallet/originals-wallet.js';
 import { createTestApp } from './create-app.js';
@@ -43,7 +45,8 @@ const eventually = async (check: () => Promise<void>) => {
 
 describe('Metrobet Originals (e2e)', () => {
   let ctx: Awaited<ReturnType<typeof createTestApp>>;
-  let jet: MetroJetService;
+  let crash: CrashService;
+  let jet: CrashEngine;
   let baseUrl: string;
   const sockets: Socket[] = [];
   const http = () => request(ctx.app.getHttpServer());
@@ -84,24 +87,31 @@ describe('Metrobet Originals (e2e)', () => {
       socket.once(ORIGINALS_WS.balance, () => resolve(socket));
       socket.once('disconnect', () => reject(new Error('disconnected')));
     });
-  const currentRound = async () =>
-    (await ctx.db.select().from(jetRounds).orderBy(desc(jetRounds.number)).limit(1))[0]!;
+  const currentRound = async (game: CrashGame = 'metro-jet') =>
+    (
+      await ctx.db
+        .select()
+        .from(crashRounds)
+        .where(eq(crashRounds.game, game))
+        .orderBy(desc(crashRounds.number))
+        .limit(1)
+    )[0]!;
 
   /**
    * Starts betting rounds (finishing each) until one will fly at least to `min`. Returns it with
    * `now` = the moment its betting window opened (the test clock).
    */
-  const roundReaching = async (min: number) => {
-    await jet.advance(Date.now());
+  const roundReaching = async (min: number, engine: CrashEngine = jet) => {
+    await engine.advance(Date.now());
     for (;;) {
-      const round = await currentRound();
-      const now = jet.state(null)!.round.bettingEndsAt - JET_BETTING_MS;
+      const round = await currentRound(engine.game);
+      const now = engine.state(null)!.round.bettingEndsAt - CRASH_BETTING_MS;
       if (round.status === 'betting' && round.crashPoint >= min) return { round, now };
-      const start = now + JET_BETTING_MS;
-      await jet.advance(start);
-      const crashedAt = start + jetElapsedFor(round.crashPoint) + 1;
-      await jet.advance(crashedAt);
-      await jet.advance(crashedAt + 60_000);
+      const start = now + CRASH_BETTING_MS;
+      await engine.advance(start);
+      const crashedAt = start + crashElapsedFor(round.crashPoint) + 1;
+      await engine.advance(crashedAt);
+      await engine.advance(crashedAt + 60_000);
     }
   };
 
@@ -110,7 +120,8 @@ describe('Metrobet Originals (e2e)', () => {
     await ctx.app.listen(0, '127.0.0.1');
     baseUrl = `http://127.0.0.1:${(ctx.app.getHttpServer().address() as AddressInfo).port}`;
     await ctx.app.get(CasinoSyncService).sync();
-    jet = ctx.app.get(MetroJetService);
+    crash = ctx.app.get(CrashService);
+    jet = crash.engine('metro-jet');
 
     // The studio reaches the game wallet API over the network; in tests it calls this app.
     const client = ctx.app
@@ -128,7 +139,7 @@ describe('Metrobet Originals (e2e)', () => {
     await ctx?.app.close();
   });
 
-  it('lists both Originals games with art, launching demo play natively', async () => {
+  it('lists the Originals games with art, launching demo play natively', async () => {
     const { body } = await http().get('/api/casino/games?search=supra').expect(200);
     expect(body.items[0]).toMatchObject({
       slug: 'supra-fortune',
@@ -142,7 +153,7 @@ describe('Metrobet Originals (e2e)', () => {
       .send({ mode: 'demo', locale: 'en' })
       .expect(200);
     expect(parseOriginalLaunch(demo.body.url)).toMatchObject({ game: 'metro-jet', mode: 'demo' });
-    expect(ctx.app.get(ConfigService).get('ORIGINALS_JET_LOOP')).toBe('off');
+    expect(ctx.app.get(ConfigService).get('ORIGINALS_CRASH_LOOP')).toBe('off');
   });
 
   it('spins Supra Fortune for real money over the socket', async () => {
@@ -175,7 +186,7 @@ describe('Metrobet Originals (e2e)', () => {
     const a = (await realSession(alice, 'metro-jet')).session;
     const b = (await realSession(bob, 'metro-jet')).session;
     const { round, now } = await roundReaching(2);
-    const start = now + JET_BETTING_MS;
+    const start = now + CRASH_BETTING_MS;
 
     expect(await jet.placeBet(a, { slot: 0, amount: 10_00, autoCashout: null }, now + 100)).toEqual(
       {
@@ -208,19 +219,21 @@ describe('Metrobet Originals (e2e)', () => {
         code: 'WRONG_PHASE',
       },
     );
-    await jet.advance(start + jetElapsedFor(1.6)); // auto cash-out of slot 1 at exactly 1.50×
-    const manual = await jet.cashout(a, 0, start + jetElapsedFor(1.8) + 1);
+    await jet.advance(start + crashElapsedFor(1.6)); // auto cash-out of slot 1 at exactly 1.50×
+    const manual = await jet.cashout(a, 0, start + crashElapsedFor(1.8) + 1);
     if (!manual.ok) throw new Error(manual.code);
     expect(manual.data).toEqual({ multiplier: 1.8, win: 18_00 });
 
-    await jet.advance(start + jetElapsedFor(round.crashPoint) + 1);
+    await jet.advance(start + crashElapsedFor(round.crashPoint) + 1);
     const state = jet.state(null)!;
     expect(state.round).toMatchObject({ phase: 'crashed', crashPoint: round.crashPoint });
     expect(seedHash(state.round.seed!)).toBe(state.round.seedHash);
-    expect(crashPointFor(state.round.seed!, state.round.number)).toBe(round.crashPoint);
+    expect(crashPointFor(state.round.seed!, 'metro-jet', state.round.number)).toBe(
+      round.crashPoint,
+    );
 
     await eventually(async () => expect(await balance(alice)).toBe(85_00 + 7_50 + 18_00));
-    const bets = await ctx.db.select().from(jetBets).where(eq(jetBets.roundId, round.id));
+    const bets = await ctx.db.select().from(crashBets).where(eq(crashBets.roundId, round.id));
     expect(bets.filter((bet) => bet.status === 'cashed')).toHaveLength(2);
     expect(bets.every((bet) => bet.settled)).toBe(true);
   });
@@ -232,11 +245,11 @@ describe('Metrobet Originals (e2e)', () => {
     expect(
       (await jet.placeBet(session, { slot: 0, amount: 4_00, autoCashout: null }, now)).ok,
     ).toBe(true);
-    await jet.advance(now + JET_BETTING_MS);
-    await jet.advance(now + JET_BETTING_MS + jetElapsedFor(round.crashPoint) + 1);
+    await jet.advance(now + CRASH_BETTING_MS);
+    await jet.advance(now + CRASH_BETTING_MS + crashElapsedFor(round.crashPoint) + 1);
 
     await eventually(async () => {
-      const [bet] = await ctx.db.select().from(jetBets).where(eq(jetBets.roundId, round.id));
+      const [bet] = await ctx.db.select().from(crashBets).where(eq(crashBets.roundId, round.id));
       expect(bet).toMatchObject({ status: 'lost', settled: true });
     });
     const [walletRound] = await ctx.db
@@ -249,6 +262,33 @@ describe('Metrobet Originals (e2e)', () => {
     expect(await balance(player)).toBe(6_00);
   });
 
+  it('runs Longshot on its own rounds, settling through its own wallet game', async () => {
+    const longshot = crash.engine('longshot');
+    const player = await signUp(10_00);
+    const { session } = await realSession(player, 'longshot');
+    const { round, now } = await roundReaching(1, longshot);
+    expect(round.game).toBe('longshot');
+    expect(
+      (await longshot.placeBet(session, { slot: 0, amount: 2_00, autoCashout: null }, now)).ok,
+    ).toBe(true);
+    await longshot.advance(now + CRASH_BETTING_MS);
+    await longshot.advance(now + CRASH_BETTING_MS + crashElapsedFor(round.crashPoint) + 1);
+
+    const state = longshot.state(null)!;
+    expect(state).toMatchObject({ game: 'longshot', round: { phase: 'crashed' } });
+    expect(crashPointFor(state.round.seed!, 'longshot', state.round.number)).toBe(round.crashPoint);
+    await eventually(async () => {
+      const [walletRound] = await ctx.db
+        .select()
+        .from(gameRounds)
+        .where(eq(gameRounds.gameSlug, 'longshot'))
+        .orderBy(desc(gameRounds.openedAt))
+        .limit(1);
+      expect(walletRound).toMatchObject({ status: 'closed', betTotal: 2_00, winTotal: 0 });
+    });
+    expect(await balance(player)).toBe(8_00);
+  });
+
   it('refunds bets of a round cut short by a restart', async () => {
     const player = await signUp(10_00);
     const { session } = await realSession(player, 'metro-jet');
@@ -259,7 +299,7 @@ describe('Metrobet Originals (e2e)', () => {
     expect(await balance(player)).toBe(7_00);
 
     // A fresh instance = the server after a restart: it voids the round and refunds the bet.
-    const restarted = new MetroJetService(
+    const restarted = new CrashService(
       ctx.db,
       ctx.app.get(OriginalsWallet),
       ctx.app.get(ConfigService),
