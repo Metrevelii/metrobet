@@ -19,9 +19,9 @@ producer ──publish(event)──▶ ActivityBus ──insert activity_events 
 
 ## Producers
 
-| Producer                                | When                                                                                                                        |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `POST /api/dev/activity/casino-bet`     | **Dev only** (404 in production). Body `{ gameSlug, amount }`, player session required. Fakes a bet until the wallet exists |
-| Aggregator wallet callbacks (not built) | Real bets: publish the same `casino.bet` event                                                                              |
+| Producer                                | When                                                                                                                 |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/dev/activity/casino-bet`     | **Dev only** (404 in production). Body `{ gameSlug, amount }`, player session required. Fakes a bet (no money moves) |
+| Game wallet API (`modules/game-wallet`) | Every real-money bet, after commit, id `game:<provider transaction id>`                                              |
 
 Subscribe with `bus.subscribe(handler)` in `onModuleInit` (see `PromoActivityService`).

@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 
 import { HeaderAccount } from '@/features/auth';
+import { HeaderBalance } from '@/features/wallet';
 
 import { HeaderTabs } from './header-tabs';
 import { LocaleSwitcher } from './locale-switcher';
@@ -21,6 +22,9 @@ export async function Header() {
             <Search />
           </Button>
           <LocaleSwitcher className="hidden sm:flex" />
+          <Suspense fallback={null}>
+            <HeaderBalance />
+          </Suspense>
           <Suspense fallback={<Skeleton className="h-8 w-36 rounded-md" />}>
             <HeaderAccount />
           </Suspense>

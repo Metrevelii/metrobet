@@ -56,6 +56,8 @@ export class MockGameAggregator extends GameAggregator {
           rtp: provider.type === 'crash' ? 97 : 94 + (h % 36) / 10,
           volatility: (['low', 'medium', 'high'] as const)[h % 3]!,
           hasDemo: true,
+          // The mock studio's game server settles slot rounds through our game wallet API.
+          hasRealMoney: provider.type === 'slot',
           popularity: h % 1000,
           releasedAt: new Date(RELEASE_EPOCH - (index * 9 + (h % 9)) * DAY),
         };

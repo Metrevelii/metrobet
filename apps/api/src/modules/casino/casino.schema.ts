@@ -48,6 +48,7 @@ export const casinoGames = pgTable(
     rtp: numeric({ precision: 5, scale: 2, mode: 'number' }),
     volatility: gameVolatility(),
     hasDemo: boolean().notNull().default(true),
+    hasRealMoney: boolean().notNull().default(false),
     /** Higher = more popular. From the aggregator for now, later from our own play stats. */
     popularity: integer().notNull().default(0),
     releasedAt: timestamp({ withTimezone: true }).notNull(),

@@ -31,12 +31,21 @@ const envSchema = z.object({
    */
   CASINO_AGGREGATOR: z.enum(['mock', 'public-demos']).default('mock'),
 
+  /** `on` runs the Metro Jet round loop; `off` stops it (e2e tests step rounds by hand). */
+  ORIGINALS_JET_LOOP: z.enum(['on', 'off']).default('on'),
+
   /** `simulated` runs the built-in odds feed; `off` disables it (e.g. in tests that don't need it). */
   SPORTSBOOK_FEED: z.enum(['simulated', 'off']).default('simulated'),
 
   /** The player site, asked to drop cached content after admin changes. */
   WEB_URL: z.url().default('http://localhost:3000'),
   WEB_REVALIDATE_SECRET: secret,
+
+  /**
+   * Shared with the game provider: signs every game wallet call (HMAC-SHA256 of the body).
+   * The mock studio's game server signs with it too.
+   */
+  GAME_WALLET_SECRET: secret,
 });
 
 const guardedEnvSchema = envSchema.refine(

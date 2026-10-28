@@ -50,6 +50,34 @@
       "when": 1793113931654,
       "tag": "0006_activity_wheel_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793214753754,
+      "tag": "0007_wallet_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793214758524,
+      "tag": "0008_wallet_ledger_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793219631948,
+      "tag": "0009_game_wallet",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793220867901,
+      "tag": "0010_originals_metro_jet",
+      "breakpoints": true
     }
   ]
 }

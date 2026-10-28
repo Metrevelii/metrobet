@@ -12,6 +12,8 @@ export type AggregatorGame = {
   rtp: number | null;
   volatility: 'low' | 'medium' | 'high' | null;
   hasDemo: boolean;
+  /** The provider can settle real-money bets with our game wallet API. */
+  hasRealMoney: boolean;
   popularity: number;
   releasedAt: Date;
 };
@@ -20,7 +22,10 @@ export type LaunchParams = {
   externalGameId: string;
   mode: GameMode;
   locale: Locale;
-  /** Our session reference, echoed back in provider callbacks (wallet, later). */
+  /**
+   * Our session token, echoed back in the provider's game wallet calls (real mode). Demo
+   * launches get a throwaway value.
+   */
   sessionId: string;
 };
 

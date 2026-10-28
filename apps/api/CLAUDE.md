@@ -17,13 +17,17 @@ src/
     schema/index.ts    re-exports every module's tables (used by drizzle-kit)
     errors.ts          isUniqueViolation() for Postgres constraint errors
     migrate.ts seed.ts scripts (db:migrate, db:seed via tsx)
-  common/              guards (AdminKeyGuard), pipes (ZodValidationPipe)
+  common/              guards (AdminKeyGuard), pipes (ZodValidationPipe), game-wallet (signed
+                       provider-side client used by our own game servers)
   modules/<name>/      one folder per bounded context:
                          health · promotions · audit (audit_log) · media (uploads)
                          · web (revalidates the player site's cache) · auth (sessions, guards)
                          · players · staff · notifications (codes; dev outbox)
                          · activity (bus of player bets; promotions subscribe)
-                       later: auth, wallet, sportsbook, casino, bonus, risk
+                         · wallet (double-entry ledger; the only writer of money)
+                         · game-wallet (seamless wallet API for game providers)
+                         · originals (in-house studio: Supra Fortune, Metro Jet game server)
+                       later: bonus, risk
 test/                  e2e specs (*.e2e-spec.ts) against a real `metrobet_test` database
 drizzle/               generated SQL migrations (commit them)
 ```

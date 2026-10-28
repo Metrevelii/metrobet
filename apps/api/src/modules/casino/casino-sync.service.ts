@@ -87,6 +87,7 @@ export class CasinoSyncService {
             rtp: sql`excluded.rtp`,
             volatility: sql`excluded.volatility`,
             hasDemo: sql`excluded.has_demo`,
+            hasRealMoney: sql`excluded.has_real_money`,
             popularity: sql`excluded.popularity`,
             releasedAt: sql`excluded.released_at`,
             providerId: sql`excluded.provider_id`,

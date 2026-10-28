@@ -1,12 +1,16 @@
 import { MockGameAggregator } from '../mock/mock-aggregator.js';
-import { DEMO_SOURCES, PublicDemoAggregator } from './public-demo-aggregator.js';
+import {
+  DEMO_SOURCES,
+  PublicDemoAggregator,
+  REAL_MONEY_MOCK_STUDIO,
+} from './public-demo-aggregator.js';
 
 const config = { get: () => 'http://localhost:4000' } as never;
 
 describe('PublicDemoAggregator', () => {
   const aggregator = new PublicDemoAggregator(new MockGameAggregator(config));
 
-  it('lists every demo source as a provider with only its slots, plus mock non-slot games', async () => {
+  it('lists every demo source with only its slots, plus mock non-slot games and one real-money studio', async () => {
     const games = await aggregator.listGames();
     const providers = (await aggregator.listProviders()).map((p) => p.externalId);
     for (const source of DEMO_SOURCES) {
@@ -17,11 +21,18 @@ describe('PublicDemoAggregator', () => {
         true,
       );
     }
+    const slots = games.filter((game) => game.type === 'slot');
     expect(
-      games
-        .filter((game) => game.type === 'slot')
-        .every((g) => DEMO_SOURCES.some((s) => s.providerId === g.providerExternalId)),
+      slots
+        .filter((g) => !DEMO_SOURCES.some((s) => s.providerId === g.providerExternalId))
+        .every((g) => g.providerExternalId === REAL_MONEY_MOCK_STUDIO && g.hasRealMoney),
     ).toBe(true);
+    expect(slots.some((g) => g.hasRealMoney)).toBe(true);
+    expect(
+      slots
+        .filter((g) => DEMO_SOURCES.some((s) => s.providerId === g.providerExternalId))
+        .some((g) => g.hasRealMoney),
+    ).toBe(false);
     expect(games.some((game) => game.type === 'crash')).toBe(true);
     for (const game of games) expect(providers).toContain(game.providerExternalId);
   });

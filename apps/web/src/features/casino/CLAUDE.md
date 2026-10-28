@@ -39,7 +39,15 @@ always pass `type: 'slot'` to listings.
 - iframe `sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-pointer-lock"`:
   game clients are cross-origin and need storage; top navigation stays blocked.
 - Opening a game records it in "Recently played".
-- Demo only for now (`launchGame(slug, 'demo', locale)`); real money comes with auth/wallet.
+- **Real money** when the game has `hasRealMoney` and the player is signed in (default;
+  `?mode=demo` opts out): `openRealSession(slug, locale)` opens a game session for the player.
+  Otherwise `launchGame(slug, 'demo', locale)`. `ModeSwitch` in the toolbar links between the
+  two (signed-out players are sent to log in first).
+- **Metrobet Originals** launch URLs (`parseOriginalLaunch`) render the native client
+  (`features/originals`) in the stage instead of an iframe.
+- In real mode `GameFrame` accepts `{ type: 'metrobet:balance', balance }` messages **only from
+  the game iframe's own origin and window**, Zod-checks them and calls `setLiveBalance` (wallet
+  feature), so the header follows without reloading the page (a refresh would reload the game).
 
 ## Thumbnails
 

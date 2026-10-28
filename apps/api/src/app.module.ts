@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module.js';
 import { ActivityModule } from './modules/activity/activity.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CasinoModule } from './modules/casino/casino.module.js';
+import { GameWalletModule } from './modules/game-wallet/game-wallet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
@@ -14,6 +15,7 @@ import { PlayersModule } from './modules/players/players.module.js';
 import { PromotionsModule } from './modules/promotions/promotions.module.js';
 import { SportsbookModule } from './modules/sportsbook/sportsbook.module.js';
 import { StaffModule } from './modules/staff/staff.module.js';
+import { WalletModule } from './modules/wallet/wallet.module.js';
 
 @Module({
   imports: [
@@ -34,12 +36,14 @@ import { StaffModule } from './modules/staff/staff.module.js';
     AuthModule,
     NotificationsModule,
     CasinoModule,
+    GameWalletModule,
     HealthModule,
     MediaModule,
     PlayersModule,
     PromotionsModule,
     SportsbookModule,
     StaffModule,
+    WalletModule,
   ],
 })
 export class AppModule {}

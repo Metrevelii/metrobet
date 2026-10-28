@@ -5,7 +5,8 @@ import { AppModule } from './app.module.js';
 import { configureApp } from './app.setup.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // rawBody: the game wallet API verifies HMAC signatures over the exact request bytes.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
   const config = configureApp(app);
   await app.listen(config.get('PORT', { infer: true }));
 }

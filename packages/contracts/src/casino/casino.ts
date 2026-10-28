@@ -43,6 +43,8 @@ export type GameCard = z.infer<typeof gameCardSchema>;
 export const gameDetailSchema = gameCardSchema.extend({
   rtp: z.number().nullable(),
   volatility: z.enum(['low', 'medium', 'high']).nullable(),
+  /** Playable with the wallet balance (the provider settles bets through our game wallet API). */
+  hasRealMoney: z.boolean(),
 });
 export type GameDetail = z.infer<typeof gameDetailSchema>;
 
@@ -89,6 +91,10 @@ export const gameLaunchRequestSchema = z.object({
   locale: localeSchema,
 });
 export type GameLaunchRequest = z.infer<typeof gameLaunchRequestSchema>;
+
+/** Real-money play: opens a game session for the signed-in player (response: GameLaunchResponse). */
+export const gameSessionRequestSchema = z.object({ locale: localeSchema });
+export type GameSessionRequest = z.infer<typeof gameSessionRequestSchema>;
 
 export const gameLaunchResponseSchema = z.object({ url: z.url() });
 export type GameLaunchResponse = z.infer<typeof gameLaunchResponseSchema>;

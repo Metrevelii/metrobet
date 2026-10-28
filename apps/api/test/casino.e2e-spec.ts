@@ -53,8 +53,8 @@ describe('casino (e2e)', () => {
     await http().get('/api/casino/games?search=x').expect(400);
   });
 
-  it('launches demo games and refuses real money without a session', async () => {
-    const { slug } = (await games('type=crash&pageSize=1')).items[0]!;
+  it('launches demo games and sends real money to the session endpoint', async () => {
+    const { slug } = (await games('type=crash&provider=red-rocket&pageSize=1')).items[0]!;
     const { body } = await http()
       .post(`/api/casino/games/${slug}/launch`)
       .send({ mode: 'demo', locale: 'ka' })
@@ -70,7 +70,7 @@ describe('casino (e2e)', () => {
     await http()
       .post(`/api/casino/games/${slug}/launch`)
       .send({ mode: 'real', locale: 'ka' })
-      .expect(401);
+      .expect(400);
     await http()
       .post('/api/casino/games/nope/launch')
       .send({ mode: 'demo', locale: 'en' })

@@ -6,10 +6,10 @@ catalogue as **Slots** (slot games only); crash games are listed on the Crash pa
 
 ## Adapters (`CASINO_AGGREGATOR`)
 
-| Value            | What                                                                                                                                                                                                                                                                      |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mock` (default) | `MockGameAggregator`: fictional studios, generated art, our own demo page                                                                                                                                                                                                 |
-| `public-demos`   | `PublicDemoAggregator`: real slots from providers' **free public demos**: Pragmatic Play (40, `demogamesfree.pragmaticplay.net`) and BGaming (22, `demo.bgaming-network.com`), plus mock crash/table games. **Development only**: env validation refuses it in production |
+| Value            | What                                                                                                                                                                                                                                                                                                                        |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mock` (default) | `MockGameAggregator`: fictional studios, generated art, our own demo page                                                                                                                                                                                                                                                   |
+| `public-demos`   | `PublicDemoAggregator`: real slots from providers' **free public demos**: Pragmatic Play (40, `demogamesfree.pragmaticplay.net`) and BGaming (22, `demo.bgaming-network.com`), plus mock crash/table games and the mock **Golden Fleece** slots (real money). **Development only**: env validation refuses it in production |
 
 Showing a provider's games publicly requires an agreement (in Georgia, certified content via a
 licensed supplier). Production must use the contracted aggregator, which also provides official
@@ -30,10 +30,26 @@ Endorphina; Hacksaw needs their JS launcher + partner config.
 | GET    | `/api/casino/lobby`                                             | `CasinoLobby`: slots only, row per category + providers with slots |
 | GET    | `/api/casino/games?type&category&provider&search&page&pageSize` | `GamePage`                                                         |
 | GET    | `/api/casino/games/:slug`                                       | `GameDetail`                                                       |
-| POST   | `/api/casino/games/:slug/launch`                                | `{ url }`; body `{ mode, locale }`                                 |
+| POST   | `/api/casino/games/:slug/launch`                                | `{ url }`; body `{ mode: 'demo', locale }` (`real` → 400)          |
+| POST   | `/api/casino/games/:slug/sessions`                              | **Player auth.** Real money: opens a game session, `{ url }`       |
 | GET    | `/api/casino/providers?type`                                    | `Provider[]` with game counts                                      |
 
-`mode: 'real'` returns 401 until player auth + wallet exist (roadmap step 7).
+## Real money
+
+- `hasRealMoney` (aggregator-owned, synced; in `GameDetail`): the provider settles this game
+  through our game wallet API. Mock slots: yes. Public demos: never.
+- `POST games/:slug/sessions` checks the game and that the player is `active`, then
+  `GameSessions.open` stores a session (SHA-256 of a random token, 6 h TTL, table
+  `casino_game_sessions`) and the aggregator builds the launch URL with the raw token. The
+  provider sends that token back in every game wallet call (`modules/game-wallet`).
+- `GameSessions` is exported for the game wallet module: game sessions belong to the casino
+  (launching), money to the game wallet.
+
+## Catalogue sources
+
+`GameAggregator` is bound to a `CombinedAggregator`: the adapter picked by `CASINO_AGGREGATOR`
+plus first-party sources that are always on (today: **Metrobet Originals**, `modules/originals`).
+Catalogues are merged; a launch goes to the source that `owns()` the game id (`originals:*`).
 
 ## Data flow
 
@@ -57,8 +73,15 @@ aggregator ──sync (CasinoSyncService)──▶ casino_providers / casino_gam
 
 - `mock-catalog.ts`: 10 fictional studios, 78 games, deterministic tags/popularity/RTP.
 - `MockAggregatorController` (`/api/casino/mock/*`) stands in for the aggregator's CDN and game
-  servers: generated SVG thumbnails (strict CSP) and a playable demo page (slot or crash, in
+  servers: generated SVG thumbnails (strict CSP) and a playable game page (slot or crash, in
   ka/en/ru) that only allows framing by our sites (`frame-ancestors` = `CORS_ORIGINS`).
+- **Real money (slots):** the page (`?mode=real&session=…`) calls the studio's game server
+  (`play/:id/balance`, `play/:id/spin`). `MockGameServer` decides the outcome
+  (`mock-slot-math.ts`: CSPRNG reels, ≈ 95.4 % RTP, bets 1–50 ₾) and settles it through the
+  signed game wallet API over HTTP (`GameWalletClient` → `API_PUBLIC_URL/api/game-wallet`):
+  bet, then win (0 closes a lost round, retried with the same id); a bet with an unknown
+  outcome is rolled back. The page posts `{ type: 'metrobet:balance', balance }` to the site
+  (`WEB_URL` origin) after each spin so the header balance follows.
 - **When the real aggregator arrives:** implement `GameAggregator` (catalogue, launch, later the
   seamless-wallet callbacks), switch the binding in `casino.module.ts`, delete the mock
   controller, and add the provider image host to the web `images.remotePatterns`.

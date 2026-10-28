@@ -69,6 +69,8 @@ tokens (like `odds-up`, `live`) only when a color carries meaning, not for one-o
   `useCarousel()` (`selectedIndex`, `slideCount`, `scrollTo`, `api`…). Arrow keys work out of the box.
 - Animation tokens: `animate-flash` (one-shot fade; re-key the element to replay, e.g. odds
   changes) and `animate-progress` fills an element left→right once over
-  `--progress-duration` (set inline). Respect `motion-reduce:` variants.
+  `--progress-duration` (set inline). `animate-scroll-y` loops content that is repeated twice
+  upward (speed: `--scroll-duration`), `animate-settle` drops an element into place. Respect
+  `motion-reduce:` variants.
 - Utilities: `tabular` (tabular numerals, for odds, balances and timers) and `bg-glow` (primary-tinted hero
   glow) are defined in `src/styles/index.css`.

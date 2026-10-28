@@ -1,5 +1,7 @@
 import type { GameType, Locale } from '@metrobet/contracts';
 
+import { SLOT_BETS, SLOT_SYMBOLS } from './mock-slot-math.js';
+
 const escapeHtml = (value: string) =>
   value.replace(/[<>&'"]/g, (char) => `&#${char.charCodeAt(0)};`);
 
@@ -13,6 +15,9 @@ const LABELS: Record<Locale, Record<string, string>> = {
     demo: 'დემო რეჟიმი',
     win: 'მოგება',
     crashed: 'გაფრინდა',
+    real: 'რეალური ფული',
+    noFunds: 'ბალანსი არ არის საკმარისი',
+    error: 'რაღაც შეცდომაა. სცადე თავიდან.',
   },
   en: {
     balance: 'Balance',
@@ -23,6 +28,9 @@ const LABELS: Record<Locale, Record<string, string>> = {
     demo: 'Demo mode',
     win: 'Win',
     crashed: 'Flew away',
+    real: 'Real money',
+    noFunds: 'Not enough balance',
+    error: 'Something went wrong. Please try again.',
   },
   ru: {
     balance: 'Баланс',
@@ -33,6 +41,9 @@ const LABELS: Record<Locale, Record<string, string>> = {
     demo: 'Демо-режим',
     win: 'Выигрыш',
     crashed: 'Улетел',
+    real: 'Реальные деньги',
+    noFunds: 'Недостаточно средств',
+    error: 'Что-то пошло не так. Попробуйте ещё раз.',
   },
 };
 
@@ -51,15 +62,40 @@ function frame(){m*=1.006;mult.textContent=m.toFixed(2)+'×';if(m>=crashAt){flyi
 btn.onclick=()=>{if(flying){cancelAnimationFrame(raf);flying=false;const win=bet*m;balance+=win;out.textContent=balance.toFixed(2);msg.textContent=L.win+' '+win.toFixed(2);btn.textContent=L.start;return;}
 if(balance<bet)return;balance-=bet;out.textContent=balance.toFixed(2);m=1;crashAt=1+(-Math.log(Math.random())*1.4);flying=true;mult.classList.remove('lost');msg.textContent='';btn.textContent=L.cashout;frame();};`;
 
-/** Self-contained demo game page standing in for a provider's game client. */
+/**
+ * Real-money slot client: the outcome comes from the game server (`<page>/spin`), which settles
+ * it through our game wallet API. Tells the parent site the new balance after every spin.
+ */
+const REAL_SLOT_SCRIPT = `
+const reels=[...document.querySelectorAll('.reel')],out=document.getElementById('balance'),msg=document.getElementById('msg'),btn=document.getElementById('play'),sel=document.getElementById('bet');
+const fmt=v=>(v/100).toFixed(2);let bet=Number(sel.value);sel.onchange=()=>{bet=Number(sel.value)};
+const fail=code=>{msg.className='err';msg.textContent=code==='INSUFFICIENT_FUNDS'?L.noFunds:L.error};
+const show=b=>{out.textContent=fmt(b);parent.postMessage({type:'metrobet:balance',balance:b},R.parentOrigin)};
+fetch(location.pathname+'/balance?session='+encodeURIComponent(R.session)).then(r=>r.ok?r.json():Promise.reject()).then(r=>show(r.balance)).catch(()=>fail());
+btn.onclick=async()=>{btn.disabled=true;msg.className='';msg.textContent='';
+const t=setInterval(()=>reels.forEach(r=>r.textContent=S[Math.random()*S.length|0]),70);
+try{const res=await fetch(location.pathname+'/spin',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({session:R.session,bet})});
+const r=await res.json();if(!res.ok)throw r;await new Promise(ok=>setTimeout(ok,700));clearInterval(t);
+r.reels.forEach((s,i)=>{reels[i].textContent=S[s]});show(r.balance);if(r.win)msg.textContent=L.win+' '+fmt(r.win);}
+catch(e){clearInterval(t);fail(e&&e.code)}btn.disabled=false;};`;
+
+/** JSON for an inline <script>: `<` escaped so data can never close the tag. */
+const scriptJson = (value: unknown) => JSON.stringify(value).replace(/</g, '\\u003c');
+
+/**
+ * Self-contained game page standing in for a provider's game client. With `real`, slots play
+ * for real money through the mock game server; everything else is local demo play.
+ */
 export function renderMockDemoPage(params: {
   title: string;
   provider: string;
   type: GameType;
   locale: Locale;
+  real?: { session: string; parentOrigin: string };
 }): string {
   const l = LABELS[params.locale];
   const crash = params.type === 'crash';
+  const real = !crash && params.real;
   const stage = crash
     ? '<div id="mult" class="mult">1.00×</div>'
     : '<div class="reels"><div class="reel">🍒</div><div class="reel">💎</div><div class="reel">7️⃣</div></div>';
@@ -73,14 +109,24 @@ h1{margin:0;font-size:clamp(20px,4vw,36px);text-align:center}.provider{opacity:.
 .mult{font-size:clamp(56px,12vw,120px);font-weight:900;color:#c6ff3d;font-variant-numeric:tabular-nums}.mult.lost{color:#ff4d5e}
 .bar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}.pill{background:#141925;border:1px solid #2a3347;border-radius:10px;padding:8px 14px;font-variant-numeric:tabular-nums}
 button{font:inherit;font-weight:800;font-size:18px;padding:14px 40px;border:0;border-radius:12px;background:#c6ff3d;color:#0b0e14;cursor:pointer}button:disabled{opacity:.5}
-#msg{min-height:24px;color:#2ee59d;font-weight:700}.demo{position:fixed;top:12px;right:12px;font-size:12px;background:#ffb020;color:#0b0e14;padding:4px 10px;border-radius:999px;font-weight:800}
+#msg{min-height:24px;color:#2ee59d;font-weight:700}#msg.err{color:#ff4d5e}select{font:inherit;background:#141925;color:inherit;border:1px solid #2a3347;border-radius:8px;padding:2px 6px}.demo.real{background:#2ee59d}.demo{position:fixed;top:12px;right:12px;font-size:12px;background:#ffb020;color:#0b0e14;padding:4px 10px;border-radius:999px;font-weight:800}
 </style></head><body>
-<div class="demo">${l.demo}</div>
+<div class="demo${real ? ' real' : ''}">${real ? l.real : l.demo}</div>
 <div class="provider">${escapeHtml(params.provider)}</div>
 <h1>${escapeHtml(params.title)}</h1>
 ${stage}
 <div id="msg"></div>
-<div class="bar"><span class="pill">${l.balance}: <b id="balance">1000.00</b></span><span class="pill">${l.bet}: 10.00</span><button id="play">${crash ? l.start : l.spin}</button></div>
-<script>const L=${JSON.stringify(l)};${crash ? CRASH_SCRIPT : SLOT_SCRIPT}</script>
+<div class="bar"><span class="pill">${l.balance}: <b id="balance">${real ? '…' : '1000.00'}</b></span>${
+    real
+      ? `<label class="pill">${l.bet}: <select id="bet">${SLOT_BETS.map((bet, i) => `<option value="${bet}"${i === 2 ? ' selected' : ''}>${(bet / 100).toFixed(2)}</option>`).join('')}</select></label>`
+      : `<span class="pill">${l.bet}: 10.00</span>`
+  }<button id="play">${crash ? l.start : l.spin}</button></div>
+<script>const L=${scriptJson(l)};${
+    real
+      ? `const S=${scriptJson(SLOT_SYMBOLS)};const R=${scriptJson(real)};${REAL_SLOT_SCRIPT}`
+      : crash
+        ? CRASH_SCRIPT
+        : SLOT_SCRIPT
+  }</script>
 </body></html>`;
 }

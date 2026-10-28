@@ -68,8 +68,17 @@ describe('promo wheel (e2e)', () => {
     admin = await ctx.staffHeaders('marketing');
     await ctx.app.get(CasinoSyncService).sync();
     const casino = ctx.app.get(CasinoService);
-    slot = (await casino.listGames({ type: 'slot', page: 1, pageSize: 1 })).items[0]!.slug;
-    crash = (await casino.listGames({ type: 'crash', page: 1, pageSize: 1 })).items[0]!.slug;
+    slot = (
+      await casino.listGames({
+        type: 'slot',
+        provider: 'golden-fleece-studios',
+        page: 1,
+        pageSize: 1,
+      })
+    ).items[0]!.slug;
+    crash = (
+      await casino.listGames({ type: 'crash', provider: 'red-rocket', page: 1, pageSize: 1 })
+    ).items[0]!.slug;
   });
   beforeEach(() => ctx.reset());
   afterAll(() => ctx?.app.close());

@@ -78,20 +78,22 @@ export class CasinoCatalog {
     return { items: items.map(toCard), total, page, pageSize };
   }
 
-  async findGame(slug: string): Promise<(GameDetail & { externalId: string }) | null> {
+  async findGame(slug: string): Promise<(GameDetail & { id: string; externalId: string }) | null> {
     const [row] = await this.db
       .select({
         ...cardColumns,
+        id: casinoGames.id,
         externalId: casinoGames.externalId,
         rtp: casinoGames.rtp,
         volatility: casinoGames.volatility,
+        hasRealMoney: casinoGames.hasRealMoney,
       })
       .from(casinoGames)
       .innerJoin(casinoProviders, eq(casinoGames.providerId, casinoProviders.id))
       .where(this.where({ slug }));
     if (!row) return null;
-    const { externalId, rtp, volatility, ...card } = row;
-    return { ...toCard(card), externalId, rtp, volatility };
+    const { id, externalId, rtp, volatility, hasRealMoney, ...card } = row;
+    return { ...toCard(card), id, externalId, rtp, volatility, hasRealMoney };
   }
 
   /** Providers with at least one visible game (optionally of one type). */

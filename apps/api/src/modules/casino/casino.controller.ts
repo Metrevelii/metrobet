@@ -5,16 +5,29 @@ import {
   gameLaunchRequestSchema,
   type GameLaunchResponse,
   type GamePage,
+  type GameSessionRequest,
+  gameSessionRequestSchema,
   type GameType,
   gameTypeSchema,
   gameListQuerySchema,
   type Provider,
   slugSchema,
 } from '@metrobet/contracts';
-import { Body, Controller, Get, HttpCode, Inject, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import type { z } from 'zod';
 
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+import { CurrentPlayer, PlayerAuthGuard, type PlayerPrincipal } from '../auth/auth.guards.js';
 import { CasinoService } from './casino.service.js';
 
 const slug = new ZodValidationPipe(slugSchema);
@@ -48,6 +61,18 @@ export class CasinoController {
     @Body(new ZodValidationPipe(gameLaunchRequestSchema)) request: GameLaunchRequest,
   ): Promise<GameLaunchResponse> {
     return this.casino.launch(gameSlug, request);
+  }
+
+  /** Real-money play: opens a game session for the signed-in player and returns its URL. */
+  @Post('games/:slug/sessions')
+  @HttpCode(200)
+  @UseGuards(PlayerAuthGuard)
+  openSession(
+    @Param('slug', slug) gameSlug: string,
+    @CurrentPlayer() { playerId }: PlayerPrincipal,
+    @Body(new ZodValidationPipe(gameSessionRequestSchema)) request: GameSessionRequest,
+  ): Promise<GameLaunchResponse> {
+    return this.casino.openRealSession(gameSlug, playerId, request);
   }
 
   /** Providers with visible games; `?type=slot` limits to providers that have slots. */

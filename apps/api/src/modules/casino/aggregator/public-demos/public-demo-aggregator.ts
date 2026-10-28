@@ -13,13 +13,17 @@ const RELEASE_EPOCH = Date.UTC(2026, 9, 1);
 const DAY = 24 * 60 * 60 * 1000;
 const externalId = (source: DemoSource, code: string) => `${source.idPrefix}:${code}`;
 
+/** The mock studio kept next to the demos: its slots play for real money (mock game server). */
+export const REAL_MONEY_MOCK_STUDIO = 'golden-fleece';
+
 /**
  * DEVELOPMENT ONLY. Real slots from providers' free public demos (Pragmatic Play, BGaming), for
  * internal demos before an aggregator contract exists. Showing a provider's games publicly needs
  * an agreement: in production, games come from the contracted aggregator (env validation refuses
  * `CASINO_AGGREGATOR=public-demos` when NODE_ENV=production).
  *
- * Non-slot games (crash, table) still come from the mock aggregator.
+ * Non-slot games (crash, table) still come from the mock aggregator, plus one mock slot studio
+ * (`REAL_MONEY_MOCK_STUDIO`) so real-money play through the game wallet API can be tried here too.
  */
 @Injectable()
 export class PublicDemoAggregator extends GameAggregator {
@@ -28,11 +32,9 @@ export class PublicDemoAggregator extends GameAggregator {
   }
 
   async listProviders() {
-    const nonSlotStudios = new Set(
-      (await this.mockNonSlotGames()).map((game) => game.providerExternalId),
-    );
+    const mockStudios = new Set((await this.mockGames()).map((game) => game.providerExternalId));
     const mockProviders = (await this.mock.listProviders()).filter((provider) =>
-      nonSlotStudios.has(provider.externalId),
+      mockStudios.has(provider.externalId),
     );
     return [
       ...DEMO_SOURCES.map((source) => ({
@@ -55,11 +57,13 @@ export class PublicDemoAggregator extends GameAggregator {
         rtp: game.rtp,
         volatility: game.volatility,
         hasDemo: true,
+        // Public demos are free play only: no wallet integration with these providers.
+        hasRealMoney: false,
         popularity: game.popularity,
         releasedAt: new Date(RELEASE_EPOCH - index * 11 * DAY),
       })),
     );
-    return [...slots, ...(await this.mockNonSlotGames())];
+    return [...slots, ...(await this.mockGames())];
   }
 
   launch(params: LaunchParams) {
@@ -74,7 +78,9 @@ export class PublicDemoAggregator extends GameAggregator {
     return this.mock.launch(params);
   }
 
-  private async mockNonSlotGames() {
-    return (await this.mock.listGames()).filter((game) => game.type !== 'slot');
+  private async mockGames() {
+    return (await this.mock.listGames()).filter(
+      (game) => game.type !== 'slot' || game.providerExternalId === REAL_MONEY_MOCK_STUDIO,
+    );
   }
 }

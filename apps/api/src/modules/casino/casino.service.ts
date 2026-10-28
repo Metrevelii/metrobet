@@ -6,6 +6,7 @@ import {
   type GameDetail,
   type GameLaunchRequest,
   type GameLaunchResponse,
+  type GameSessionRequest,
   type GamePage,
   type GameType,
   gameListQuerySchema,
@@ -13,15 +14,17 @@ import {
 } from '@metrobet/contracts';
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import type { z } from 'zod';
 
 import { GameAggregator } from './aggregator/game-aggregator.js';
+import { PlayersService } from '../players/players.service.js';
 import { CasinoCatalog } from './casino.catalog.js';
+import { GameSessions } from './game-sessions.js';
 
 const LOBBY_ROW_SIZE = 12;
 
@@ -30,6 +33,8 @@ export class CasinoService {
   constructor(
     @Inject(CasinoCatalog) private readonly catalog: CasinoCatalog,
     @Inject(GameAggregator) private readonly aggregator: GameAggregator,
+    @Inject(GameSessions) private readonly sessions: GameSessions,
+    @Inject(PlayersService) private readonly players: PlayersService,
   ) {}
 
   /** Slots lobby: one row per category (empty ones left out) plus providers that have slots. */
@@ -62,15 +67,16 @@ export class CasinoService {
   async getGame(slug: string): Promise<GameDetail> {
     const game = await this.catalog.findGame(slug);
     if (!game) throw new NotFoundException(`Game "${slug}" not found`);
-    const { externalId: _externalId, ...detail } = game;
+    const { id: _id, externalId: _externalId, ...detail } = game;
     return detail;
   }
 
   async launch(slug: string, { mode, locale }: GameLaunchRequest): Promise<GameLaunchResponse> {
     const game = await this.catalog.findGame(slug);
     if (!game) throw new NotFoundException(`Game "${slug}" not found`);
-    // Real-money play needs a player session and wallet (roadmap step 7).
-    if (mode === 'real') throw new UnauthorizedException('Log in to play for real money');
+    if (mode === 'real') {
+      throw new BadRequestException('Real-money play opens a session: POST games/:slug/sessions');
+    }
     if (!game.hasDemo) throw new BadRequestException('This game has no demo mode');
 
     const url = await this.aggregator.launch({
@@ -78,6 +84,31 @@ export class CasinoService {
       mode,
       locale,
       sessionId: randomUUID(),
+    });
+    return { url };
+  }
+
+  /**
+   * Real-money launch for a signed-in player: opens a game session whose token the provider
+   * sends back in every game wallet call (bets, wins, rollbacks).
+   */
+  async openRealSession(
+    slug: string,
+    playerId: string,
+    { locale }: GameSessionRequest,
+  ): Promise<GameLaunchResponse> {
+    const game = await this.catalog.findGame(slug);
+    if (!game) throw new NotFoundException(`Game "${slug}" not found`);
+    if (!game.hasRealMoney) throw new BadRequestException('This game is demo only');
+    if ((await this.players.me(playerId)).status !== 'active') {
+      throw new ForbiddenException('Your account cannot play for real money');
+    }
+
+    const url = await this.aggregator.launch({
+      externalGameId: game.externalId,
+      mode: 'real',
+      locale,
+      sessionId: await this.sessions.open(playerId, game.id),
     });
     return { url };
   }

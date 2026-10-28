@@ -8,6 +8,14 @@ export { GamesListing } from './components/games-listing';
 export { GamesUnavailable } from './components/games-unavailable';
 export { LoadMoreGrid } from './components/load-more-grid';
 export { RecentlyPlayedRow } from './components/recently-played-row';
-export { CASINO_CACHE_TAG, getGame, getGames, getLobby, getProviders, launchGame } from './data';
+export {
+  CASINO_CACHE_TAG,
+  getGame,
+  getGames,
+  getLobby,
+  getProviders,
+  launchGame,
+  openRealSession,
+} from './data';
 export { categoryHref, gameHref, providerHref, SLOTS_HREF, slotsHref } from './links';
 export { categoryParam } from './search-params';

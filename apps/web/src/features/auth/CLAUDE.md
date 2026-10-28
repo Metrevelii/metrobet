@@ -23,5 +23,6 @@ server's answer.
 
 ## Not yet
 
-Real-money actions (deposits, placing bets) wait for wallet + KYC. Profile/settings, 2FA and
+Real deposits and real-money bets wait for payments + KYC (the wallet exists: see
+`features/wallet`). Profile/settings, 2FA and
 "sign out everywhere" UI come later.

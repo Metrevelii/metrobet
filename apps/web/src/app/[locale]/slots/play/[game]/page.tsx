@@ -6,7 +6,8 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { EmptyState } from '@/components/shared/empty-state';
-import { GameFrame, getGame, launchGame, SLOTS_HREF } from '@/features/casino';
+import { getCurrentPlayer } from '@/features/auth';
+import { GameFrame, getGame, launchGame, openRealSession, SLOTS_HREF } from '@/features/casino';
 import { Link } from '@/i18n/navigation';
 
 type Props = PageProps<'/[locale]/slots/play/[game]'>;
@@ -16,12 +17,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return game ? { title: game.name, robots: { index: false } } : {};
 }
 
-async function Launcher({ params }: Pick<Props, 'params'>) {
+async function Launcher({ params, searchParams }: Props) {
   const game = await getGame((await params).game);
   if (!game) notFound();
 
+  // Real money by default for signed-in players when the game supports it; `?mode=demo` opts out.
+  const signedIn = game.hasRealMoney && (await getCurrentPlayer()) !== null;
+  const mode = signedIn && (await searchParams).mode !== 'demo' ? 'real' : 'demo';
+  const locale = await getLocale();
   // A new provider session per visit: never cached.
-  const url = await launchGame(game.slug, 'demo', await getLocale());
+  const url =
+    mode === 'real'
+      ? await openRealSession(game.slug, locale)
+      : await launchGame(game.slug, 'demo', locale);
   if (!url) {
     const t = await getTranslations('Casino.launcher');
     return (
@@ -37,10 +45,10 @@ async function Launcher({ params }: Pick<Props, 'params'>) {
       </Card>
     );
   }
-  return <GameFrame game={game} url={url} />;
+  return <GameFrame game={game} url={url} mode={mode} signedIn={signedIn} />;
 }
 
-export default function PlayGamePage({ params }: Props) {
+export default function PlayGamePage({ params, searchParams }: Props) {
   return (
     <Suspense
       fallback={
@@ -50,7 +58,7 @@ export default function PlayGamePage({ params }: Props) {
         </div>
       }
     >
-      <Launcher params={params} />
+      <Launcher params={params} searchParams={searchParams} />
     </Suspense>
   );
 }

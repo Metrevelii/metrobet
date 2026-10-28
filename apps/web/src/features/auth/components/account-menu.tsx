@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@metrobet/ui';
-import { LogOut, ShieldCheck, UserRound } from 'lucide-react';
+import { LogOut, ShieldCheck, UserRound, WalletIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 
@@ -59,6 +59,10 @@ export function AccountMenu({ player }: { player: PlayerProfile }) {
             {t('verify')}
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem onSelect={() => router.push('/wallet')}>
+          <WalletIcon />
+          {t('wallet')}
+        </DropdownMenuItem>
         <DropdownMenuItem
           disabled={pending}
           onSelect={() =>

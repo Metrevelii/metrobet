@@ -15,6 +15,30 @@
   /* One-shot highlight that fades out (e.g. odds movement). Restart by changing the element key. */
   --animate-flash: flash 2.5s ease-out forwards;
 
+  /* Endless upward scroll of content repeated twice (e.g. spinning reels); set --scroll-duration. */
+  --animate-scroll-y: scroll-y var(--scroll-duration, 0.4s) linear infinite;
+
+  /* Short drop into place, e.g. a reel stopping. */
+  --animate-settle: settle 0.3s cubic-bezier(0.2, 1.4, 0.5, 1);
+
+  @keyframes scroll-y {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes settle {
+    from {
+      transform: translateY(-14%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
   @keyframes flash {
     from {
       opacity: 1;

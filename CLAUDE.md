@@ -59,6 +59,7 @@ pnpm --filter @metrobet/api db:seed      # demo promotions, casino sync, dev adm
 # backoffice login: admin@metrobet.local / SEED_ADMIN_PASSWORD from apps/api/.env
 # more staff: STAFF_EMAIL=… STAFF_NAME=… STAFF_ROLE=marketing STAFF_PASSWORD=… pnpm --filter @metrobet/api staff:create
 # dev codes (verification, password reset): API log or GET http://localhost:4000/api/dev/outbox
+# real money in dev: sign in, /wallet → test deposit, then play a Golden Fleece slot
 
 pnpm dev                    # all apps (turbo builds contracts first)
 pnpm --filter @metrobet/web dev
@@ -90,8 +91,9 @@ package uses it, add the version to `catalog:` in `pnpm-workspace.yaml` and refe
    that needs state, effects or browser APIs.
 6. **Every user-facing string is translated**: add the key to all three files in
    `apps/web/src/messages/`.
-7. **Money (when we get there):** integer minor units (`bigint` / tetri), never floats;
-   double-entry ledger; idempotency keys on every balance-changing call.
+7. **Money:** integer minor units (`bigint` / tetri), never floats;
+   double-entry ledger; idempotency keys on every balance-changing call. Only the wallet's `Ledger.post`
+   writes money (see `apps/api/src/modules/wallet/CLAUDE.md`).
 
 ## Design system: built to be replaced
 
@@ -139,6 +141,11 @@ isolated so it can be swapped later without touching components:
 - `apps/api/src/modules/auth/CLAUDE.md`: sessions, guards, roles, codes, rate limits
 - `apps/api/src/modules/players/CLAUDE.md`: player accounts and auth endpoints
 - `apps/web/src/features/auth/CLAUDE.md`: login/register/verify/reset pages
+- `apps/api/src/modules/wallet/CLAUDE.md`: double-entry ledger, ledger invariants, wallet endpoints
+- `apps/web/src/features/wallet/CLAUDE.md`: header balance, `/wallet` page, dev deposits
+- `apps/api/src/modules/game-wallet/CLAUDE.md`: seamless wallet API for game providers (bet/win/rollback)
+- `apps/api/src/modules/originals/CLAUDE.md`: in-house studio game server (Supra Fortune, Metro Jet)
+- `apps/web/src/features/originals/CLAUDE.md`: native Originals game clients
 
 ## Roadmap
 
@@ -158,11 +165,17 @@ isolated so it can be swapped later without touching components:
    player opt-in. ✅ activity bus + mechanic plugins + **prize wheel** (spins from wager
    checkpoints, free-spin rewards). ⏳ symbol collection, leaderboards, more instant-win skins,
    calendar/raffle/cashback, templates/clone, per-promo theme
-6. ⏳ Crash games section
+6. 🟡 Crash games: ✅ Metro Jet (Metrobet Originals, see step 8) listed on the Crash page.
+   ⏳ more crash titles, a dedicated crash lobby
 7. ⏳ Backoffice screens (players, bets, games, sportsbook management, audit log)
 8. 🟡 Auth ✅ (players: email or phone, 25+, code verification, password reset; staff accounts
-   with roles replace the shared admin key). ⏳ KYC, wallet/ledger, payments (TBC/BoG), real
-   provider integrations
+   with roles replace the shared admin key). ✅ Wallet: double-entry ledger in tetri (idempotent,
+   append-only, DB-enforced zero-sum), balance in header, `/wallet` history, dev test deposits.
+   ✅ Game wallet API (signed bet/win/rollback, rounds, game sessions) + real-money mock slots
+   (Golden Fleece) that settle through it; real bets feed promotions. ✅ **Metrobet Originals**
+   (in-house studio): Supra Fortune slot (5×3, 96.27 %) and Metro Jet crash (shared live rounds,
+   provably fair, 97 %), native clients over Socket.IO, real money + demo. ⏳ KYC, payments
+   (TBC/BoG), real provider integrations
 
 Until step 8, frontends run on **mock data and mock providers**. Keep mocks behind the same
 interfaces the real integrations will use, so swapping them changes no UI code.
