@@ -21,6 +21,7 @@ import { SportsbookStore } from './sportsbook.store.js';
     // Swap for the licensed feed adapter (Betradar, Genius…) once contracted.
     { provide: OddsFeed, useClass: SimulatedOddsFeed },
   ],
+  exports: [SportsbookStore, OddsFeed],
 })
 export class SportsbookModule implements OnApplicationBootstrap, OnApplicationShutdown {
   constructor(

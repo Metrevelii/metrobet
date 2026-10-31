@@ -136,6 +136,19 @@ export class SportsbookStore implements FeedHandler {
     return this.events.get(id);
   }
 
+  /**
+   * A selection with its market and event, by selection id (`<eventId>:<type>:<line>:<key>`),
+   * or null when the event is not in the feed any more.
+   */
+  findSelection(selectionId: string) {
+    const event = this.events.get(selectionId.split(':').slice(0, -3).join(':'));
+    for (const market of event?.markets ?? []) {
+      const selection = market.selections.find((item) => item.id === selectionId);
+      if (selection) return { event: event!, market, selection };
+    }
+    return null;
+  }
+
   /** Current full state of the given events, for clients that just subscribed. */
   snapshot(eventIds: string[]): EventUpdate[] {
     return eventIds.flatMap((id) => {

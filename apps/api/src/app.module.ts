@@ -6,6 +6,7 @@ import { type Env, validateEnv } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
 import { ActivityModule } from './modules/activity/activity.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { BettingModule } from './modules/betting/betting.module.js';
 import { CasinoModule } from './modules/casino/casino.module.js';
 import { GameWalletModule } from './modules/game-wallet/game-wallet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
@@ -13,6 +14,7 @@ import { MediaModule } from './modules/media/media.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PlayersModule } from './modules/players/players.module.js';
 import { PromotionsModule } from './modules/promotions/promotions.module.js';
+import { ReportsModule } from './modules/reports/reports.module.js';
 import { SportsbookModule } from './modules/sportsbook/sportsbook.module.js';
 import { StaffModule } from './modules/staff/staff.module.js';
 import { WalletModule } from './modules/wallet/wallet.module.js';
@@ -34,6 +36,7 @@ import { WalletModule } from './modules/wallet/wallet.module.js';
     }),
     ActivityModule,
     AuthModule,
+    BettingModule,
     NotificationsModule,
     CasinoModule,
     GameWalletModule,
@@ -41,6 +44,7 @@ import { WalletModule } from './modules/wallet/wallet.module.js';
     MediaModule,
     PlayersModule,
     PromotionsModule,
+    ReportsModule,
     SportsbookModule,
     StaffModule,
     WalletModule,

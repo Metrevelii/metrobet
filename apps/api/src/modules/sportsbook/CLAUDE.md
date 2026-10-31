@@ -44,6 +44,12 @@ OddsFeed ──upsert/remove(EventDetail)──▶ SportsbookStore ──diff─
 
 ## Replacing with a real feed
 
-Implement `OddsFeed` (connect, map provider messages to `EventDetail`, handle bet stops and
-settlement), bind it in `sportsbook.module.ts`. Keep ids stable. Settlement and bet storage
-arrive with the wallet (roadmap step 7).
+Implement `OddsFeed` (connect, map provider messages to `EventDetail`, handle bet stops, and
+`result(eventId)` from the provider's results/settlement API), bind it in
+`sportsbook.module.ts`. Keep ids stable.
+
+## Used by betting (`modules/betting`)
+
+The module exports `SportsbookStore` (`findSelection(id)` prices bets) and `OddsFeed`
+(`result(eventId)`: final `LiveState` of a finished event, null before). The simulated feed
+recomputes any match from its id, so results are available long after it left the lists.

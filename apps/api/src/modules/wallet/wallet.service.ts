@@ -1,6 +1,11 @@
-import { DEFAULT_CURRENCY, type Wallet, type WalletTransactionsPage } from '@metrobet/contracts';
+import {
+  DEFAULT_CURRENCY,
+  type ProductTotals,
+  type Wallet,
+  type WalletTransactionsPage,
+} from '@metrobet/contracts';
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { and, count, desc, eq } from 'drizzle-orm';
+import { and, count, countDistinct, desc, eq, gte, inArray, sql, sum } from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { IdempotencyConflictError } from './ledger-math.js';
@@ -77,5 +82,82 @@ export class WalletService {
       if (error instanceof IdempotencyConflictError) throw new ConflictException(error.message);
       throw error;
     }
+  }
+
+  /** Balances of many players at once (0 for players without an account yet). */
+  async balances(playerIds: string[]): Promise<Map<string, number>> {
+    if (playerIds.length === 0) return new Map();
+    const rows = await this.db
+      .select({ playerId: walletAccounts.playerId, balance: walletAccounts.balance })
+      .from(walletAccounts)
+      .where(and(eq(walletAccounts.kind, 'player'), inArray(walletAccounts.playerId, playerIds)));
+    return new Map(rows.map((row) => [row.playerId!, row.balance]));
+  }
+
+  /** What the platform owes players right now: the sum of every player balance. */
+  async totalPlayerBalances(): Promise<number> {
+    const [row] = await this.db
+      .select({ value: sum(walletAccounts.balance) })
+      .from(walletAccounts)
+      .where(eq(walletAccounts.kind, 'player'));
+    return Number(row?.value ?? 0);
+  }
+
+  /**
+   * Money totals since `since`, from the players' side of the ledger: per product (casino =
+   * game wallet `game:*` transactions, sportsbook = `sportsbook:*`), plus deposits and the number
+   * of players who placed a bet.
+   */
+  async totalsSince(since: Date): Promise<{
+    casino: ProductTotals;
+    sportsbook: ProductTotals;
+    deposits: number;
+    activePlayers: number;
+  }> {
+    const product = sql<string>`case when ${walletTransactions.idempotencyKey} like 'sportsbook:%' then 'sportsbook' else 'casino' end`;
+    const playerEntries = and(
+      eq(walletAccounts.kind, 'player'),
+      gte(walletTransactions.createdAt, since),
+    );
+    const [rows, [active]] = await Promise.all([
+      this.db
+        .select({
+          product,
+          type: walletTransactions.type,
+          amount: sum(walletEntries.amount),
+          transactions: count(),
+        })
+        .from(walletEntries)
+        .innerJoin(walletAccounts, eq(walletEntries.accountId, walletAccounts.id))
+        .innerJoin(walletTransactions, eq(walletEntries.transactionId, walletTransactions.id))
+        .where(playerEntries)
+        .groupBy(product, walletTransactions.type),
+      this.db
+        .select({ value: countDistinct(walletTransactions.playerId) })
+        .from(walletTransactions)
+        .where(and(eq(walletTransactions.type, 'bet'), gte(walletTransactions.createdAt, since))),
+    ]);
+    const totals = (name: 'casino' | 'sportsbook'): ProductTotals => {
+      const pick = (type: string) => rows.find((row) => row.product === name && row.type === type);
+      const stakes = -Number(pick('bet')?.amount ?? 0);
+      const wins = Number(pick('win')?.amount ?? 0);
+      const refunds = Number(pick('rollback')?.amount ?? 0);
+      return {
+        stakes,
+        wins,
+        refunds,
+        ggr: stakes - wins - refunds,
+        bets: pick('bet')?.transactions ?? 0,
+      };
+    };
+    const deposits = rows
+      .filter((row) => row.type === 'deposit')
+      .reduce((total, row) => total + Number(row.amount ?? 0), 0);
+    return {
+      casino: totals('casino'),
+      sportsbook: totals('sportsbook'),
+      deposits,
+      activePlayers: active?.value ?? 0,
+    };
   }
 }

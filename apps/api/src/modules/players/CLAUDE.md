@@ -13,6 +13,17 @@ Player accounts and authentication (`/api/auth/*`).
 | POST   | `/auth/password/forgot`      | –      | always 204 (no account enumeration)                                                            |
 | POST   | `/auth/password/reset`       | –      | `{ identifier, code, password }`; signs out all sessions                                       |
 
+## Admin (`/api/admin/players`, `AdminPlayersService`)
+
+| Method | Path                        | Roles                  | Notes                                                                    |
+| ------ | --------------------------- | ---------------------- | ------------------------------------------------------------------------ |
+| GET    | `/admin/players`            | support, risk, finance | `?search` (email, phone digits, id) `&status&page`; with balances        |
+| GET    | `/admin/players/:id`        | support, risk, finance | `AdminPlayer`                                                            |
+| PATCH  | `/admin/players/:id/status` | support, risk          | `{ status, reason }`; not `active` → every session revoked; audit-logged |
+
+A player's history lives in the owning modules: `/admin/players/:id/transactions` (wallet),
+`/admin/players/:id/rounds` (game-wallet), `/admin/bets?playerId=` (betting).
+
 ## Rules
 
 - **Identifier** = email OR mobile (`parseIdentifier` in contracts): emails lower-cased, phones

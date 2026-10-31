@@ -5,6 +5,7 @@ import { Ticket } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Betslip } from './betslip';
+import { BetslipTabs } from './betslip-rail';
 import { useBetslip } from './store';
 
 /** Mobile/tablet: floating betslip button (above the bottom nav) opening a bottom sheet. */
@@ -25,6 +26,7 @@ export function BetslipSheet() {
         {t('count', { count })}
       </SheetTrigger>
       <SheetContent title={t('title')} closeLabel={common('close')}>
+        <BetslipTabs />
         <Betslip />
       </SheetContent>
     </Sheet>

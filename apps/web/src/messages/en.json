@@ -33,7 +33,7 @@
     "totalStake": "Total stake",
     "totalOdds": "Total odds",
     "potentialWin": "Potential win",
-    "placeBet": "Place bet",
+    "placeBet": "Place ticket",
     "loginToBet": "Log in to place bets",
     "clear": "Clear all",
     "remove": "Remove",
@@ -43,7 +43,28 @@
     "comboSameEvent": "An accumulator can't contain two selections from the same event",
     "open": "Open betslip",
     "count": "{count, plural, one {# selection} other {# selections}}",
-    "bettingSoon": "Betting opens once deposits are available"
+    "placing": "Placing…",
+    "placed": "{count, plural, one {Bet placed} other {# bets placed}}. Good luck!",
+    "viewBets": "My bets",
+    "done": "Done",
+    "topUp": "Top up",
+    "errors": {
+      "ODDS_CHANGED": "Odds changed. Check the new prices and accept them to continue.",
+      "SELECTION_UNAVAILABLE": "A selection can no longer be bet. Remove it to continue.",
+      "SAME_EVENT": "An accumulator can't contain two selections from the same event.",
+      "STAKE_TOO_LOW": "The minimum stake is 0.10 ₾.",
+      "STAKE_TOO_HIGH": "The maximum stake is 1 000 ₾ per bet.",
+      "PAYOUT_TOO_HIGH": "The potential win is above the 100 000 ₾ limit. Lower the stake.",
+      "INSUFFICIENT_FUNDS": "Not enough balance.",
+      "PLAYER_BLOCKED": "Your account cannot place bets.",
+      "signedOut": "Your session ended. Log in again.",
+      "failed": "The bet couldn't be placed. Please try again."
+    },
+    "all": "ALL",
+    "less": "Lower stake",
+    "more": "Raise stake",
+    "acceptHigher": "Accept higher odds",
+    "acceptAll": "Accept any odds changes"
   },
   "Home": {
     "liveNow": "Live now",
@@ -280,7 +301,8 @@
       "verify": "Confirm account",
       "unverified": "Not confirmed",
       "logout": "Log out",
-      "wallet": "Wallet"
+      "wallet": "Wallet",
+      "bets": "My bets"
     },
     "errors": {
       "invalidCredentials": "Wrong email/phone or password",
@@ -398,5 +420,41 @@
       "preparing": "Reloading the ballista",
       "crashed": "Burned!"
     }
+  },
+  "Bets": {
+    "title": "My bets",
+    "tabs": "Bet status",
+    "tab": {
+      "open": "Open",
+      "settled": "Settled"
+    },
+    "empty": {
+      "open": "No open bets",
+      "settled": "No settled bets yet"
+    },
+    "emptyHint": "Pick odds on any match to fill your betslip.",
+    "browse": "Go to sports",
+    "unavailable": "Your bets are unavailable right now. Please try again later.",
+    "single": "Single",
+    "combo": "Accumulator · {count} selections",
+    "status": {
+      "open": "Open",
+      "won": "Won",
+      "lost": "Lost",
+      "void": "Void"
+    },
+    "results": {
+      "won": "Won",
+      "lost": "Lost",
+      "void": "Void"
+    },
+    "stake": "Stake",
+    "odds": "Odds",
+    "potentialWin": "Potential win",
+    "payout": "Payout",
+    "pages": "Bet pages",
+    "page": "Page {page} of {pages}",
+    "newer": "Newer",
+    "older": "Older"
   }
 }

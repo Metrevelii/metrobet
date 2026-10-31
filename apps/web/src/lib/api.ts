@@ -9,6 +9,8 @@ export class ApiError extends Error {
     readonly path: string,
     /** Parsed error body (message + validation issues) when the API sent one. */
     readonly body: ApiErrorBody | null = null,
+    /** The raw JSON error body, for endpoints with richer errors (e.g. bet errors). */
+    readonly raw: unknown = null,
   ) {
     super(`API responded ${status} for ${path}`);
   }
@@ -48,8 +50,9 @@ async function request<T extends z.ZodType>(
   });
 
   if (!response.ok) {
-    const error = apiErrorSchema.safeParse(await response.json().catch(() => null));
-    throw new ApiError(response.status, path, error.success ? error.data : null);
+    const raw: unknown = await response.json().catch(() => null);
+    const error = apiErrorSchema.safeParse(raw);
+    throw new ApiError(response.status, path, error.success ? error.data : null, raw);
   }
   return schema.parse(response.status === 204 ? undefined : await response.json());
 }

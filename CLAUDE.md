@@ -137,7 +137,8 @@ isolated so it can be swapped later without touching components:
 - `apps/api/src/modules/casino/CLAUDE.md`: game catalogue, aggregator port, mock aggregator
 - `apps/web/src/features/casino/CLAUDE.md`: Slots lobby, listings, favorites, launcher
 - `apps/api/src/modules/sportsbook/CLAUDE.md`: odds feed port, simulated feed, store, Socket.IO
-- `apps/web/src/features/sportsbook/CLAUDE.md`: sports pages, live odds, betslip
+- `apps/web/src/features/sportsbook/CLAUDE.md`: sports pages, live odds, betslip, my bets
+- `apps/api/src/modules/betting/CLAUDE.md`: sportsbook tickets: placement, settlement, history
 - `apps/api/src/modules/auth/CLAUDE.md`: sessions, guards, roles, codes, rate limits
 - `apps/api/src/modules/players/CLAUDE.md`: player accounts and auth endpoints
 - `apps/web/src/features/auth/CLAUDE.md`: login/register/verify/reset pages
@@ -159,7 +160,9 @@ isolated so it can be swapped later without touching components:
    `CASINO_AGGREGATOR=public-demos` loads real Pragmatic Play + BGaming demo slots for **local
    development only**. Crash page lists crash games
 4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
-   betslip (singles/accumulator, odds changes). Free deterministic simulated feed
+   betslip (singles/accumulator, odds changes). Free deterministic simulated feed.
+   ✅ Real bets: server-priced placement (live delay, limits, idempotent), wallet debit,
+   automatic settlement from feed results, "My bets" page
 5. 🟡 Promo engine (adjarabet-style promotions as data + plugins, not a branch per promo):
    ✅ page blocks (text, steps, countdown, prizes, FAQ, terms, opt-in) + backoffice page builder +
    player opt-in. ✅ activity bus + mechanic plugins + **prize wheel** (spins from wager
@@ -168,7 +171,9 @@ isolated so it can be swapped later without touching components:
 6. 🟡 Crash games: ✅ Metro Jet and Longshot (Metrobet Originals, see step 8; one shared crash
    engine) listed on the Crash page.
    ⏳ more crash titles, a dedicated crash lobby
-7. ⏳ Backoffice screens (players, bets, games, sportsbook management, audit log)
+7. 🟡 Backoffice screens: ✅ dashboard (today's GGR per product), players (search, detail,
+   suspend / self-exclude, transactions, tickets, game rounds), sports tickets (void, manual
+   settlement), audit log. ⏳ games & providers, sportsbook management, staff management
 8. 🟡 Auth ✅ (players: email or phone, 25+, code verification, password reset; staff accounts
    with roles replace the shared admin key). ✅ Wallet: double-entry ledger in tetri (idempotent,
    append-only, DB-enforced zero-sum), balance in header, `/wallet` history, dev test deposits.

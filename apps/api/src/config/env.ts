@@ -34,6 +34,11 @@ const envSchema = z.object({
   /** `on` runs the crash games' round loop; `off` stops it (e2e tests step rounds by hand). */
   ORIGINALS_CRASH_LOOP: z.enum(['on', 'off']).default('on'),
 
+  /** Live bets wait this long and are re-checked before acceptance (anti past-posting). */
+  BET_LIVE_DELAY_MS: z.coerce.number().int().min(0).max(15_000).default(3_000),
+  /** `on` settles sportsbook tickets from feed results every 15 s; `off` (e2e) settles by hand. */
+  BET_SETTLEMENT: z.enum(['on', 'off']).default('on'),
+
   /** `simulated` runs the built-in odds feed; `off` disables it (e.g. in tests that don't need it). */
   SPORTSBOOK_FEED: z.enum(['simulated', 'off']).default('simulated'),
 

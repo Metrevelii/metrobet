@@ -1,5 +1,7 @@
 export { BetslipRail } from './betslip/betslip-rail';
 export { BetslipSheet } from './betslip/betslip-sheet';
+export { type BetsTab, MyBets } from './bets/components/my-bets';
+export { BETS_HREF } from './bets/links';
 export { CompetitionBlock } from './components/competition-block';
 export { EventHeader } from './components/event-header';
 export { EventRow } from './components/event-row';

@@ -28,8 +28,12 @@ export type BetslipItem = z.infer<typeof itemSchema>;
 const stateSchema = z.object({
   items: z.array(itemSchema),
   mode: z.enum(['single', 'combo']),
-  stakes: z.record(z.string(), z.number()),
-  comboStake: z.number(),
+  /** ₾. The accumulator's stake, or the stake of each single. */
+  stake: z.number().min(0),
+  /** Place at a higher live price without asking (the server takes it). */
+  acceptHigher: z.boolean(),
+  /** Place at the live price whatever it moved to (no "accept changes" step). */
+  acceptAll: z.boolean(),
 });
 export type BetslipState = z.infer<typeof stateSchema>;
 export type BetslipMode = BetslipState['mode'];
@@ -37,7 +41,13 @@ export type BetslipMode = BetslipState['mode'];
 const STORAGE_KEY = 'mb.betslip';
 const MAX_ITEMS = 20;
 export const DEFAULT_STAKE = 5;
-const EMPTY: BetslipState = { items: [], mode: 'single', stakes: {}, comboStake: DEFAULT_STAKE };
+const EMPTY: BetslipState = {
+  items: [],
+  mode: 'single',
+  stake: DEFAULT_STAKE,
+  acceptHigher: true,
+  acceptAll: false,
+};
 
 let state: BetslipState | null = null;
 const listeners = new Set<() => void>();
@@ -110,29 +120,22 @@ export function toggleSelection(item: BetslipItem) {
     current.mode === 'single' && current.items.length === 1 && events.size > 1
       ? 'combo'
       : current.mode;
-  write({
-    ...current,
-    items,
-    mode,
-    stakes: {
-      ...current.stakes,
-      [item.selectionId]: current.stakes[item.selectionId] ?? DEFAULT_STAKE,
-    },
-  });
+  write({ ...current, items, mode });
 }
 
 export function removeSelection(selectionId: string) {
   const current = read();
-  const { [selectionId]: _removed, ...stakes } = current.stakes;
   const items = current.items.filter((item) => item.selectionId !== selectionId);
-  write({ ...current, items, stakes, mode: items.length <= 1 ? 'single' : current.mode });
+  write({ ...current, items, mode: items.length <= 1 ? 'single' : current.mode });
 }
 
-export const clearBetslip = () => write(EMPTY);
+/** Empties the slip but keeps the player's stake and preferences. */
+export const clearBetslip = () => write({ ...read(), items: [], mode: 'single' });
 export const setMode = (mode: BetslipMode) => write({ ...read(), mode });
-export const setStake = (selectionId: string, stake: number) =>
-  write({ ...read(), stakes: { ...read().stakes, [selectionId]: stake } });
-export const setComboStake = (comboStake: number) => write({ ...read(), comboStake });
+export const setStake = (stake: number) =>
+  write({ ...read(), stake: Math.max(0, Math.round(stake * 100) / 100) });
+export const setAcceptHigher = (acceptHigher: boolean) => write({ ...read(), acceptHigher });
+export const setAcceptAll = (acceptAll: boolean) => write({ ...read(), acceptAll });
 
 /** Accepts the latest live price of every selection. */
 export function acceptOddsChanges() {

@@ -92,6 +92,13 @@
       "when": 1793223192661,
       "tag": "0012_crash_game_column",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793304371315,
+      "tag": "0013_sportsbook_bets",
+      "breakpoints": true
     }
   ]
 }

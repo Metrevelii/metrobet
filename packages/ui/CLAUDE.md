@@ -13,7 +13,7 @@ so there is no build step.
 | `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font |
 
 Components: `Alert`, `AlertDialog*`, `Badge`, `Button`, `Card*`, `Carousel*`, `Checkbox`, `Chip`,
-`DropdownMenu*`, `Field` (label + control + hint/error, wires aria), `HeroBanner`, `Input`, `Label`, `NativeSelect`, `PasswordInput`, `Sheet*` (bottom sheet), `Skeleton`, `Switch`, `Tabs*`, `Textarea`.
+`DropdownMenu*`, `Field` (label + control + hint/error, wires aria), `HeroBanner`, `Input`, `Label`, `NativeSelect`, `PasswordInput`, `Sheet*` (bottom sheet), `Skeleton`, `Switch`, `Table*` (data tables; scrolls horizontally), `Tabs*`, `Textarea`.
 
 - `HeroBanner`: artwork + scrim + badge/title/subtitle/action. `layout`: `responsive` (site),
   `desktop` / `mobile` (fixed, e.g. backoffice previews). Aspect classes in `heroBannerAspect`.

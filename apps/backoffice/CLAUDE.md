@@ -12,7 +12,11 @@ src/
   components/          backoffice-only components (Sidebar, PageHeader)
   features/auth/       login form/actions, getCurrentStaff, RequireStaff
   config/navigation.ts BACKOFFICE_NAV: single source for the sidebar
-  features/<area>/     promotions (done) → see its CLAUDE.md; later players, bets, sportsbook…
+  features/<area>/     promotions (see its CLAUDE.md), players, bets, audit, dashboard
+  lib/format.ts        money(minor) / dateTime(iso) in Asia/Tbilisi, en-GB
+  lib/query.ts         withQuery(path, params), param(), pageParam(): filters live in the URL
+  lib/actions.ts       runAction(paths, mutation): Server Action wrapper → ActionResult
+  components/pager.tsx Previous / next links that keep the filters; no-access.tsx for roles
   hooks/use-now.ts     current time after mount (keeps time-dependent UI out of static HTML)
   lib/admin-api.ts     adminFetch(): server-only calls to /api/admin/* with the staff session
   lib/session.ts       mb_staff httpOnly cookie (SameSite=strict) + forwarded client headers
@@ -36,6 +40,20 @@ src/
 ## Env (`.env.local`, see `.env.example`)
 
 `API_URL`, `NEXT_PUBLIC_WEB_URL` (player site origin for previews).
+
+## Screens
+
+| Route           | Roles (admin always)   | What                                                                                                      |
+| --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `/`             | every role             | Today (Tbilisi): GGR, stakes/wins/refunds per product, players, open tickets, balances owed               |
+| `/players`      | support, risk, finance | Search (email, phone, id) + status filter; balance per player                                             |
+| `/players/[id]` | support, risk, finance | Account facts; status change with reason (support, risk); tabs: transactions, sports tickets, game rounds |
+| `/bets`         | support, risk, finance | Sports tickets, filters status / sport                                                                    |
+| `/bets/[id]`    | support, risk, finance | Selections with results; **risk**: settle a selection by hand, void ticket                                |
+| `/audit-log`    | risk                   | Every staff change (who, what, before/after), filter by entity                                            |
+
+Pages check the role with `hasRole(getCurrentStaff(), roles)` and show `NoAccess`; the API
+enforces the same roles. Actions ask for a reason (stored in the audit log).
 
 ## Planned scope
 

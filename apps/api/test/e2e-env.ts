@@ -7,6 +7,8 @@ export const E2E_ENV = {
   // Same catalogue locally and in CI, whatever apps/api/.env says.
   CASINO_AGGREGATOR: 'mock',
   ORIGINALS_CRASH_LOOP: 'off',
+  BET_LIVE_DELAY_MS: '0',
+  BET_SETTLEMENT: 'off',
   SPORTSBOOK_FEED: 'simulated',
   WEB_REVALIDATE_SECRET: 'e2e-revalidate-secret-0123456789abcdef01234567',
   GAME_WALLET_SECRET: 'e2e-game-wallet-secret-0123456789abcdef0123456',

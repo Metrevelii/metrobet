@@ -1,7 +1,7 @@
 import type { EventDetail, Sport } from '@metrobet/contracts';
 import { Injectable, Logger } from '@nestjs/common';
 
-import { type FeedHandler, OddsFeed } from '../odds-feed.js';
+import { type EventResult, type FeedHandler, OddsFeed } from '../odds-feed.js';
 import { createBasketballMatch } from './basketball.js';
 import { COMPETITIONS, type SimCompetition } from './catalog.js';
 import { createFootballMatch } from './football.js';
@@ -93,6 +93,19 @@ export class SimulatedOddsFeed extends OddsFeed {
 
   stop() {
     clearInterval(this.timer);
+  }
+
+  /** Recomputes the match from its id (fixtures are a pure function of the slot). */
+  result(eventId: string, now = Date.now()): Promise<EventResult | null> {
+    const slot = Number(/^sim-(-?\d+)-/.exec(eventId)?.[1]);
+    const fixture = Number.isInteger(slot)
+      ? fixturesForSlot(slot).find((item) => item.id === eventId)
+      : undefined;
+    if (!fixture || now < Date.parse(fixture.startsAt) + fixture.model.durationMs) {
+      return Promise.resolve(null);
+    }
+    const { live } = fixture.model.stateAt(eventId, fixture.model.durationMs, now);
+    return Promise.resolve(live && { eventId, sport: fixture.sport, final: live });
   }
 
   tick(handler: FeedHandler, now: number) {

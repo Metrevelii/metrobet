@@ -2,6 +2,7 @@
 export * from '../../modules/activity/activity.schema.js';
 export * from '../../modules/audit/audit.schema.js';
 export * from '../../modules/auth/auth.schema.js';
+export * from '../../modules/betting/betting.schema.js';
 export * from '../../modules/casino/casino.schema.js';
 export * from '../../modules/casino/game-sessions.schema.js';
 export * from '../../modules/game-wallet/game-wallet.schema.js';

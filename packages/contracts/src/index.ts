@@ -20,3 +20,5 @@ export * from './wallet/wallet.js';
 export * from './originals/crash.js';
 export * from './originals/originals.js';
 export * from './originals/supra-fortune.js';
+export * from './sportsbook/bets.js';
+export * from './admin/admin.js';

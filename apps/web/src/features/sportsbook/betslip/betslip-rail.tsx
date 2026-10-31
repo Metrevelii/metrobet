@@ -1,32 +1,58 @@
 'use client';
 
-import { Badge, Card, cn } from '@metrobet/ui';
-import { Ticket } from 'lucide-react';
+import { Card, cn } from '@metrobet/ui';
+import { Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { Link } from '@/i18n/navigation';
+
+import { BETS_HREF } from '../bets/links';
 import { Betslip } from './betslip';
 import { clearBetslip, useBetslip } from './store';
 
-/** Desktop betslip column (sticky, scrolls internally). */
-export function BetslipRail({ className }: { className?: string }) {
+/** Header tabs: the betslip (with its count) and a link to the player's bets. */
+export function BetslipTabs() {
   const t = useTranslations('Betslip');
   const count = useBetslip()?.items.length ?? 0;
   return (
-    <Card className={cn('flex max-h-[calc(100dvh-6rem)] flex-col overflow-hidden', className)}>
-      <div className="flex items-center gap-2 border-b px-4 py-3">
-        <Ticket className="size-4 text-primary" />
-        <h2 className="text-sm font-semibold">{t('title')}</h2>
-        {count > 0 && <Badge variant="primary">{count}</Badge>}
+    <div className="flex items-stretch border-b">
+      <span
+        aria-current="page"
+        className="-mb-px flex items-center gap-2 border-b-2 border-primary px-4 py-3 text-sm font-bold"
+      >
+        {t('title')}
         {count > 0 && (
-          <button
-            type="button"
-            onClick={clearBetslip}
-            className="ml-auto cursor-pointer text-xs text-muted-foreground hover:text-foreground"
-          >
-            {t('clear')}
-          </button>
+          <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-black text-primary-foreground tabular">
+            {count}
+          </span>
         )}
-      </div>
+      </span>
+      <Link
+        href={BETS_HREF}
+        className="flex items-center px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+      >
+        {t('viewBets')}
+      </Link>
+      {count > 0 && (
+        <button
+          type="button"
+          onClick={clearBetslip}
+          aria-label={t('clear')}
+          title={t('clear')}
+          className="ml-auto cursor-pointer px-4 text-muted-foreground transition-colors hover:text-destructive"
+        >
+          <Trash2 className="size-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Desktop betslip column (sticky, scrolls internally). */
+export function BetslipRail({ className }: { className?: string }) {
+  return (
+    <Card className={cn('flex max-h-[calc(100dvh-6rem)] flex-col overflow-hidden', className)}>
+      <BetslipTabs />
       <div className="min-h-0 overflow-y-auto">
         <Betslip />
       </div>

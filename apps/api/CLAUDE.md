@@ -27,6 +27,8 @@ src/
                          · wallet (double-entry ledger; the only writer of money)
                          · game-wallet (seamless wallet API for game providers)
                          · originals (in-house studio: Supra Fortune, Metro Jet game server)
+                         · betting (sportsbook tickets: placement, settlement)
+                         · reports (backoffice dashboard, composed from other modules)
                        later: bonus, risk
 test/                  e2e specs (*.e2e-spec.ts) against a real `metrobet_test` database
 drizzle/               generated SQL migrations (commit them)
@@ -57,6 +59,11 @@ drizzle/               generated SQL migrations (commit them)
   to HTTP 409 in the service.
 
 ## Admin endpoints
+
+Staff screens read through each owning module's admin routes (players, wallet, game-wallet,
+betting, audit) and `reports` composes the dashboard from their services; no module reads
+another's tables. Roles per route are listed in each module's CLAUDE.md and in
+`apps/backoffice/CLAUDE.md`.
 
 - Everything under `/api/admin/*` uses `@UseGuards(StaffAuthGuard)` + `@Roles(...)` and records
   `staffActor(staff)` as the audit actor (see `modules/auth/CLAUDE.md`).

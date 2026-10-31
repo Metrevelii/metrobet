@@ -1,6 +1,6 @@
 import type { EventDetail } from '@metrobet/contracts';
 
-import { eventAt, fixturesForSlot, SLOT_MS } from './simulated-feed.js';
+import { eventAt, fixturesForSlot, SimulatedOddsFeed, SLOT_MS } from './simulated-feed.js';
 
 const MINUTE = 60_000;
 
@@ -70,5 +70,22 @@ describe('simulated schedule', () => {
         byTeam.set(key, spans);
       }
     }
+  });
+
+  it('answers the final result of any finished match from its id alone', async () => {
+    const feed = new SimulatedOddsFeed();
+    for (const fixture of fixturesForSlot(777_000)) {
+      const end = Date.parse(fixture.startsAt) + fixture.model.durationMs;
+      expect(await feed.result(fixture.id, end - MINUTE)).toBeNull();
+      // Long after the match left the lists, the result is still there and matches the feed.
+      const result = await feed.result(fixture.id, end + 24 * 60 * MINUTE);
+      expect(result).toEqual({
+        eventId: fixture.id,
+        sport: fixture.sport,
+        final: (eventAt(fixture, end + 1) as EventDetail).live,
+      });
+      expect(result?.final.period).toBe('FT');
+    }
+    expect(await feed.result('not-a-sim-event')).toBeNull();
   });
 });

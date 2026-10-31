@@ -5,6 +5,8 @@ import { devDepositInputSchema, type Wallet, walletSchema } from '@metrobet/cont
 import { ApiError, apiPost } from '@/lib/api';
 import { clientHeaders, getSessionToken } from '@/lib/session';
 
+import { getWallet } from './data';
+
 export type DepositResult =
   { ok: true; data: Wallet } | { ok: false; error: 'signedOut' | 'failed' };
 
@@ -26,4 +28,9 @@ export async function devDeposit(amount: unknown): Promise<DepositResult> {
     console.error('[wallet] Dev deposit failed', error);
     return { ok: false, error: 'failed' };
   }
+}
+
+/** The signed-in player's balance in minor units, or null (signed out / unavailable). */
+export async function currentBalance(): Promise<number | null> {
+  return (await getWallet())?.balance ?? null;
 }

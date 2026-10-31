@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { staff } from '../staff/staff.schema.js';
@@ -15,5 +15,15 @@ export class StaffDirectory {
       .from(staff)
       .where(and(eq(staff.id, id), eq(staff.isActive, true)));
     return member ?? null;
+  }
+
+  /** Display names by staff id (for audit log actors). */
+  async names(ids: string[]): Promise<Map<string, string>> {
+    if (ids.length === 0) return new Map();
+    const rows = await this.db
+      .select({ id: staff.id, name: staff.name })
+      .from(staff)
+      .where(inArray(staff.id, ids));
+    return new Map(rows.map((row) => [row.id, row.name]));
   }
 }

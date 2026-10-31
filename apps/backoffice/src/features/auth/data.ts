@@ -15,3 +15,7 @@ export const getCurrentStaff = cache(async (): Promise<StaffProfile | null> => {
     return null;
   }
 });
+
+/** Whether a staff member may use something limited to `roles` (`admin` may use everything). */
+export const hasRole = (staff: StaffProfile | null, roles: readonly StaffProfile['role'][]) =>
+  staff !== null && (staff.role === 'admin' || roles.includes(staff.role));
