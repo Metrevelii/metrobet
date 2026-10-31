@@ -23,11 +23,24 @@ tickets: Open / Settled tabs as `?status=`, paged; signed-out → log in).
 | ------------------------------ | ----------------------------------------------------------------------------------------------------- |
 | `OddsButton`                   | Live price, ▲/▼ flash (`animate-flash`, re-keyed per change), lock when not bettable, toggles betslip |
 | `EventRow`                     | Time/clock, teams + score, headline market, "+N" link                                                 |
-| `CompetitionBlock`             | Card per competition                                                                                  |
 | `EventHeader`                  | Scoreboard (score, period, clock, period scores)                                                      |
 | `MarketCard`                   | One market with labelled selections                                                                   |
 | `SportTabs`                    | Live + sport chips with counts                                                                        |
 | `BetslipRail` / `BetslipSheet` | Desktop column (xl) / floating button + bottom sheet (below xl)                                       |
+
+## Match table (`match-table/`, Crystalbet-style)
+
+- `CompetitionTable`: one card per league (flag, country · name, ★ favourite toggle), then per
+  Tbilisi day a header row repeating the column labels, then `MatchRow`s: time or live clock,
+  live score, "Home – Away", one compact `OddsButton` per column, "+N" markets. Scrolls
+  sideways on small screens with the match column pinned. Live listings pass `live`.
+- Columns come from contracts `TABLE_COLUMNS[sport]` (football 1 X 2 · 1X 12 X2 · total line
+  over/under; basketball 1 2 · handicap · total; tennis 1 2 · set winner). The API sends the
+  matching `EventSummary.markets` (main line per type), so a column never needs a fetch.
+- `ListingFilters` (client): day chips (`?day=all|today|tomorrow|soon`) and league chips
+  (`?competitions=id,id`): all, ★ favourites (`favorites.ts`, localStorage), one per league
+  with flag and count (`getCompetitions`). Links keep the other filter: views are shareable.
+- Day labels ("Today · …") use the browser's date after hydration (no `Date.now()` in render).
 
 Labels: `labels.ts` builds market/selection/period labels from translations (`Sports.*`).
 Short labels (1/X/2) in lists, team names on the event page and betslip.

@@ -107,15 +107,66 @@ const eventBaseSchema = z.object({
   live: liveStateSchema.nullable(),
 });
 
-/** List row: the event plus its headline market (1x2 / moneyline). */
+/**
+ * List row: the event, its headline market (1x2 / moneyline) and the markets shown as columns
+ * of the match table (`TABLE_COLUMNS`, one main line per market type).
+ */
 export const eventSummarySchema = eventBaseSchema.extend({
   mainMarket: marketSchema.nullable(),
+  markets: z.array(marketSchema),
   marketCount: z.number().int(),
 });
 export type EventSummary = z.infer<typeof eventSummarySchema>;
 
 export const eventDetailSchema = eventBaseSchema.extend({ markets: z.array(marketSchema) });
 export type EventDetail = z.infer<typeof eventDetailSchema>;
+
+/**
+ * Match table columns per sport: groups of selections of one market type. `line: true` adds a
+ * cell with the market's line (total 2.5, handicap −4.5, set 2) before the prices. The first
+ * group is always shown; the others on wider screens.
+ */
+export type TableColumnGroup = { type: MarketType; keys: SelectionKey[]; line?: boolean };
+export const TABLE_COLUMNS: Record<Sport, TableColumnGroup[]> = {
+  football: [
+    { type: '1x2', keys: ['home', 'draw', 'away'] },
+    { type: 'double_chance', keys: ['home_draw', 'home_away', 'draw_away'] },
+    { type: 'total', keys: ['over', 'under'], line: true },
+  ],
+  basketball: [
+    { type: 'moneyline', keys: ['home', 'away'] },
+    { type: 'spread', keys: ['home', 'away'], line: true },
+    { type: 'total', keys: ['over', 'under'], line: true },
+  ],
+  tennis: [
+    { type: 'moneyline', keys: ['home', 'away'] },
+    { type: 'set_winner', keys: ['home', 'away'], line: true },
+  ],
+};
+
+/** Listing filters (days are Tbilisi calendar days; `soon` = starting within an hour). */
+export const DAY_FILTERS = ['all', 'today', 'tomorrow', 'soon'] as const;
+export const dayFilterSchema = z.enum(DAY_FILTERS);
+export type DayFilter = z.infer<typeof dayFilterSchema>;
+
+export const sportOverviewQuerySchema = z.object({
+  day: dayFilterSchema.catch('all').default('all'),
+  /** Comma-separated competition ids (e.g. the player's favourites); all when empty. */
+  competitions: z
+    .string()
+    .max(500)
+    .optional()
+    .transform((value) => (value ? value.split(',').filter(Boolean).slice(0, 30) : [])),
+});
+export type SportOverviewQuery = z.input<typeof sportOverviewQuerySchema>;
+
+/** A competition with its event counts, for the league navigation. */
+export const competitionSummarySchema = z.object({
+  competition: competitionSchema,
+  liveCount: z.number().int(),
+  upcomingCount: z.number().int(),
+});
+export type CompetitionSummary = z.infer<typeof competitionSummarySchema>;
 
 export const competitionEventsSchema = z.object({
   competition: competitionSchema,

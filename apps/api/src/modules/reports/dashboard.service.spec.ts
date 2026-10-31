@@ -1,4 +1,4 @@
-import { tbilisiDayStart } from './dashboard.service.js';
+import { tbilisiDateKey, tbilisiDayStart } from '@metrobet/contracts';
 
 describe('tbilisiDayStart', () => {
   it('is midnight in Tbilisi (20:00 UTC the day before)', () => {
@@ -14,5 +14,10 @@ describe('tbilisiDayStart', () => {
     expect(tbilisiDayStart(Date.UTC(2026, 10, 1, 20, 10)).toISOString()).toBe(
       '2026-11-01T20:00:00.000Z',
     );
+  });
+
+  it('groups instants by their Tbilisi calendar day', () => {
+    expect(tbilisiDateKey(Date.UTC(2026, 10, 1, 19, 59))).toBe('2026-11-01');
+    expect(tbilisiDateKey(Date.UTC(2026, 10, 1, 20, 0))).toBe('2026-11-02');
   });
 });

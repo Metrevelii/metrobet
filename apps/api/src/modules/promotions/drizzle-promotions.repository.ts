@@ -133,9 +133,11 @@ export class DrizzlePromotionsRepository extends PromotionsRepository {
   }
 
   async enroll(promotionId: string, playerId: string) {
+    // The app's clock, not the database's: eligibility compares enrolledAt with activity times
+    // the app produced, and a few ms of clock skew between the two would drop early bets.
     await this.db
       .insert(promotionEnrollments)
-      .values({ promotionId, playerId })
+      .values({ promotionId, playerId, enrolledAt: new Date() })
       .onConflictDoNothing();
     return (await this.findEnrollment(promotionId, playerId))!;
   }

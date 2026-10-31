@@ -247,7 +247,38 @@
       "home_away": "12",
       "draw_away": "X2",
       "drawLong": "ფრე"
-    }
+    },
+    "columns": {
+      "home": "1",
+      "draw": "X",
+      "away": "2",
+      "home_draw": "1X",
+      "home_away": "12",
+      "draw_away": "X2",
+      "over": "მეტი",
+      "under": "ნაკლ.",
+      "yes": "კი",
+      "no": "არა"
+    },
+    "lineColumns": {
+      "total": "ტოტალი",
+      "spread": "ფორა",
+      "set_winner": "სეტი"
+    },
+    "days": {
+      "all": "ყველა",
+      "today": "დღეს",
+      "tomorrow": "ხვალ",
+      "soon": "უახლოესი 1 სთ"
+    },
+    "dayFilter": "დრო",
+    "leagues": "ლიგები",
+    "allLeagues": "ყველა ლიგა",
+    "favorites": "რჩეულები",
+    "favoritesHint": "მონიშნე ლიგა ვარსკვლავით, რომ რჩეულებში დაემატოს",
+    "favorite": "რჩეულებში დამატება",
+    "unfavorite": "რჩეულებიდან ამოღება",
+    "noEventsHint": "სცადე სხვა დღე ან ლიგა."
   },
   "Auth": {
     "login": {

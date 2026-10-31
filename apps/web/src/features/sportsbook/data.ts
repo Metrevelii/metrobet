@@ -1,5 +1,8 @@
 import {
   type CompetitionEvents,
+  competitionSummarySchema,
+  type CompetitionSummary,
+  type DayFilter,
   competitionEventsSchema,
   type EventDetail,
   eventDetailSchema,
@@ -30,13 +33,33 @@ export async function getSports(): Promise<SportSummary[]> {
   }
 }
 
-export async function getSportOverview(sport: Sport): Promise<SportOverview | null> {
+export async function getSportOverview(
+  sport: Sport,
+  { day = 'all', competitions = [] }: { day?: DayFilter; competitions?: string[] } = {},
+): Promise<SportOverview | null> {
   await connection();
   try {
-    return await apiGet(`sportsbook/sports/${sport}`, sportOverviewSchema);
+    return await apiGet(`sportsbook/sports/${sport}`, sportOverviewSchema, {
+      day,
+      competitions: competitions.length > 0 ? competitions.join(',') : undefined,
+    });
   } catch (error) {
     console.error(`[sportsbook] Failed to load ${sport}`, error);
     return null;
+  }
+}
+
+/** A sport's leagues with live / upcoming counts (league navigation). Empty on failure. */
+export async function getCompetitions(sport: Sport): Promise<CompetitionSummary[]> {
+  await connection();
+  try {
+    return await apiGet(
+      `sportsbook/sports/${sport}/competitions`,
+      competitionSummarySchema.array(),
+    );
+  } catch (error) {
+    console.error(`[sportsbook] Failed to load ${sport} competitions`, error);
+    return [];
   }
 }
 

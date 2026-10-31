@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 
 import { EmptyState } from '@/components/shared/empty-state';
 import { GamesUnavailable } from '@/features/casino';
-import { CompetitionBlock, getLive, LiveEvents } from '@/features/sportsbook';
+import { CompetitionTable, getLive, LiveEvents } from '@/features/sportsbook';
 import { PromotionsSlider } from '@/features/promotions';
 
 import { ListSkeleton, SportsbookFrame } from '../sportsbook-frame';
@@ -40,7 +40,7 @@ async function LiveList() {
           {groups
             .filter((group) => group.competition.sport === sport)
             .map((group) => (
-              <CompetitionBlock key={group.competition.id} group={group} />
+              <CompetitionTable key={group.competition.id} group={group} live />
             ))}
         </section>
       ))}

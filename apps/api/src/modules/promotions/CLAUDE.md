@@ -73,6 +73,9 @@ implementing `PromoMechanic` (+ its own tables in `mechanics/<name>/`) → add i
   one `jsonb` column and validated by `promotionInputSchema`: unique block ids, at most one
   `optIn`, a `countdown` needs `endsAt`, max 30 blocks.
 - **Opt-in is derived:** `requiresOptIn(blocks)` = the page has an `optIn` block. No flag column.
+- `enrolledAt` is stamped with the **app's clock** (not the database's `now()`): eligibility
+  compares it with activity times the app produced, and a few ms of skew between the DB and
+  API servers would otherwise drop bets placed right after opting in.
 - Localization happens here: `LocalizedText` (`{ ka, en, ru }`, all required) is resolved for
   the requested locale. The site never receives other languages.
 - Every admin mutation (`AdminPromotionsService`): audit entry `promotion.<action>` with

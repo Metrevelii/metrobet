@@ -247,7 +247,38 @@
       "home_away": "12",
       "draw_away": "Х2",
       "drawLong": "Ничья"
-    }
+    },
+    "columns": {
+      "home": "1",
+      "draw": "X",
+      "away": "2",
+      "home_draw": "1X",
+      "home_away": "12",
+      "draw_away": "X2",
+      "over": "Больше",
+      "under": "Меньше",
+      "yes": "Да",
+      "no": "Нет"
+    },
+    "lineColumns": {
+      "total": "Тотал",
+      "spread": "Фора",
+      "set_winner": "Сет"
+    },
+    "days": {
+      "all": "Все",
+      "today": "Сегодня",
+      "tomorrow": "Завтра",
+      "soon": "Ближайший час"
+    },
+    "dayFilter": "Когда",
+    "leagues": "Лиги",
+    "allLeagues": "Все лиги",
+    "favorites": "Избранное",
+    "favoritesHint": "Отметьте лигу звёздочкой, чтобы добавить в избранное",
+    "favorite": "В избранное",
+    "unfavorite": "Убрать из избранного",
+    "noEventsHint": "Попробуйте другой день или лигу."
   },
   "Auth": {
     "login": {

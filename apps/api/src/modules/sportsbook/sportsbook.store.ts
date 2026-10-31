@@ -2,6 +2,9 @@ import { EventEmitter } from 'node:events';
 
 import {
   type CompetitionEvents,
+  type CompetitionSummary,
+  DAY_MS,
+  type DayFilter,
   type EventDetail,
   type EventSummary,
   type EventUpdate,
@@ -10,6 +13,8 @@ import {
   SPORTS,
   type SportOverview,
   type SportSummary,
+  TABLE_COLUMNS,
+  tbilisiDayStart,
 } from '@metrobet/contracts';
 import { Injectable } from '@nestjs/common';
 
@@ -17,6 +22,9 @@ import type { FeedHandler } from './feed/odds-feed.js';
 
 const UPCOMING_WINDOW_MS = 48 * 60 * 60 * 1000;
 const UPCOMING_LIMIT = 60;
+/** With a day or league filter the list is shorter, so more of it can be shown. */
+const FILTERED_LIMIT = 200;
+const SOON_MS = 60 * 60 * 1000;
 const MAIN_MARKETS = new Set(['1x2', 'moneyline']);
 
 const sameMarket = (a: Market | undefined, b: Market) =>
@@ -30,12 +38,47 @@ const closeMarket = (market: Market): Market => ({
   selections: market.selections.map((selection) => ({ ...selection, active: false })),
 });
 
-export function toSummary({ markets, ...event }: EventDetail): EventSummary {
+/** How far a market is from even odds (its "main line" is the most balanced one). */
+const imbalance = (market: Market) => {
+  const [a, b] = market.selections;
+  return a && b ? Math.abs(a.odds - b.odds) : Number.POSITIVE_INFINITY;
+};
+
+/** The markets shown as match table columns: one per TABLE_COLUMNS group, main line first. */
+export function tableMarkets(event: EventDetail): Market[] {
+  return TABLE_COLUMNS[event.sport].flatMap(({ type }) => {
+    const candidates = event.markets.filter((market) => market.type === type);
+    const open = candidates.filter((market) => market.status !== 'closed');
+    const [best] = (open.length > 0 ? open : candidates).toSorted(
+      (a, b) => imbalance(a) - imbalance(b),
+    );
+    return best ? [best] : [];
+  });
+}
+
+export function toSummary(event: EventDetail): EventSummary {
+  const { markets, ...rest } = event;
   return {
-    ...event,
+    ...rest,
     mainMarket: markets.find((m) => MAIN_MARKETS.has(m.type)) ?? null,
+    markets: tableMarkets(event),
     marketCount: markets.length,
   };
+}
+
+/** Start/end (ms) of the upcoming window a day filter allows, or null for live-only rules. */
+function dayWindow(day: DayFilter, now: number): [number, number] {
+  const today = tbilisiDayStart(now).getTime();
+  switch (day) {
+    case 'today':
+      return [now, today + DAY_MS];
+    case 'tomorrow':
+      return [today + DAY_MS, today + 2 * DAY_MS];
+    case 'soon':
+      return [now, now + SOON_MS];
+    case 'all':
+      return [now, now + UPCOMING_WINDOW_MS];
+  }
 }
 
 /** Groups events by competition, keeping the order in which competitions first appear. */
@@ -114,14 +157,51 @@ export class SportsbookStore implements FeedHandler {
     }));
   }
 
-  overview(sport: Sport, now = Date.now()): SportOverview {
-    const events = this.sorted().filter((event) => event.sport === sport);
+  /**
+   * Live and upcoming events of a sport, by competition. `day` limits upcoming events to a
+   * Tbilisi day (`today` keeps live matches, `tomorrow` and `soon` leave them out);
+   * `competitions` keeps only those leagues.
+   */
+  overview(
+    sport: Sport,
+    { day = 'all', competitions = [] }: { day?: DayFilter; competitions?: string[] } = {},
+    now = Date.now(),
+  ): SportOverview {
+    const leagues = new Set(competitions);
+    const events = this.sorted().filter(
+      (event) => event.sport === sport && (leagues.size === 0 || leagues.has(event.competition.id)),
+    );
+    const [from, to] = dayWindow(day, now);
+    const showLive = day === 'all' || day === 'today';
+    const limit = day === 'all' && leagues.size === 0 ? UPCOMING_LIMIT : FILTERED_LIMIT;
     return {
-      live: byCompetition(events.filter((event) => event.status === 'live')),
+      live: showLive ? byCompetition(events.filter((event) => event.status === 'live')) : [],
       upcoming: byCompetition(
-        events.filter((event) => this.isUpcoming(event, now)).slice(0, UPCOMING_LIMIT),
+        events
+          .filter((event) => {
+            const starts = Date.parse(event.startsAt);
+            return event.status === 'scheduled' && starts >= from && starts < to;
+          })
+          .slice(0, limit),
       ),
     };
+  }
+
+  /** Competitions of a sport with live / upcoming counts, for the league navigation. */
+  competitions(sport: Sport, now = Date.now()): CompetitionSummary[] {
+    const groups = new Map<string, CompetitionSummary>();
+    for (const event of this.sorted()) {
+      if (event.sport !== sport) continue;
+      const group = groups.get(event.competition.id) ?? {
+        competition: event.competition,
+        liveCount: 0,
+        upcomingCount: 0,
+      };
+      if (event.status === 'live') group.liveCount += 1;
+      else if (this.isUpcoming(event, now)) group.upcomingCount += 1;
+      groups.set(event.competition.id, group);
+    }
+    return [...groups.values()];
   }
 
   live(): CompetitionEvents[] {

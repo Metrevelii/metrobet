@@ -10,6 +10,7 @@ export * from './common/health.js';
 export * from './common/locale.js';
 export * from './common/money.js';
 export * from './common/slug.js';
+export * from './common/time.js';
 export * from './common/localized.js';
 export * from './media/media.js';
 export * from './promotions/blocks.js';

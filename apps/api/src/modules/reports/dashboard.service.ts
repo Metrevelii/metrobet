@@ -1,17 +1,9 @@
-import type { Dashboard } from '@metrobet/contracts';
+import { type Dashboard, tbilisiDayStart } from '@metrobet/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminBetsService } from '../betting/admin-bets.service.js';
 import { AdminPlayersService } from '../players/admin-players.service.js';
 import { WalletService } from '../wallet/wallet.service.js';
-
-/** Georgia is UTC+4 all year (no daylight saving). */
-const TBILISI_OFFSET_MS = 4 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-/** Midnight in Tbilisi at the start of the day containing `now`, as an instant. */
-export const tbilisiDayStart = (now: number) =>
-  new Date(Math.floor((now + TBILISI_OFFSET_MS) / DAY_MS) * DAY_MS - TBILISI_OFFSET_MS);
 
 /** Today's numbers for the backoffice dashboard, composed from the owning modules. */
 @Injectable()

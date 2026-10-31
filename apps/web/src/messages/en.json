@@ -247,7 +247,38 @@
       "home_away": "12",
       "draw_away": "X2",
       "drawLong": "Draw"
-    }
+    },
+    "columns": {
+      "home": "1",
+      "draw": "X",
+      "away": "2",
+      "home_draw": "1X",
+      "home_away": "12",
+      "draw_away": "X2",
+      "over": "Over",
+      "under": "Under",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "lineColumns": {
+      "total": "Total",
+      "spread": "Hcp",
+      "set_winner": "Set"
+    },
+    "days": {
+      "all": "All",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "soon": "Next hour"
+    },
+    "dayFilter": "When",
+    "leagues": "Leagues",
+    "allLeagues": "All leagues",
+    "favorites": "Favourites",
+    "favoritesHint": "Star a league to add it to your favourites",
+    "favorite": "Add to favourites",
+    "unfavorite": "Remove from favourites",
+    "noEventsHint": "Try another day or league."
   },
   "Auth": {
     "login": {

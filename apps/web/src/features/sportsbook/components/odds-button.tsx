@@ -12,6 +12,8 @@ type OddsButtonProps = {
   market: Market;
   selection: Selection;
   label: string;
+  /** Table cell: the price only (the column header names the outcome). */
+  compact?: boolean;
   className?: string;
 };
 
@@ -19,7 +21,14 @@ type OddsButtonProps = {
  * A price. Updates live, flashes green/red with an arrow when it moves, locks while the market
  * is suspended or the outcome is decided, and toggles the selection in the betslip.
  */
-export function OddsButton({ event, market, selection, label, className }: OddsButtonProps) {
+export function OddsButton({
+  event,
+  market,
+  selection,
+  label,
+  compact = false,
+  className,
+}: OddsButtonProps) {
   const live = useSelectionLiveState(selection, market.status);
   const selected = useInBetslip(selection.id);
   const locked = !live.active || live.marketStatus !== 'open';
@@ -47,24 +56,29 @@ export function OddsButton({ event, market, selection, label, className }: OddsB
         })
       }
       className={cn(
-        'relative flex h-11 min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-md border border-transparent bg-secondary px-3 text-sm transition-colors hover:bg-accent disabled:cursor-not-allowed',
+        'relative flex min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-md border border-transparent bg-secondary text-sm transition-colors hover:bg-accent disabled:cursor-not-allowed',
+        compact ? 'h-10 w-full justify-center px-1' : 'h-11 px-3',
         selected && 'border-primary bg-primary text-primary-foreground hover:bg-primary-hover',
         locked && 'opacity-50 hover:bg-secondary',
         className,
       )}
     >
-      <span
-        className={cn(
-          'truncate text-xs',
-          selected ? 'text-primary-foreground/80' : 'text-muted-foreground',
-        )}
-      >
-        {label}
-      </span>
+      {!compact && (
+        <span
+          className={cn(
+            'truncate text-xs',
+            selected ? 'text-primary-foreground/80' : 'text-muted-foreground',
+          )}
+        >
+          {label}
+        </span>
+      )}
       {locked ? (
-        <Lock className="ml-auto size-3.5 shrink-0" />
+        <Lock className={cn('size-3.5 shrink-0', !compact && 'ml-auto')} />
       ) : (
-        <span className="ml-auto font-bold tabular">{live.odds.toFixed(2)}</span>
+        <span className={cn('font-bold tabular', !compact && 'ml-auto')}>
+          {live.odds.toFixed(2)}
+        </span>
       )}
       {direction && !locked && (
         // Re-keyed on every price change so the fade restarts.

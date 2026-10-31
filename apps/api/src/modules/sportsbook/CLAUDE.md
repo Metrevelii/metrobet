@@ -15,8 +15,11 @@ OddsFeed ──upsert/remove(EventDetail)──▶ SportsbookStore ──diff─
   markets are emitted (`update`); markets that disappear are emitted once as `closed`. Live-set
   changes are coalesced into one `live-changed` per tick. Move to Redis (+ Socket.IO Redis
   adapter) before running more than one API instance.
-- **REST** (`/api/sportsbook/*`): `sports`, `sports/:sport` (live + next 48 h by competition),
-  `live`, `events/:id`. Used for first render.
+- **REST** (`/api/sportsbook/*`): `sports`, `sports/:sport` (live + next 48 h by competition;
+  `?day=all|today|tomorrow|soon` in Tbilisi days, `today` keeps live matches; `?competitions=id,id`),
+  `sports/:sport/competitions` (leagues with live/upcoming counts), `live`, `events/:id`. Used
+  for first render. Every `EventSummary` carries its match-table `markets` (`tableMarkets`: one
+  per `TABLE_COLUMNS` group, the most balanced open line for totals/handicaps).
 - **Socket.IO** namespace `/sportsbook`: client `subscribe { eventIds }` → ack with each event's
   current state (closes the gap between the REST snapshot and the first update); then `update`
   messages per subscribed event; `live-changed` broadcast. Message names in contracts
