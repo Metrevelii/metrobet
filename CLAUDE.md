@@ -144,6 +144,8 @@ isolated so it can be swapped later without touching components:
 - `apps/web/src/features/auth/CLAUDE.md`: login/register/verify/reset pages
 - `apps/api/src/modules/wallet/CLAUDE.md`: double-entry ledger, ledger invariants, wallet endpoints
 - `apps/web/src/features/wallet/CLAUDE.md`: header balance, `/wallet` page, dev deposits
+- `apps/api/src/modules/player-live/CLAUDE.md`: player live channel (balance, settled tickets) via Postgres NOTIFY
+- `apps/web/src/features/notifications/CLAUDE.md`: live channel client (header balance, ticket toasts)
 - `apps/api/src/modules/game-wallet/CLAUDE.md`: seamless wallet API for game providers (bet/win/rollback)
 - `apps/api/src/modules/originals/CLAUDE.md`: in-house studio game server (Supra Fortune, crash games)
 - `apps/web/src/features/originals/CLAUDE.md`: native Originals game clients
@@ -162,7 +164,8 @@ isolated so it can be swapped later without touching components:
 4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
    betslip (singles/accumulator, odds changes). Free deterministic simulated feed.
    ✅ Real bets: server-priced placement (live delay, limits, idempotent), wallet debit,
-   automatic settlement from feed results, "My bets" page, live cash-out
+   automatic settlement from feed results, "My bets" page, live cash-out, live "ticket won"
+   notifications and balance push
 5. 🟡 Promo engine (adjarabet-style promotions as data + plugins, not a branch per promo):
    ✅ page blocks (text, steps, countdown, prizes, FAQ, terms, opt-in) + backoffice page builder +
    player opt-in. ✅ activity bus + mechanic plugins + **prize wheel** (spins from wager

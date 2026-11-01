@@ -23,3 +23,4 @@ export * from './originals/originals.js';
 export * from './originals/supra-fortune.js';
 export * from './sportsbook/bets.js';
 export * from './admin/admin.js';
+export * from './realtime/player.js';

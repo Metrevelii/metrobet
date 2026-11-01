@@ -506,5 +506,11 @@
       },
       "done": "Cashed out {amount}"
     }
+  },
+  "Notifications": {
+    "ticketWon": "🎉 Your ticket won {amount}!",
+    "ticketVoid": "A ticket was voided: {amount} returned to your balance",
+    "ticketLost": "A ticket lost. Better luck next time!",
+    "viewBets": "My bets"
   }
 }

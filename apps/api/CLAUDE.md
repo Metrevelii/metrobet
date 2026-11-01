@@ -29,6 +29,7 @@ src/
                          · originals (in-house studio: Supra Fortune, Metro Jet game server)
                          · betting (sportsbook tickets: placement, settlement)
                          · reports (backoffice dashboard, composed from other modules)
+                         · player-live (player's live channel: balance, settled tickets)
                        later: bonus, risk
 test/                  e2e specs (*.e2e-spec.ts) against a real `metrobet_test` database
 drizzle/               generated SQL migrations (commit them)

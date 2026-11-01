@@ -12,6 +12,7 @@ import { GameWalletModule } from './modules/game-wallet/game-wallet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { PlayerLiveModule } from './modules/player-live/player-live.module.js';
 import { PlayersModule } from './modules/players/players.module.js';
 import { PromotionsModule } from './modules/promotions/promotions.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
@@ -42,6 +43,7 @@ import { WalletModule } from './modules/wallet/wallet.module.js';
     GameWalletModule,
     HealthModule,
     MediaModule,
+    PlayerLiveModule,
     PlayersModule,
     PromotionsModule,
     ReportsModule,

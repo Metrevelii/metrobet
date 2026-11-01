@@ -4,6 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 
 import { getCurrentPlayer } from '../data';
+import { PlayerLive } from '@/features/notifications/player-live';
+
 import { SessionSync } from '../session-store';
 import { AccountMenu } from './account-menu';
 
@@ -14,7 +16,10 @@ export async function HeaderAccount() {
     <>
       <SessionSync signedIn={player !== null} />
       {player ? (
-        <AccountMenu player={player} />
+        <>
+          <PlayerLive />
+          <AccountMenu player={player} />
+        </>
       ) : (
         <>
           <Button variant="ghost" size="sm" asChild>

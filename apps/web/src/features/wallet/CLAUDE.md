@@ -19,8 +19,8 @@ api /wallet, /wallet/transactions ──▶ data.ts (request-time, never cached)
 
 ## Live balance while playing
 
-`LiveBalance` (client, in the header chip) shows the balance a running game reported via
-`setLiveBalance` (from `live-balance.tsx`; import the file directly), else the server value. The
+`LiveBalance` (client, in the header chip) shows the latest pushed balance (player live
+channel, `features/notifications`, or a running game) via `setLiveBalance` (from `live-balance.tsx`; import the file directly), else the server value. The
 chip is keyed by the server balance, so a new server value (e.g. after a deposit) drops the live
 one.
 
@@ -32,5 +32,5 @@ header and page re-render with the new balance.
 
 ## Not yet
 
-Balance push over WebSocket (today only the open game reports it), real deposit/withdraw flows (payments),
+Real deposit/withdraw flows (payments),
 filters by type/date, bonus balance.
