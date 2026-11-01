@@ -59,7 +59,8 @@ export const placeBetsRequestSchema = z
   });
 export type PlaceBetsRequest = z.input<typeof placeBetsRequestSchema>;
 
-export const TICKET_STATUSES = ['open', 'won', 'lost', 'void'] as const;
+/** `cashed_out`: the player sold the ticket back before it settled (`payout` = the amount). */
+export const TICKET_STATUSES = ['open', 'won', 'lost', 'void', 'cashed_out'] as const;
 export const ticketStatusSchema = z.enum(TICKET_STATUSES);
 export type TicketStatus = z.infer<typeof ticketStatusSchema>;
 
@@ -82,6 +83,11 @@ export const ticketSelectionSchema = z.object({
   odds: z.number(),
   /** null while the outcome is not known yet. */
   result: selectionResultSchema.nullable(),
+  /**
+   * Open tickets, unresolved selections: the live price when it can be bet right now, else null
+   * (suspended, closed, or the event left the feed). Used to price a cash-out.
+   */
+  currentOdds: z.number().nullable(),
 });
 export type TicketSelection = z.infer<typeof ticketSelectionSchema>;
 
@@ -98,6 +104,8 @@ export const ticketSchema = z.object({
   placedAt: z.iso.datetime(),
   settledAt: z.iso.datetime().nullable(),
   selections: z.array(ticketSelectionSchema),
+  /** Cash-out offer when the ticket was read (minor units), or null when not available. */
+  cashout: z.number().int().nullable(),
 });
 export type Ticket = z.infer<typeof ticketSchema>;
 
@@ -138,6 +146,10 @@ export const BET_ERRORS = [
   'PLAYER_BLOCKED',
   /** The idempotency key was already used for another request. */
   'DUPLICATE_REQUEST',
+  /** No cash-out right now (settled, a leg lost, a market suspended or closed). */
+  'CASHOUT_UNAVAILABLE',
+  /** The offer went down: see `cashout` for the current amount. */
+  'CASHOUT_CHANGED',
 ] as const;
 export type BetError = (typeof BET_ERRORS)[number];
 
@@ -148,8 +160,49 @@ export const betErrorSchema = z.object({
   selections: z
     .array(z.object({ selectionId: z.string(), odds: z.number().nullable() }))
     .optional(),
+  /** For CASHOUT_CHANGED: the current offer (minor units). */
+  cashout: z.number().int().nullable().optional(),
 });
 export type BetErrorBody = z.infer<typeof betErrorSchema>;
+
+// ── Cash-out ─────────────────────────────────────────────────────────────────────────────────
+
+/** Kept by the house on a cash-out (on top of the margin already in the odds). */
+export const CASHOUT_MARGIN = 0.05;
+
+export type CashoutLeg = {
+  /** Odds the selection was placed at. */
+  odds: number;
+  result: SelectionResult | null;
+  /** Live price of an unresolved selection, or null when it can't be bet right now. */
+  currentOdds: number | null;
+};
+
+/**
+ * What an open ticket is worth now, in minor units: stake × placed odds of the non-void legs ÷
+ * current odds of the legs still running × (1 − CASHOUT_MARGIN), rounded down, never above the
+ * potential win. Null when not offered: a leg lost, a running leg can't be priced, nothing is
+ * left to run (it is about to settle), or the value is below the minimum stake.
+ */
+export function cashoutValue(stake: number, potentialWin: number, legs: readonly CashoutLeg[]) {
+  if (legs.some((leg) => leg.result === 'lost')) return null;
+  const running = legs.filter((leg) => leg.result === null);
+  if (running.length === 0 || running.some((leg) => leg.currentOdds === null)) return null;
+  const placed = legs
+    .filter((leg) => leg.result !== 'void')
+    .reduce((product, leg) => product * leg.odds, 1);
+  const current = running.reduce((product, leg) => product * leg.currentOdds!, 1);
+  const value = Math.floor((stake * placed * (1 - CASHOUT_MARGIN)) / current);
+  const capped = Math.min(value, potentialWin);
+  return capped >= BET_LIMITS.minStake ? capped : null;
+}
+
+/** Cash out an open ticket. `amount` is the offer the player saw; a lower offer is refused. */
+export const cashoutRequestSchema = z.object({ amount: z.number().int().positive() });
+export type CashoutRequest = z.infer<typeof cashoutRequestSchema>;
+
+export const cashoutResponseSchema = z.object({ ticket: ticketSchema, balance: z.number().int() });
+export type CashoutResponse = z.infer<typeof cashoutResponseSchema>;
 
 /** Total odds of a ticket: product of the selections, rounded down to 2 decimals. */
 export const comboOdds = (odds: readonly number[]) =>

@@ -6,12 +6,14 @@ import { Check, Minus, X } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 
 import { marketLabel, selectionLabel } from '../../labels';
+import { CashoutButton } from './cashout-button';
 
 const STATUS_BADGE = {
   open: 'default',
   won: 'success',
   lost: 'destructive',
   void: 'warning',
+  cashed_out: 'primary',
 } as const;
 
 function ResultIcon({ result }: { result: Ticket['selections'][number]['result'] }) {
@@ -100,7 +102,13 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
           <span className="font-semibold tabular">{ticket.odds.toFixed(2)}</span>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-muted-foreground">{settled ? t('payout') : t('potentialWin')}</span>
+          <span className="text-muted-foreground">
+            {ticket.status === 'cashed_out'
+              ? t('cashedOut')
+              : settled
+                ? t('payout')
+                : t('potentialWin')}
+          </span>
           <span
             className={cn(
               'font-bold tabular',
@@ -111,6 +119,11 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
           </span>
         </div>
       </footer>
+      {ticket.status === 'open' && (
+        <div className="border-t px-4 py-3">
+          <CashoutButton ticket={ticket} />
+        </div>
+      )}
     </Card>
   );
 }

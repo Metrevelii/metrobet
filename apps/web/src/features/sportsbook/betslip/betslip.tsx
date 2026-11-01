@@ -33,9 +33,18 @@ import {
 /** − / + step for the stake, in ₾. */
 const STAKE_STEP = 1;
 
-/** Message key for a placement error (a duplicate request reads as a generic failure). */
+/** Errors that can't come from placing (or need no own message) read as a generic failure. */
+const GENERIC = new Set<PlaceBetsError>([
+  'DUPLICATE_REQUEST',
+  'CASHOUT_UNAVAILABLE',
+  'CASHOUT_CHANGED',
+]);
+type PlacementMessage = Exclude<
+  PlaceBetsError,
+  'DUPLICATE_REQUEST' | 'CASHOUT_UNAVAILABLE' | 'CASHOUT_CHANGED'
+>;
 const errorKey = (error: PlaceBetsError) =>
-  `errors.${error === 'DUPLICATE_REQUEST' ? 'failed' : error}` as const;
+  `errors.${GENERIC.has(error) ? 'failed' : (error as PlacementMessage)}` as const;
 
 type LiveItem = BetslipItem & {
   liveOdds: number;

@@ -4,7 +4,8 @@ import { currencySchema } from '../common/currency.js';
 
 /**
  * What moved money. `deposit`/`withdrawal` come from payments (dev deposits for now); `bet`,
- * `win` and `rollback` from games (the aggregator's wallet callbacks); `adjustment` from staff.
+ * `win` and `rollback` from games and the sportsbook; `cashout` from selling a sports ticket
+ * early; `adjustment` from staff.
  */
 export const WALLET_TRANSACTION_TYPES = [
   'deposit',
@@ -13,6 +14,7 @@ export const WALLET_TRANSACTION_TYPES = [
   'win',
   'rollback',
   'adjustment',
+  'cashout',
 ] as const;
 export const walletTransactionTypeSchema = z.enum(WALLET_TRANSACTION_TYPES);
 export type WalletTransactionType = z.infer<typeof walletTransactionTypeSchema>;

@@ -39,12 +39,26 @@ SettlementService (every 15 s) ── OddsFeed.result(eventId) for events with o
 8. Settlement asks the feed (`OddsFeed.result`) instead of listening to live updates, so results
    that came while the API was down are still settled.
 
+## Cash-out
+
+- Offer = `cashoutValue` (contracts, shared with the client): stake × placed odds of the
+  non-void legs ÷ current odds of the legs still running × (1 − 5 %), rounded down, capped at the
+  potential win. Not offered after a lost leg, while a running leg can't be bet (suspended,
+  closed, event gone), when nothing is left running, or below 0.10 ₾.
+- Tickets carry `cashout` (offer when read) and, per unresolved selection, `currentOdds`.
+- `POST /sportsbook/bets/:id/cashout { amount }`: the player's own open ticket; live legs → the
+  same `BET_LIVE_DELAY_MS`, then in one transaction: lock the ticket (must still be `open`),
+  price again; lower than `amount` → `CASHOUT_CHANGED` (with the new `cashout`), higher → paid.
+  Ledger `cashout` (`sportsbook:cashout:<id>`), ticket → `cashed_out` with `payout`. Settlement
+  leaves it alone (only `open` tickets settle). The dashboard counts cash-outs as payouts.
+
 ## Endpoints
 
 | Method | Path                                             | Auth                   | Notes                                                                                              |
 | ------ | ------------------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
 | POST   | `/sportsbook/bets`                               | player                 | `PlaceBetsRequest` → `{ tickets, balance }`; errors `{ code, message, selections? }`               |
 | GET    | `/sportsbook/bets`                               | player                 | `TicketsPage`, newest first, `?status=open\|settled&page`                                          |
+| POST   | `/sportsbook/bets/:id/cashout`                   | player                 | `{ amount }` → `{ ticket, balance }`; `CASHOUT_CHANGED` / `CASHOUT_UNAVAILABLE`                    |
 | GET    | `/admin/bets`                                    | support, risk, finance | `AdminTicketsPage` (with player contact), `?status&sport&playerId&page`                            |
 | GET    | `/admin/bets/:id`                                | support, risk, finance | `AdminTicket`                                                                                      |
 | POST   | `/admin/bets/:id/void`                           | risk                   | `{ reason }`: open tickets only; stake refunded (`sportsbook:refund:<id>`), audit-logged           |
@@ -52,6 +66,6 @@ SettlementService (every 15 s) ── OddsFeed.result(eventId) for events with o
 
 ## Not yet
 
-Cash-out, bet builder / same-game combos, system bets, per-player limits and risk management
+Partial cash-out, auto cash-out rules, bet builder / same-game combos, system bets, per-player limits and risk management
 (liability per selection), re-settling an already settled ticket (needs reversing the payout),
 early settlement of markets decided before full time (e.g. over 1.5 after two goals).

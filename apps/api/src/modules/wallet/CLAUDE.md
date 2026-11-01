@@ -46,6 +46,7 @@ Transaction types (contracts `WALLET_TRANSACTION_TYPES`):
 | `win`        | house −, player +             | game wallet API (`game-wallet`) |
 | `rollback`   | reverses a bet                | game wallet API (`game-wallet`) |
 | `adjustment` | either way, staff + audit log | backoffice (later)              |
+| `cashout`    | house −, player +             | sportsbook cash-out             |
 
 ## Endpoints
 

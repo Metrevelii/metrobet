@@ -140,7 +140,8 @@ export class WalletService {
     const totals = (name: 'casino' | 'sportsbook'): ProductTotals => {
       const pick = (type: string) => rows.find((row) => row.product === name && row.type === type);
       const stakes = -Number(pick('bet')?.amount ?? 0);
-      const wins = Number(pick('win')?.amount ?? 0);
+      // A cash-out is money paid on a bet, like a win.
+      const wins = Number(pick('win')?.amount ?? 0) + Number(pick('cashout')?.amount ?? 0);
       const refunds = Number(pick('rollback')?.amount ?? 0);
       return {
         stakes,

@@ -162,7 +162,7 @@ isolated so it can be swapped later without touching components:
 4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
    betslip (singles/accumulator, odds changes). Free deterministic simulated feed.
    ✅ Real bets: server-priced placement (live delay, limits, idempotent), wallet debit,
-   automatic settlement from feed results, "My bets" page
+   automatic settlement from feed results, "My bets" page, live cash-out
 5. 🟡 Promo engine (adjarabet-style promotions as data + plugins, not a branch per promo):
    ✅ page blocks (text, steps, countdown, prizes, FAQ, terms, opt-in) + backoffice page builder +
    player opt-in. ✅ activity bus + mechanic plugins + **prize wheel** (spins from wager

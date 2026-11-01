@@ -375,7 +375,8 @@
       "bet": "Bet",
       "win": "Win",
       "rollback": "Bet refunded",
-      "adjustment": "Adjustment"
+      "adjustment": "Adjustment",
+      "cashout": "Cash-out"
     },
     "dev": {
       "title": "Test money (development only)",
@@ -472,7 +473,8 @@
       "open": "Open",
       "won": "Won",
       "lost": "Lost",
-      "void": "Void"
+      "void": "Void",
+      "cashed_out": "Cashed out"
     },
     "results": {
       "won": "Won",
@@ -486,6 +488,20 @@
     "pages": "Bet pages",
     "page": "Page {page} of {pages}",
     "newer": "Newer",
-    "older": "Older"
+    "older": "Older",
+    "cashedOut": "Cashed out",
+    "cashout": {
+      "button": "Cash out {amount}",
+      "confirm": "Confirm {amount}",
+      "cancel": "Cancel",
+      "cashingOut": "Cashing out…",
+      "unavailable": "Cash-out unavailable right now",
+      "errors": {
+        "CASHOUT_CHANGED": "The offer changed. Confirm the new amount.",
+        "CASHOUT_UNAVAILABLE": "Cash-out is not available right now.",
+        "signedOut": "Your session ended. Log in again.",
+        "failed": "Couldn't cash out. Please try again."
+      }
+    }
   }
 }

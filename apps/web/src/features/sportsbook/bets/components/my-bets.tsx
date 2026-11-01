@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Link } from '@/i18n/navigation';
 
+import { LiveEvents } from '../../realtime/live-events';
 import { getTickets } from '../data';
 import { BETS_HREF } from '../links';
 import { TicketCard } from './ticket-card';
@@ -44,6 +45,20 @@ export async function MyBets({ tab, page }: { tab: BetsTab; page: number }) {
         </Card>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
+          {/* Live prices for open tickets keep the cash-out offers current. */}
+          {tab === 'open' && (
+            <LiveEvents
+              eventIds={[
+                ...new Set(
+                  tickets.items.flatMap((ticket) =>
+                    ticket.selections
+                      .filter((selection) => selection.result === null)
+                      .map((selection) => selection.eventId),
+                  ),
+                ),
+              ]}
+            />
+          )}
           {tickets.items.map((ticket) => (
             <TicketCard key={ticket.id} ticket={ticket} />
           ))}

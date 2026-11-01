@@ -1,10 +1,23 @@
 import {
+  cashoutRequestSchema,
+  type CashoutResponse,
   type PlaceBetsResponse,
   placeBetsRequestSchema,
   type TicketsPage,
   ticketsQuerySchema,
 } from '@metrobet/contracts';
-import { Body, Controller, Get, HttpCode, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import type { z } from 'zod';
 
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
@@ -24,6 +37,17 @@ export class BettingController {
     request: z.output<typeof placeBetsRequestSchema>,
   ): Promise<PlaceBetsResponse> {
     return this.betting.place(playerId, request);
+  }
+
+  /** Sell an open ticket back at the current offer (`{ amount }` = the offer the player saw). */
+  @Post(':id/cashout')
+  @HttpCode(200)
+  cashout(
+    @CurrentPlayer() { playerId }: PlayerPrincipal,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(new ZodValidationPipe(cashoutRequestSchema)) { amount }: { amount: number },
+  ): Promise<CashoutResponse> {
+    return this.betting.cashout(playerId, id, amount);
   }
 
   @Get()

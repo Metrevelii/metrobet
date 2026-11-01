@@ -262,4 +262,49 @@ describe('sportsbook betting (e2e)', () => {
     expect(results[0]!.body.tickets[0].id).toBe(results[1]!.body.tickets[0].id);
     expect(await balance(player)).toBe(6_00);
   });
+
+  it('cashes out an open ticket once, at the offer the player saw or better', async () => {
+    const player = await signUp(20_00);
+    const [pick] = homeWins(1);
+    const placed = (await bet(player, single(pick!, 10_00)).expect(200)).body as PlaceBetsResponse;
+    const ticket = placed.tickets[0]!;
+    // 95 % of the stake while the price is unchanged (prices drift, so use the server's offer).
+    const offer = ticket.cashout!;
+    if (ticket.selections[0]!.currentOdds === pick!.odds) {
+      expect(offer).toBe(Math.floor(10_00 * 0.95));
+    }
+
+    const cashout = (amount: number, who = player) =>
+      http().post(`/api/sportsbook/bets/${ticket.id}/cashout`).set(who.headers).send({ amount });
+    const other = await signUp(0);
+    await cashout(offer, other).expect(404);
+    expect((await cashout(offer + 1).expect(409)).body.code).toBe('CASHOUT_CHANGED');
+
+    const { body } = await cashout(offer).expect(200);
+    expect(body.ticket).toMatchObject({ status: 'cashed_out', payout: offer, cashout: null });
+    expect(body.balance).toBe(10_00 + offer);
+    expect((await cashout(offer).expect(409)).body.code).toBe('CASHOUT_UNAVAILABLE');
+
+    // The match finishing later changes nothing for a cashed-out ticket.
+    await settlement.settleEvent({ eventId: pick!.eventId, sport: 'football', final: final(3, 0) });
+    expect(await balance(player)).toBe(10_00 + offer);
+    expect(await status(ticket.id)).toBe('cashed_out');
+    const history = await http().get('/api/wallet/transactions').set(player.headers).expect(200);
+    expect(history.body.items[0]).toMatchObject({ type: 'cashout', amount: offer });
+  });
+
+  it('offers no cash-out once a leg has lost', async () => {
+    const player = await signUp(10_00);
+    const [a, b] = homeWins(2);
+    const ticket = (await bet(player, combo(a!, b!)).expect(200)).body.tickets[0];
+    expect(ticket.cashout).toBeGreaterThan(0);
+    await settlement.settleEvent({ eventId: a!.eventId, sport: 'football', final: final(0, 2) });
+    const { body } = await http().get('/api/sportsbook/bets').set(player.headers).expect(200);
+    expect(body.items[0]).toMatchObject({ status: 'lost', cashout: null });
+    await http()
+      .post(`/api/sportsbook/bets/${ticket.id}/cashout`)
+      .set(player.headers)
+      .send({ amount: 1_00 })
+      .expect(409);
+  });
 });

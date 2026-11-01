@@ -68,3 +68,8 @@ Short labels (1/X/2) in lists, team names on the event page and betslip.
   `Betslip.errors.*` (insufficient funds links to `/wallet`).
 - `bets/`: `TicketCard` (selections with ✓/✗/– results, stake, odds, potential win or payout),
   `MyBets` (tabs, paging), `data.ts` `getTickets` (request-time).
+- **Cash-out** (`CashoutButton` on open tickets): the offer is recomputed live with
+  `cashoutValue` from the live store (My bets subscribes `LiveEvents` to the open legs), falling
+  back to the ticket's `currentOdds`. Tap → "Confirm X" → `cashoutTicket` action; a lower
+  server offer comes back as `CASHOUT_CHANGED` and needs a new confirmation. Locked ("Cash-out
+  unavailable") while a leg is suspended.
