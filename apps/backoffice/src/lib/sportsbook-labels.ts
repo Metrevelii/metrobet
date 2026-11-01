@@ -28,18 +28,20 @@ const SELECTIONS: Partial<Record<SelectionKey, string>> = {
   cs_other: 'Any other score',
 };
 
-const selectionName = (key: SelectionKey) => {
+/** English market label, e.g. "Total 2.5" or "Set 2 winner". */
+export function marketText(type: MarketType, line: number | null): string {
+  if (type === 'set_winner') return `Set ${line} winner`;
+  if (line === null) return MARKETS[type];
+  return `${MARKETS[type]} ${type === 'spread' && line > 0 ? `+${line}` : line}`;
+}
+
+/** English selection label, e.g. "Over" or "2:1". */
+export const selectionName = (key: SelectionKey) => {
   const score = correctScoreOf(key);
   return score ? `${score.home}:${score.away}` : (SELECTIONS[key] ?? key);
 };
 
 /** English label for a placed selection, e.g. "Total 2.5 · Over" (the backoffice is English only). */
 export function selectionText(type: MarketType, line: number | null, key: SelectionKey): string {
-  const market =
-    type === 'set_winner'
-      ? `Set ${line} winner`
-      : line === null
-        ? MARKETS[type]
-        : `${MARKETS[type]} ${line}`;
-  return `${market} · ${selectionName(key)}`;
+  return `${marketText(type, line)} · ${selectionName(key)}`;
 }

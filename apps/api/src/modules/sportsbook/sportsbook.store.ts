@@ -16,9 +16,10 @@ import {
   TABLE_COLUMNS,
   tbilisiDayStart,
 } from '@metrobet/contracts';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 
 import type { FeedHandler } from './feed/odds-feed.js';
+import { TradingRules } from './trading/trading-rules.js';
 
 const UPCOMING_WINDOW_MS = 48 * 60 * 60 * 1000;
 const UPCOMING_LIMIT = 60;
@@ -110,7 +111,10 @@ type StoreEvents = { update: [EventUpdate]; 'live-changed': [] };
  */
 @Injectable()
 export class SportsbookStore implements FeedHandler {
+  /** What players see: the feed's events after the trading rules. */
   private readonly events = new Map<string, EventDetail>();
+  /** The feed's own events, so rule changes can be re-applied without waiting for a tick. */
+  private readonly feedEvents = new Map<string, EventDetail>();
   private readonly emitter = new EventEmitter<StoreEvents>();
   private liveChangePending = false;
 
@@ -119,7 +123,24 @@ export class SportsbookStore implements FeedHandler {
     return () => this.emitter.off(event, listener as never);
   }
 
-  upsert(next: EventDetail) {
+  constructor(
+    @Optional() @Inject(TradingRules) private readonly rules: TradingRules = new TradingRules(),
+  ) {
+    this.rules.onChange((eventIds) => {
+      for (const id of eventIds ?? [...this.feedEvents.keys()]) {
+        const event = this.feedEvents.get(id);
+        if (event) this.commit(this.rules.apply(event));
+      }
+    });
+  }
+
+  upsert(event: EventDetail) {
+    this.feedEvents.set(event.id, event);
+    this.commit(this.rules.apply(event));
+  }
+
+  /** Stores the event players see and emits what changed. */
+  private commit(next: EventDetail) {
     const prev = this.events.get(next.id);
     this.events.set(next.id, next);
     if (!prev) {
@@ -152,6 +173,7 @@ export class SportsbookStore implements FeedHandler {
   remove(eventId: string) {
     const prev = this.events.get(eventId);
     this.events.delete(eventId);
+    this.feedEvents.delete(eventId);
     if (prev?.status === 'live') this.liveChanged();
   }
 
@@ -221,6 +243,16 @@ export class SportsbookStore implements FeedHandler {
 
   event(id: string): EventDetail | undefined {
     return this.events.get(id);
+  }
+
+  /** The event as the feed sent it (before trading rules), for the backoffice. */
+  feedEvent(id: string): EventDetail | undefined {
+    return this.feedEvents.get(id);
+  }
+
+  /** Every event that has not ended, by start time (backoffice trading list). */
+  all(): EventDetail[] {
+    return this.sorted().filter((event) => event.status !== 'ended');
   }
 
   /**

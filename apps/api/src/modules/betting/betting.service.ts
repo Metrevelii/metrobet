@@ -29,6 +29,7 @@ import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { ActivityBus } from '../activity/activity-bus.js';
 import { PlayersService } from '../players/players.service.js';
 import { SportsbookStore } from '../sportsbook/sportsbook.store.js';
+import { TradingRules } from '../sportsbook/trading/trading-rules.js';
 import { InsufficientFundsError } from '../wallet/ledger-math.js';
 import { Ledger } from '../wallet/ledger.js';
 import {
@@ -68,6 +69,8 @@ export const betError = (
 /** A selection priced from the store: the snapshot stored on the ticket. */
 type Priced = Omit<typeof betSelections.$inferInsert, 'ticketId' | 'position'> & {
   live: boolean;
+  /** For the trading limits (the ticket stores the competition's name). */
+  competitionId: string;
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -80,6 +83,7 @@ export class BettingService {
   constructor(
     @Inject(DRIZZLE) private readonly db: Database,
     @Inject(SportsbookStore) private readonly store: SportsbookStore,
+    @Inject(TradingRules) private readonly trading: TradingRules,
     @Inject(Ledger) private readonly ledger: Ledger,
     @Inject(PlayersService) private readonly players: PlayersService,
     @Inject(ActivityBus) private readonly activity: ActivityBus,
@@ -108,9 +112,13 @@ export class BettingService {
       return { ...draft, index, odds, potentialWin: payoutFor(draft.stake, odds) };
     });
     for (const draft of drafts) {
+      // Trading rules per sport / competition; a combo gets the strictest of its legs.
+      const limits = this.trading.limitsFor(
+        draft.legs.map((leg) => ({ sport: leg.sport, competition: { id: leg.competitionId } })),
+      );
       if (draft.stake < BET_LIMITS.minStake) throw betError('STAKE_TOO_LOW', 'Stake too low');
-      if (draft.stake > BET_LIMITS.maxStake) throw betError('STAKE_TOO_HIGH', 'Stake too high');
-      if (draft.potentialWin > BET_LIMITS.maxPayout) {
+      if (draft.stake > limits.maxStake) throw betError('STAKE_TOO_HIGH', 'Stake too high');
+      if (draft.potentialWin > limits.maxPayout) {
         throw betError('PAYOUT_TOO_HIGH', 'Potential win above the limit');
       }
     }
@@ -134,7 +142,7 @@ export class BettingService {
             })
             .returning();
           await tx.insert(betSelections).values(
-            draft.legs.map(({ live: _live, ...leg }, position) => ({
+            draft.legs.map(({ live: _live, competitionId: _competition, ...leg }, position) => ({
               ...leg,
               ticketId: ticket!.id,
               position,
@@ -229,6 +237,7 @@ export class BettingService {
         selectionKey: selection.key,
         odds: current,
         live: event.status === 'live',
+        competitionId: event.competition.id,
       });
     }
     if (unavailable.length > 0) {

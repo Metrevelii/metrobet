@@ -120,6 +120,13 @@
       "when": 1793551092453,
       "tag": "0016_esoccer_and_markets",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793554691298,
+      "tag": "0017_trading",
+      "breakpoints": true
     }
   ]
 }

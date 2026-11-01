@@ -54,6 +54,29 @@ OddsFeed ──upsert/remove(EventDetail)──▶ SportsbookStore ──diff─
 - Prices drift every 20 s live / 10 min pre-match so odds move like a real feed.
 - `SPORTSBOOK_FEED=off` disables it.
 
+## Trading (`trading/`, backoffice controls)
+
+```
+feed ──▶ SportsbookStore.upsert(raw) ──TradingRules.apply──▶ what players see (REST, socket, bets)
+backoffice ──▶ TradingService (DB + audit) ──▶ TradingRules ──onChange──▶ store re-applies at once
+```
+
+- **Suspensions** (`trading_suspensions`): a whole event or one market. Open markets become
+  `suspended` with inactive selections, so new bets, betslips and cash-out stop at once. Kept
+  until resumed (survive restarts; the feed can't reopen them).
+- **Rules** (`trading_rules`) per sport or competition: `margin` (percent; the feed's price is
+  normalised and re-margined, `remargin()`), `maxStake`, `maxPayout`. Field by field:
+  competition → sport → feed price / `BET_LIMITS`. Combos get the strictest limits of their legs
+  (`TradingRules.limitsFor`, used by betting).
+- The store keeps both the feed's events (`feedEvent`) and the effective ones; staff screens show
+  both prices. `TradingRules` is pure and in memory: with several API instances, broadcast
+  changes (Redis) like the store itself.
+- Admin API `/api/admin/sportsbook/*` (risk; audit-logged as `sportsbook.suspend|resume|rule.*`):
+  `GET events?sport&status=live|scheduled|suspended&q&page`, `GET events/:id` (event, feed odds,
+  suspensions with staff names, effective margin/limits), `POST suspensions`,
+  `POST suspensions/resume` (`{ scope, targetId, reason }`), `GET|PUT rules`,
+  `DELETE rules/:scope/:key`, `GET targets` (competitions in the feed).
+
 ## Replacing with a real feed
 
 Implement `OddsFeed` (connect, map provider messages to `EventDetail`, handle bet stops, and

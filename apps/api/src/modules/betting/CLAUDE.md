@@ -23,8 +23,9 @@ SettlementService (every 15 s) ── OddsFeed.result(eventId) for events with o
    `SELECTION_UNAVAILABLE`. A combo needs 2+ selections from different events (`SAME_EVENT`).
 3. **Live delay:** when any selection is live, the request waits `BET_LIVE_DELAY_MS` (3 s) and is
    validated again, so a bet can't be placed on a goal that already happened.
-4. **Limits** (contracts `BET_LIMITS`): stake 0.10–1 000 ₾ per ticket, potential win ≤ 100 000 ₾,
-   ≤ 20 selections.
+4. **Limits:** stake ≥ 0.10 ₾ and ≤ 20 selections (contracts `BET_LIMITS`); max stake and max
+   potential win come from the trading rules (`TradingRules.limitsFor`, sportsbook module:
+   competition → sport → `BET_LIMITS` 1 000 ₾ / 100 000 ₾; a combo gets its strictest leg's).
 5. **Atomic and idempotent:** tickets, selections and the wallet debit commit in one DB
    transaction (`Ledger.post(…, tx)`). Each ticket has `(requestKey, requestIndex)` unique; the
    same `idempotencyKey` again returns the already placed tickets (another player's key →
@@ -54,6 +55,14 @@ SettlementService (every 15 s) ── OddsFeed.result(eventId) for events with o
   Ledger `cashout` (`sportsbook:cashout:<id>`), ticket → `cashed_out` with `payout`. Settlement
   leaves it alone (only `open` tickets settle). The dashboard counts cash-outs as payouts.
 
+## Liability (backoffice)
+
+`liability.ts` (pure) over the unresolved selections of open tickets: per selection the singles
+(count, stake, payout) and combos (count, full potential win: worst case), and `net` = the
+market's single stakes − what that selection would pay. Event `worstCase` = sum over markets of
+the worst loss. `GET /admin/sportsbook/liability?eventIds=a,b` (totals) and
+`/admin/sportsbook/liability/:eventId` (per market), risk role.
+
 ## Endpoints
 
 | Method | Path                                             | Auth                   | Notes                                                                                              |
@@ -68,6 +77,5 @@ SettlementService (every 15 s) ── OddsFeed.result(eventId) for events with o
 
 ## Not yet
 
-Partial cash-out, auto cash-out rules, bet builder / same-game combos, system bets, per-player limits and risk management
-(liability per selection), re-settling an already settled ticket (needs reversing the payout),
+Partial cash-out, auto cash-out rules, bet builder / same-game combos, system bets, per-player limits, re-settling an already settled ticket (needs reversing the payout),
 early settlement of markets decided before full time (e.g. over 1.5 after two goals).

@@ -2,7 +2,14 @@ import { z } from 'zod';
 
 import { kycStatusSchema, playerStatusSchema } from '../auth/auth.js';
 import { selectionResultSchema, ticketSchema, ticketStatusSchema } from '../sportsbook/bets.js';
-import { sportSchema } from '../sportsbook/sportsbook.js';
+import { minorAmountSchema } from '../common/money.js';
+import {
+  competitionSchema,
+  eventDetailSchema,
+  eventStatusSchema,
+  liveStateSchema,
+  sportSchema,
+} from '../sportsbook/sportsbook.js';
 import { walletTransactionsPageSchema } from '../wallet/wallet.js';
 
 /**
@@ -110,6 +117,171 @@ export const selectionSettleInputSchema = z.object({
   reason: reasonSchema,
 });
 export type SelectionSettleInput = z.infer<typeof selectionSettleInputSchema>;
+
+// ── Sportsbook trading ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Trading controls over the odds feed: suspensions (a whole event or one market) and rules
+ * (margin, stake and win limits) per sport or competition. A competition rule wins over its
+ * sport's; anything not set falls back to the feed's price and `BET_LIMITS`.
+ */
+export const SUSPENSION_SCOPES = ['event', 'market'] as const;
+export const suspensionScopeSchema = z.enum(SUSPENSION_SCOPES);
+export type SuspensionScope = z.infer<typeof suspensionScopeSchema>;
+
+export const suspensionSchema = z.object({
+  scope: suspensionScopeSchema,
+  /** Event id or market id. */
+  targetId: z.string(),
+  eventId: z.string(),
+  reason: z.string(),
+  /** Staff member's name (or the audit actor when unknown). */
+  by: z.string(),
+  at: z.iso.datetime(),
+});
+export type Suspension = z.infer<typeof suspensionSchema>;
+
+/** Suspend or resume an event or a market. */
+export const suspensionInputSchema = z.object({
+  scope: suspensionScopeSchema,
+  targetId: z.string().min(1).max(200),
+  reason: reasonSchema,
+});
+export type SuspensionInput = z.infer<typeof suspensionInputSchema>;
+
+export const TRADING_RULE_SCOPES = ['sport', 'competition'] as const;
+export const tradingRuleScopeSchema = z.enum(TRADING_RULE_SCOPES);
+export type TradingRuleScope = z.infer<typeof tradingRuleScopeSchema>;
+
+/** Margin in percent (implied probabilities sum to 1 + margin / 100). */
+export const marginSchema = z.number().min(0).max(25).multipleOf(0.1);
+
+const tradingRuleFields = {
+  scope: tradingRuleScopeSchema,
+  /** Sport (`football`) or competition id. */
+  key: z.string().min(1).max(200),
+  margin: marginSchema.nullable(),
+  maxStake: minorAmountSchema.nullable(),
+  maxPayout: minorAmountSchema.nullable(),
+};
+
+/** Set (create or replace) a rule; `null` fields inherit. */
+export const tradingRuleInputSchema = z
+  .object(tradingRuleFields)
+  .refine((rule) => rule.margin !== null || rule.maxStake !== null || rule.maxPayout !== null, {
+    message: 'Set a margin or a limit',
+    path: ['margin'],
+  });
+export type TradingRuleInput = z.infer<typeof tradingRuleInputSchema>;
+
+export const tradingRuleSchema = z.object({
+  ...tradingRuleFields,
+  /** Sport or competition name, for display. */
+  label: z.string(),
+  updatedAt: z.iso.datetime(),
+});
+export type TradingRule = z.infer<typeof tradingRuleSchema>;
+
+/** Margin and limits that apply to an event after the rules. `margin` null = the feed's price. */
+export const effectiveTradingSchema = z.object({
+  margin: z.number().nullable(),
+  maxStake: z.number().int(),
+  maxPayout: z.number().int(),
+});
+export type EffectiveTrading = z.infer<typeof effectiveTradingSchema>;
+
+export const adminTradingEventsQuerySchema = z.object({
+  sport: sportSchema.optional(),
+  status: z.enum(['live', 'scheduled', 'suspended']).optional(),
+  /** Team or competition name fragment. */
+  q: z.string().trim().max(100).optional(),
+  page,
+  pageSize,
+});
+export type AdminTradingEventsQuery = z.input<typeof adminTradingEventsQuerySchema>;
+
+export const adminTradingEventSchema = z.object({
+  id: z.string(),
+  sport: sportSchema,
+  competition: competitionSchema,
+  home: z.string(),
+  away: z.string(),
+  startsAt: z.iso.datetime(),
+  status: eventStatusSchema,
+  live: liveStateSchema.nullable(),
+  suspended: z.boolean(),
+  marketCount: z.number().int(),
+  suspendedMarkets: z.number().int(),
+  trading: effectiveTradingSchema,
+});
+export type AdminTradingEvent = z.infer<typeof adminTradingEventSchema>;
+export const adminTradingEventsPageSchema = pageOf(adminTradingEventSchema);
+export type AdminTradingEventsPage = z.infer<typeof adminTradingEventsPageSchema>;
+
+/**
+ * One event for trading: what players see (`event`, after rules), the feed's own odds by
+ * selection id, the active suspensions and the effective margin/limits.
+ */
+export const adminTradingEventDetailSchema = z.object({
+  event: eventDetailSchema,
+  feedOdds: z.record(z.string(), z.number()),
+  suspensions: z.array(suspensionSchema),
+  trading: effectiveTradingSchema,
+});
+export type AdminTradingEventDetail = z.infer<typeof adminTradingEventDetailSchema>;
+
+export const tradingTargetsSchema = z.object({
+  competitions: z.array(competitionSchema),
+});
+export type TradingTargets = z.infer<typeof tradingTargetsSchema>;
+
+// ── Liability ────────────────────────────────────────────────────────────────────────────────
+
+/**
+ * What open tickets risk on an event. Singles count exactly; an accumulator counts its full
+ * potential win on each of its selections (worst case: every other leg wins too).
+ */
+export const selectionLiabilitySchema = z.object({
+  selectionId: z.string(),
+  singles: z.object({ count: z.number().int(), stake: z.number().int(), payout: z.number().int() }),
+  combos: z.object({ count: z.number().int(), payout: z.number().int() }),
+  /** Market's single stakes − payouts if this selection wins (negative = loss). */
+  net: z.number().int(),
+});
+export type SelectionLiability = z.infer<typeof selectionLiabilitySchema>;
+
+export const marketLiabilitySchema = z.object({
+  marketId: z.string(),
+  /** Stakes of singles on this market (what we keep from the losing selections). */
+  stake: z.number().int(),
+  selections: z.array(selectionLiabilitySchema),
+});
+export type MarketLiability = z.infer<typeof marketLiabilitySchema>;
+
+export const eventLiabilitySummarySchema = z.object({
+  eventId: z.string(),
+  /** Open tickets with a selection on the event. */
+  tickets: z.number().int(),
+  /** Their stakes. */
+  stake: z.number().int(),
+  /** Sum over markets of the worst loss (an upper bound of what the event can cost). */
+  worstCase: z.number().int(),
+});
+export type EventLiabilitySummary = z.infer<typeof eventLiabilitySummarySchema>;
+
+export const eventLiabilitySchema = eventLiabilitySummarySchema.extend({
+  markets: z.array(marketLiabilitySchema),
+});
+export type EventLiability = z.infer<typeof eventLiabilitySchema>;
+
+export const liabilityQuerySchema = z.object({
+  /** Comma-separated event ids (at most 100). */
+  eventIds: z
+    .string()
+    .max(10_000)
+    .transform((value) => value.split(',').filter(Boolean))
+    .pipe(z.array(z.string().min(1)).max(100)),
+});
 
 // ── Audit log ────────────────────────────────────────────────────────────────────────────────
 

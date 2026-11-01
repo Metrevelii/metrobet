@@ -176,7 +176,8 @@ isolated so it can be swapped later without touching components:
    ⏳ more crash titles, a dedicated crash lobby
 7. 🟡 Backoffice screens: ✅ dashboard (today's GGR per product), players (search, detail,
    suspend / self-exclude, transactions, tickets, game rounds), sports tickets (void, manual
-   settlement), audit log. ⏳ games & providers, sportsbook management, staff management
+   settlement), audit log, **sportsbook trading** (suspend events/markets, margins and limits per
+   sport/competition, liability per selection). ⏳ games & providers, staff management, per-player limits
 8. 🟡 Auth ✅ (players: email or phone, 25+, code verification, password reset; staff accounts
    with roles replace the shared admin key). ✅ Wallet: double-entry ledger in tetri (idempotent,
    append-only, DB-enforced zero-sum), balance in header, `/wallet` history, dev test deposits.

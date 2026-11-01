@@ -6,16 +6,18 @@ import { PlayersModule } from '../players/players.module.js';
 import { SportsbookModule } from '../sportsbook/sportsbook.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
 import { AdminBetsController } from './admin-bets.controller.js';
+import { AdminLiabilityController } from './admin-liability.controller.js';
 import { AdminBetsService } from './admin-bets.service.js';
 import { BettingController } from './betting.controller.js';
 import { BettingService } from './betting.service.js';
+import { LiabilityService } from './liability.service.js';
 import { SettlementService } from './settlement.service.js';
 
 /** Sportsbook tickets: placement, settlement, history. See CLAUDE.md. */
 @Module({
   imports: [ActivityModule, AuditModule, PlayersModule, SportsbookModule, WalletModule],
-  controllers: [BettingController, AdminBetsController],
-  providers: [BettingService, SettlementService, AdminBetsService],
+  controllers: [BettingController, AdminBetsController, AdminLiabilityController],
+  providers: [BettingService, SettlementService, AdminBetsService, LiabilityService],
   exports: [AdminBetsService],
 })
 export class BettingModule {}

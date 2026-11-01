@@ -11,5 +11,6 @@ export * from '../../modules/players/players.schema.js';
 export * from '../../modules/promotions/mechanics/wheel/wheel.schema.js';
 export * from '../../modules/promotions/promotions.schema.js';
 export * from '../../modules/promotions/rewards.schema.js';
+export * from '../../modules/sportsbook/trading/trading.schema.js';
 export * from '../../modules/staff/staff.schema.js';
 export * from '../../modules/wallet/wallet.schema.js';
