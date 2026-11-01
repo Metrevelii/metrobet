@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { locale as rootLocale } from 'next/root-params';
 
 import { AppShell } from '@/components/layout/app-shell';
+import { AppToaster } from '@/components/layout/app-toaster';
 import { routing } from '@/i18n/routing';
 
 import '../globals.css';
@@ -35,6 +36,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[locale]'
       <body>
         <NextIntlClientProvider>
           <AppShell>{children}</AppShell>
+          <AppToaster />
         </NextIntlClientProvider>
       </body>
     </html>

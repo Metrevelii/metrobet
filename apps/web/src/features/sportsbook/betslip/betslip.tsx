@@ -1,8 +1,8 @@
 'use client';
 
 import { toMajor, toMinor } from '@metrobet/contracts';
-import { Alert, Button, Checkbox, cn, Input, Skeleton } from '@metrobet/ui';
-import { ArrowRight, CircleCheck, Minus, Plus, Ticket, X } from 'lucide-react';
+import { Alert, Button, Checkbox, cn, Input, Skeleton, toast } from '@metrobet/ui';
+import { ArrowRight, Minus, Plus, Ticket, X } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState, useTransition } from 'react';
 
@@ -54,27 +54,6 @@ type LiveItem = BetslipItem & {
   blocking: boolean;
   suspended: boolean;
 };
-
-/** Shown after a successful placement (the slip is cleared). */
-function Placed({ count, onDone }: { count: number; onDone: () => void }) {
-  const t = useTranslations('Betslip');
-  return (
-    <div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-success/15 text-success">
-        <CircleCheck className="size-6" />
-      </div>
-      <p className="text-sm font-semibold">{t('placed', { count })}</p>
-      <div className="flex gap-2">
-        <Button variant="secondary" size="sm" asChild>
-          <Link href={BETS_HREF}>{t('viewBets')}</Link>
-        </Button>
-        <Button size="sm" onClick={onDone}>
-          {t('done')}
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 /** Accumulator / Singles, as underlined tabs. Accumulator needs two selections. */
 function ModeTabs({ mode, count }: { mode: BetslipMode; count: number }) {
@@ -263,14 +242,9 @@ export function Betslip() {
   const signedIn = useSignedIn();
   const router = useRouter();
   const [placing, startPlacing] = useTransition();
-  const [placed, setPlaced] = useState<number | null>(null);
-  const [error, setError] = useState<PlaceBetsError | null>(null);
   const ids = slip?.items.map((item) => item.selectionId) ?? [];
   useSelectionsSignature(ids);
 
-  if (placed !== null && slip?.items.length === 0) {
-    return <Placed count={placed} onDone={() => setPlaced(null)} />;
-  }
   if (slip === null) return <Skeleton className="m-4 h-32" />;
   if (slip.items.length === 0) {
     return <EmptyState icon={Ticket} title={t('empty')} description={t('emptyHint')} />;
@@ -315,12 +289,21 @@ export function Betslip() {
         acceptHigherOdds: slip.acceptHigher || slip.acceptAll,
       });
       if (!result.ok) {
-        setError(result.error);
+        const action =
+          result.error === 'INSUFFICIENT_FUNDS'
+            ? { label: t('topUp'), onClick: () => router.push('/wallet') }
+            : result.error === 'signedOut'
+              ? { label: t('loginToBet'), onClick: () => router.push('/login') }
+              : undefined;
+        // One id: a second failure replaces the first instead of stacking.
+        toast.error(t(errorKey(result.error)), { id: 'betslip-error', action });
         return;
       }
-      setError(null);
+      toast.dismiss('betslip-error');
       clearBetslip();
-      setPlaced(result.data.tickets.length);
+      toast.success(t('placed', { count: result.data.tickets.length }), {
+        action: { label: t('viewBets'), onClick: () => router.push(BETS_HREF) },
+      });
       setLiveBalance(result.data.balance);
       router.refresh();
     });
@@ -367,19 +350,6 @@ export function Betslip() {
       </div>
 
       <div className="flex flex-col gap-3 px-4 pb-4">
-        {error && (
-          <Alert variant="destructive" aria-live="polite">
-            {t(errorKey(error))}
-            {error === 'INSUFFICIENT_FUNDS' && (
-              <>
-                {' '}
-                <Link href="/wallet" className="font-semibold underline">
-                  {t('topUp')}
-                </Link>
-              </>
-            )}
-          </Alert>
-        )}
         {anyBlocking ? (
           <Button
             size="lg"
@@ -387,7 +357,7 @@ export function Betslip() {
             className="h-12 w-full text-base font-bold"
             onClick={() => {
               acceptOddsChanges();
-              setError(null);
+              toast.dismiss('betslip-error');
             }}
           >
             {t('acceptChanges')}

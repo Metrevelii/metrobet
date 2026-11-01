@@ -1,7 +1,7 @@
 'use client';
 
 import type { PromotionEnrollment } from '@metrobet/contracts';
-import { Button, buttonVariants } from '@metrobet/ui';
+import { Button, buttonVariants, toast } from '@metrobet/ui';
 import { CircleCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
@@ -22,7 +22,6 @@ export function OptInButton({ slug, enrollment: initial }: OptInButtonProps) {
   const router = useRouter();
   const [enrollment, setEnrollment] = useState(initial);
   const [signedOut, setSignedOut] = useState(initial === null);
-  const [failed, setFailed] = useState(false);
   const [pending, startTransition] = useTransition();
 
   if (enrollment?.enrolled) {
@@ -48,14 +47,14 @@ export function OptInButton({ slug, enrollment: initial }: OptInButtonProps) {
 
   const join = () =>
     startTransition(async () => {
-      setFailed(false);
       const result = await enrollInPromotion(slug);
       if (result.ok) {
         setEnrollment(result.data);
+        toast.success(t('joinedToast'));
         // Mechanic blocks (wheel…) re-read the player's state now that they take part.
         router.refresh();
       } else if (result.error === 'signedOut') setSignedOut(true);
-      else setFailed(true);
+      else toast.error(t('error'), { id: `opt-in-${slug}` });
     });
 
   return (
@@ -63,11 +62,6 @@ export function OptInButton({ slug, enrollment: initial }: OptInButtonProps) {
       <Button size="lg" onClick={join} disabled={pending}>
         {pending ? t('joining') : t('join')}
       </Button>
-      {failed && (
-        <p role="alert" className="text-xs text-destructive">
-          {t('error')}
-        </p>
-      )}
     </div>
   );
 }

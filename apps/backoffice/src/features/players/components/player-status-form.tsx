@@ -1,7 +1,7 @@
 'use client';
 
 import { type AdminPlayer, PLAYER_STATUSES } from '@metrobet/contracts';
-import { Alert, Button, Field, NativeSelect, Textarea } from '@metrobet/ui';
+import { Button, Field, NativeSelect, Textarea, toast } from '@metrobet/ui';
 import { useState, useTransition } from 'react';
 
 import { setPlayerStatus } from '../actions';
@@ -12,9 +12,7 @@ const LABELS = { active: 'Active', suspended: 'Suspended', self_excluded: 'Self-
 export function PlayerStatusForm({ player }: { player: AdminPlayer }) {
   const [status, setStatus] = useState(player.status);
   const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | undefined>();
-  const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const submit = () =>
@@ -22,13 +20,11 @@ export function PlayerStatusForm({ player }: { player: AdminPlayer }) {
       const result = await setPlayerStatus(player.id, { status, reason });
       if (result.ok) {
         setReason('');
-        setError(null);
         setFieldError(undefined);
-        setDone(true);
+        toast.success(`Status changed to ${LABELS[result.data.status].toLowerCase()}`);
       } else {
-        setError(result.error);
         setFieldError(result.fieldErrors?.reason);
-        setDone(false);
+        if (!result.fieldErrors?.reason) toast.error(result.error);
       }
     });
 
@@ -43,10 +39,7 @@ export function PlayerStatusForm({ player }: { player: AdminPlayer }) {
       <Field label="Status" hint="Suspended and self-excluded players are signed out everywhere.">
         <NativeSelect
           value={status}
-          onChange={(event) => {
-            setStatus(event.target.value as AdminPlayer['status']);
-            setDone(false);
-          }}
+          onChange={(event) => setStatus(event.target.value as AdminPlayer['status'])}
         >
           {PLAYER_STATUSES.map((value) => (
             <option key={value} value={value}>
@@ -63,8 +56,6 @@ export function PlayerStatusForm({ player }: { player: AdminPlayer }) {
           placeholder="e.g. Player asked for a 6-month self-exclusion"
         />
       </Field>
-      {error && <Alert variant="destructive">{error}</Alert>}
-      {done && <Alert>Status saved.</Alert>}
       <Button type="submit" disabled={pending || status === player.status}>
         {pending ? 'Saving…' : 'Save status'}
       </Button>

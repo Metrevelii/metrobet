@@ -1,3 +1,4 @@
+import { Toaster } from '@metrobet/ui';
 import { fontVariables } from '@metrobet/ui/fonts';
 import type { Metadata } from 'next';
 
@@ -11,7 +12,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" data-mode="dark" className={fontVariables}>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        {children}
+        {/* No top header in the backoffice: toasts sit at the top right corner. */}
+        <Toaster className="top-4" />
+      </body>
     </html>
   );
 }

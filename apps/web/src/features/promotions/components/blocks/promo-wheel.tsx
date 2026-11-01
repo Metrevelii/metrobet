@@ -1,14 +1,14 @@
 'use client';
 
 import { type PromoBlockViewOf, toMajor, type WheelState } from '@metrobet/contracts';
-import { Button, buttonVariants, cn } from '@metrobet/ui';
+import { Button, buttonVariants, cn, toast } from '@metrobet/ui';
 import { FlaskConical, Gift, LoaderCircle } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 
 import { Link } from '@/i18n/navigation';
 
-import { simulateBet, type SpinError, spinWheel } from '../../actions';
+import { simulateBet, spinWheel } from '../../actions';
 import { promotionPageHref } from '../../links';
 import { WheelGraphic } from './wheel-graphic';
 
@@ -43,7 +43,6 @@ export function PromoWheel({ slug, block, gameName, initialState, devTools }: Pr
   const [duration, setDuration] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [won, setWon] = useState<number | null>(null);
-  const [error, setError] = useState<SpinError | null>(null);
   const [simulating, startSimulating] = useTransition();
 
   const money = (minor: number) =>
@@ -55,10 +54,9 @@ export function PromoWheel({ slug, block, gameName, initialState, devTools }: Pr
     if (spinning) return;
     setSpinning(true);
     setWon(null);
-    setError(null);
     const result = await spinWheel(slug, block.id);
     if (!result.ok) {
-      setError(result.error);
+      toast.error(t(`errors.${result.error}`), { id: `wheel-${block.id}` });
       setSpinning(false);
       return;
     }
@@ -70,6 +68,7 @@ export function PromoWheel({ slug, block, gameName, initialState, devTools }: Pr
     setTimeout(() => {
       setState(result.data.state);
       setWon(result.data.freeSpins);
+      toast.success(t('won', { count: result.data.freeSpins, game: gameName }));
       setSpinning(false);
     }, ms);
   };
@@ -148,11 +147,6 @@ export function PromoWheel({ slug, block, gameName, initialState, devTools }: Pr
             <p className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-semibold">
               <Gift className="size-4 text-primary" />
               {t('won', { count: won, game: gameName })}
-            </p>
-          )}
-          {error && (
-            <p role="alert" className="text-sm text-destructive">
-              {t(`errors.${error}`)}
             </p>
           )}
         </div>

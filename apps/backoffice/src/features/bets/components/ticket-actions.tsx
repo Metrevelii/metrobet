@@ -2,7 +2,6 @@
 
 import { type AdminTicket, SELECTION_RESULTS } from '@metrobet/contracts';
 import {
-  Alert,
   Button,
   Card,
   CardContent,
@@ -11,6 +10,7 @@ import {
   Field,
   NativeSelect,
   Textarea,
+  toast,
 } from '@metrobet/ui';
 import { useState, useTransition } from 'react';
 
@@ -19,31 +19,23 @@ import { selectionText } from '@/lib/sportsbook-labels';
 
 import { settleSelection, voidTicket } from '../actions';
 
-type Outcome = { error: string; reasonError?: string } | { done: string } | null;
-
+/** Runs a risk action: success and API errors as toasts, the reason's error next to the field. */
 function useMutation() {
   const [pending, startTransition] = useTransition();
-  const [outcome, setOutcome] = useState<Outcome>(null);
+  const [reasonError, setReasonError] = useState<string | undefined>();
   const run = (action: () => ReturnType<typeof voidTicket>, done: string, reset: () => void) =>
     startTransition(async () => {
       const result = await action();
       if (result.ok) {
         reset();
-        setOutcome({ done });
+        setReasonError(undefined);
+        toast.success(done);
       } else {
-        setOutcome({ error: result.error, reasonError: result.fieldErrors?.reason });
+        setReasonError(result.fieldErrors?.reason);
+        if (!result.fieldErrors?.reason) toast.error(result.error);
       }
     });
-  return { pending, outcome, run };
-}
-
-function OutcomeAlert({ outcome }: { outcome: Outcome }) {
-  if (!outcome) return null;
-  return 'done' in outcome ? (
-    <Alert>{outcome.done}</Alert>
-  ) : (
-    <Alert variant="destructive">{outcome.error}</Alert>
-  );
+  return { pending, reasonError, run };
 }
 
 /** Settle one unresolved selection by hand (wrong or missing feed result). */
@@ -52,7 +44,7 @@ function SettleSelectionForm({ ticket }: { ticket: AdminTicket }) {
   const [selectionId, setSelectionId] = useState(unresolved[0]?.selectionId ?? '');
   const [result, setResult] = useState<(typeof SELECTION_RESULTS)[number]>('won');
   const [reason, setReason] = useState('');
-  const { pending, outcome, run } = useMutation();
+  const { pending, reasonError, run } = useMutation();
   if (unresolved.length === 0) return null;
 
   return (
@@ -89,14 +81,9 @@ function SettleSelectionForm({ ticket }: { ticket: AdminTicket }) {
           ))}
         </NativeSelect>
       </Field>
-      <Field
-        label="Reason"
-        hint="Stored in the audit log."
-        error={outcome && 'error' in outcome ? outcome.reasonError : undefined}
-      >
+      <Field label="Reason" hint="Stored in the audit log." error={reasonError}>
         <Textarea value={reason} rows={2} onChange={(event) => setReason(event.target.value)} />
       </Field>
-      <OutcomeAlert outcome={outcome} />
       <Button type="submit" variant="secondary" disabled={pending}>
         {pending ? 'Settling…' : 'Settle selection'}
       </Button>
@@ -107,7 +94,7 @@ function SettleSelectionForm({ ticket }: { ticket: AdminTicket }) {
 /** Void the whole ticket: the stake goes back to the player. */
 function VoidTicketForm({ ticket }: { ticket: AdminTicket }) {
   const [reason, setReason] = useState('');
-  const { pending, outcome, run } = useMutation();
+  const { pending, reasonError, run } = useMutation();
   return (
     <form
       className="flex flex-col gap-3"
@@ -120,11 +107,7 @@ function VoidTicketForm({ ticket }: { ticket: AdminTicket }) {
         );
       }}
     >
-      <Field
-        label="Reason"
-        hint="Stored in the audit log."
-        error={outcome && 'error' in outcome ? outcome.reasonError : undefined}
-      >
+      <Field label="Reason" hint="Stored in the audit log." error={reasonError}>
         <Textarea
           value={reason}
           rows={2}
@@ -132,7 +115,6 @@ function VoidTicketForm({ ticket }: { ticket: AdminTicket }) {
           placeholder="e.g. Palpable error in the price"
         />
       </Field>
-      <OutcomeAlert outcome={outcome} />
       <Button type="submit" variant="destructive" disabled={pending}>
         {pending ? 'Voiding…' : `Void ticket (refund ${money(ticket.stake)})`}
       </Button>

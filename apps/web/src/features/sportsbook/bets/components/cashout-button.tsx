@@ -1,7 +1,7 @@
 'use client';
 
 import { cashoutValue, type Ticket, toMajor } from '@metrobet/contracts';
-import { Button, cn } from '@metrobet/ui';
+import { Button, toast } from '@metrobet/ui';
 import { Lock } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
@@ -10,7 +10,7 @@ import { setLiveBalance } from '@/features/wallet/live-balance';
 import { useRouter } from '@/i18n/navigation';
 
 import { peekSelection, useSelectionsSignature } from '../../realtime/live-store';
-import { type CashoutError, cashoutTicket } from '../actions';
+import { cashoutTicket } from '../actions';
 
 /**
  * The ticket's cash-out offer, live: the same formula as the server (`cashoutValue`), fed by the
@@ -22,7 +22,6 @@ export function CashoutButton({ ticket }: { ticket: Ticket }) {
   const format = useFormatter();
   const router = useRouter();
   const [confirming, setConfirming] = useState<number | null>(null);
-  const [error, setError] = useState<CashoutError | null>(null);
   const [pending, startTransition] = useTransition();
   const running = ticket.selections.filter((selection) => selection.result === null);
   useSelectionsSignature(running.map((selection) => selection.selectionId));
@@ -48,14 +47,17 @@ export function CashoutButton({ ticket }: { ticket: Ticket }) {
       const result = await cashoutTicket(ticket.id, amount);
       if (result.ok) {
         setConfirming(null);
-        setError(null);
+        toast.dismiss(`cashout-${ticket.id}`);
+        toast.success(t('done', { amount: money(result.data.ticket.payout) }));
         setLiveBalance(result.data.balance);
         router.refresh();
         return;
       }
-      setError(result.error);
       // A lower offer needs a fresh confirmation at the new amount.
-      setConfirming(result.error === 'CASHOUT_CHANGED' ? (result.cashout ?? null) : null);
+      const changed = result.error === 'CASHOUT_CHANGED' ? (result.cashout ?? null) : null;
+      setConfirming(changed);
+      const show = changed === null ? toast.error : toast.warning;
+      show(t(`errors.${result.error}`), { id: `cashout-${ticket.id}` });
     });
 
   if (offer === null && confirming === null) {
@@ -73,10 +75,7 @@ export function CashoutButton({ ticket }: { ticket: Ticket }) {
         <Button
           className="h-11 w-full bg-warning text-on-status hover:bg-warning/90"
           disabled={pending || offer === null}
-          onClick={() => {
-            setError(null);
-            setConfirming(offer);
-          }}
+          onClick={() => setConfirming(offer)}
         >
           {t('button', { amount: money(offer!) })}
         </Button>
@@ -93,25 +92,11 @@ export function CashoutButton({ ticket }: { ticket: Ticket }) {
             variant="secondary"
             className="h-11"
             disabled={pending}
-            onClick={() => {
-              setConfirming(null);
-              setError(null);
-            }}
+            onClick={() => setConfirming(null)}
           >
             {t('cancel')}
           </Button>
         </div>
-      )}
-      {error && (
-        <p
-          className={cn(
-            'text-center text-xs',
-            error === 'CASHOUT_CHANGED' ? 'text-warning' : 'text-destructive',
-          )}
-          aria-live="polite"
-        >
-          {t(`errors.${error}`)}
-        </p>
       )}
     </div>
   );

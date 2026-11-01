@@ -18,7 +18,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Promotion } from '@metrobet/contracts';
-import { Alert, Badge, Button, Card, cn, Switch } from '@metrobet/ui';
+import { Badge, Button, Card, cn, Switch, toast } from '@metrobet/ui';
 import { GripVertical, Megaphone, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
@@ -138,7 +138,6 @@ function PromotionRow({ promotion, busy, onToggle, onDelete }: RowProps) {
 /** Sortable promotions list. Order, on/off and deletes are applied optimistically. */
 export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
   const [items, setItems] = useState(promotions);
-  const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   // Stable id keeps dnd-kit's generated aria ids identical on server and client (hydration).
@@ -157,13 +156,12 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
   ) => {
     const previous = items;
     setItems(next);
-    setError(null);
     setBusyId(id ?? null);
     startTransition(async () => {
       const result = await action();
       if (!result.ok) {
         setItems(previous);
-        setError(result.error ?? 'Something went wrong.');
+        toast.error(result.error ?? 'Something went wrong.', { id: 'promotions-table' });
       }
       setBusyId(null);
     });
@@ -191,7 +189,6 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
 
   return (
     <div className="flex flex-col gap-3">
-      {error && <Alert variant="destructive">{error}</Alert>}
       <Card className="overflow-hidden">
         <div className={cn(COLUMNS, 'px-4 py-2 text-xs font-semibold text-muted-foreground')}>
           <span />

@@ -13,7 +13,14 @@ so there is no build step.
 | `@metrobet/ui/fonts`      | `fontVariables`: put on `<html className>`; loads fonts via next/font |
 
 Components: `Alert`, `AlertDialog*`, `Badge`, `Button`, `Card*`, `Carousel*`, `Checkbox`, `Chip`,
-`DropdownMenu*`, `Field` (label + control + hint/error, wires aria), `HeroBanner`, `Input`, `Label`, `NativeSelect`, `PasswordInput`, `Sheet*` (bottom sheet), `Skeleton`, `Switch`, `Table*` (data tables; scrolls horizontally), `Tabs*`, `Textarea`.
+`DropdownMenu*`, `Field` (label + control + hint/error, wires aria), `HeroBanner`, `Input`, `Label`, `NativeSelect`, `PasswordInput`, `Sheet*` (bottom sheet), `Skeleton`, `Switch`, `Table*` (data tables; scrolls horizontally), `Tabs*`, `Textarea`, `Toaster` + `toast`.
+
+- **Toasts:** put one `<Toaster closeLabel label />` in an app's root layout, then call
+  `toast.success | error | warning | info(title, { description, action: { label, onClick }, id,
+duration })` from any client code (a tiny external store, no provider to thread). Errors stay
+  8 s, success 4 s; at most 3 open; an `id` replaces an earlier toast with the same id. Radix
+  Toast underneath: screen-reader announcements, swipe / Esc to dismiss, pause on hover. Use
+  toasts for the **result of an action**; field validation stays inline next to the field.
 
 - `HeroBanner`: artwork + scrim + badge/title/subtitle/action. `layout`: `responsive` (site),
   `desktop` / `mobile` (fixed, e.g. backoffice previews). Aspect classes in `heroBannerAspect`.

@@ -24,6 +24,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  toast,
 } from '@metrobet/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -131,6 +132,7 @@ export function PromotionForm({ promotion }: { promotion?: Promotion }) {
     startTransition(async () => {
       const result = await savePromotion(promotion?.id ?? null, parsed.data);
       if (result.ok) {
+        toast.success(promotion ? 'Promotion saved' : 'Promotion created');
         router.push('/promotions');
       } else {
         setErrors(result.fieldErrors ?? {});

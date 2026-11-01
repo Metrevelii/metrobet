@@ -82,6 +82,14 @@ below.
 - A loader whose failure path uses a short `cacheLife` counts as request-time data: render it
   inside `<Suspense>` (otherwise prerendering fails with `blocking-prerender-dynamic`).
 
+## Feedback (toasts)
+
+`<AppToaster />` (in the root layout) renders `@metrobet/ui` toasts with translated labels. After
+an action, report the result with `toast.success | error | warning | info(t(…), { action })`:
+bet placed (+ My bets), cash-out, deposits, opt-in, wheel prizes, errors with a way forward
+(Top up, Log in). Use an `id` for errors that can repeat (`betslip-error`) so they replace each
+other. **Form field errors stay inline**; in-game feedback (Originals) stays inside the game.
+
 ## Styling
 
 Use semantic token classes only (see `packages/ui/CLAUDE.md`). No hex colors, no Tailwind

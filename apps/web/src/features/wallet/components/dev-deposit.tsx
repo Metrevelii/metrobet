@@ -1,10 +1,10 @@
 'use client';
 
 import { toMinor } from '@metrobet/contracts';
-import { Button } from '@metrobet/ui';
+import { Button, toast } from '@metrobet/ui';
 import { Plus } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 
 import { useRouter } from '@/i18n/navigation';
 
@@ -18,13 +18,18 @@ export function DevDeposit() {
   const format = useFormatter();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [failed, setFailed] = useState(false);
 
   const deposit = (major: number) =>
     startTransition(async () => {
       const result = await devDeposit(toMinor(major));
-      setFailed(!result.ok);
-      if (result.ok) router.refresh();
+      if (!result.ok) {
+        toast.error(t('failed'), { id: 'dev-deposit' });
+        return;
+      }
+      toast.success(
+        t('added', { amount: format.number(major, { style: 'currency', currency: 'GEL' }) }),
+      );
+      router.refresh();
     });
 
   return (
@@ -44,7 +49,6 @@ export function DevDeposit() {
           </Button>
         ))}
       </div>
-      {failed && <p className="text-xs text-destructive">{t('failed')}</p>}
     </div>
   );
 }

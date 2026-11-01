@@ -46,7 +46,6 @@
     "placing": "Placing…",
     "placed": "{count, plural, one {Bet placed} other {# bets placed}}. Good luck!",
     "viewBets": "My bets",
-    "done": "Done",
     "topUp": "Top up",
     "errors": {
       "ODDS_CHANGED": "Odds changed. Check the new prices and accept them to continue.",
@@ -75,7 +74,8 @@
     "comingSoon": "Coming soon",
     "previous": "Previous",
     "next": "Next",
-    "close": "Close"
+    "close": "Close",
+    "notifications": "Notifications"
   },
   "Promotions": {
     "title": "Promotions",
@@ -108,7 +108,8 @@
       "joining": "Joining…",
       "joined": "You're in",
       "login": "Log in to join",
-      "error": "Couldn't join. Please try again."
+      "error": "Couldn't join. Please try again.",
+      "joinedToast": "You're in! Your bets now count for this promotion."
     },
     "wheel": {
       "unit": "FS",
@@ -380,7 +381,8 @@
     },
     "dev": {
       "title": "Test money (development only)",
-      "failed": "The deposit failed. Is the API running?"
+      "failed": "The deposit failed. Is the API running?",
+      "added": "{amount} added to your balance"
     }
   },
   "Originals": {
@@ -501,7 +503,8 @@
         "CASHOUT_UNAVAILABLE": "Cash-out is not available right now.",
         "signedOut": "Your session ended. Log in again.",
         "failed": "Couldn't cash out. Please try again."
-      }
+      },
+      "done": "Cashed out {amount}"
     }
   }
 }

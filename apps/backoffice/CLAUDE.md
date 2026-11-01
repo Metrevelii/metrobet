@@ -37,6 +37,12 @@ src/
 - Anything time-dependent (statuses like live/expired) uses `useNow()`; dates shown to staff are
   formatted in `Asia/Tbilisi`.
 
+## Feedback
+
+`<Toaster />` in the root layout (top right). Mutations report the outcome with
+`toast.success(…)` / `toast.error(result.error)`; field errors (e.g. a missing reason) stay
+next to the field. Optimistic list operations roll back and show the error as a toast.
+
 ## Env (`.env.local`, see `.env.example`)
 
 `API_URL`, `NEXT_PUBLIC_WEB_URL` (player site origin for previews).
