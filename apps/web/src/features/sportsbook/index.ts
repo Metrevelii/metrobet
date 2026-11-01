@@ -5,6 +5,7 @@ export { BETS_HREF } from './bets/links';
 export { EventHeader } from './components/event-header';
 export { EventRow } from './components/event-row';
 export { MarketCard } from './components/market-card';
+export { MatchTracker } from './components/match-tracker';
 export { SportTabs } from './components/sport-tabs';
 export { getCompetitions, getEvent, getLive, getSportOverview, getSports } from './data';
 export { eventHref, sportHref } from './links';

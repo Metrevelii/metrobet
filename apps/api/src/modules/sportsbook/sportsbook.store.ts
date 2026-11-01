@@ -57,9 +57,16 @@ export function tableMarkets(event: EventDetail): Market[] {
 }
 
 export function toSummary(event: EventDetail): EventSummary {
-  const { markets, ...rest } = event;
+  const { markets, live, ...rest } = event;
+  // The match tracker (stats, incidents) is for the event page only; lists stay small.
   return {
     ...rest,
+    live: live && {
+      period: live.period,
+      clock: live.clock,
+      score: live.score,
+      periodScores: live.periodScores,
+    },
     mainMarket: markets.find((m) => MAIN_MARKETS.has(m.type)) ?? null,
     markets: tableMarkets(event),
     marketCount: markets.length,

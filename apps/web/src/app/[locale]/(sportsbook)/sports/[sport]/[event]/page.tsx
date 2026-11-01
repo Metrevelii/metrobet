@@ -5,7 +5,14 @@ import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
-import { EventHeader, getEvent, LiveEvents, MarketCard, sportHref } from '@/features/sportsbook';
+import {
+  EventHeader,
+  getEvent,
+  LiveEvents,
+  MarketCard,
+  MatchTracker,
+  sportHref,
+} from '@/features/sportsbook';
 import { Link } from '@/i18n/navigation';
 
 type Props = PageProps<'/[locale]/sports/[sport]/[event]'>;
@@ -31,6 +38,7 @@ async function EventView({ params }: Pick<Props, 'params'>) {
         {t(`sports.${event.sport}`)}
       </Link>
       <EventHeader event={event} />
+      <MatchTracker event={event} />
       <div className="grid gap-3 md:grid-cols-2">
         {event.markets
           .filter((market) => market.status !== 'closed')

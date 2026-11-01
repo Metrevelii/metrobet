@@ -285,7 +285,25 @@
     "favoritesHint": "Star a league to add it to your favourites",
     "favorite": "Add to favourites",
     "unfavorite": "Remove from favourites",
-    "noEventsHint": "Try another day or league."
+    "noEventsHint": "Try another day or league.",
+    "tracker": {
+      "title": "Match tracker",
+      "events": "Match events",
+      "noIncidents": "No goals or cards yet",
+      "stats": {
+        "possession": "Possession",
+        "shots": "Shots",
+        "shotsOnTarget": "Shots on target",
+        "corners": "Corners",
+        "yellowCards": "Yellow cards",
+        "redCards": "Red cards"
+      },
+      "incidents": {
+        "goal": "Goal",
+        "yellow_card": "Yellow card",
+        "red_card": "Red card"
+      }
+    }
   },
   "Auth": {
     "login": {

@@ -19,14 +19,15 @@ tickets: Open / Settled tabs as `?status=`, paged; signed-out → log in).
 
 ## Components
 
-| Component                      | Notes                                                                                                 |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `OddsButton`                   | Live price, ▲/▼ flash (`animate-flash`, re-keyed per change), lock when not bettable, toggles betslip |
-| `EventRow`                     | Time/clock, teams + score, headline market, "+N" link                                                 |
-| `EventHeader`                  | Scoreboard (score, period, clock, period scores)                                                      |
-| `MarketCard`                   | One market with labelled selections                                                                   |
-| `SportTabs`                    | Live + sport chips with counts                                                                        |
-| `BetslipRail` / `BetslipSheet` | Desktop column (xl) / floating button + bottom sheet (below xl)                                       |
+| Component                      | Notes                                                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `OddsButton`                   | Live price, ▲/▼ flash (`animate-flash`, re-keyed per change), lock when not bettable, toggles betslip               |
+| `EventRow`                     | Time/clock, teams + score, headline market, "+N" link                                                               |
+| `EventHeader`                  | Scoreboard (score, period, clock, period scores)                                                                    |
+| `MatchTracker`                 | Football/eSoccer event page: 0'–90' timeline (goals, cards), stat bars, incidents list; hidden without `live.stats` |
+| `MarketCard`                   | One market with labelled selections                                                                                 |
+| `SportTabs`                    | Live + sport chips with counts                                                                                      |
+| `BetslipRail` / `BetslipSheet` | Desktop column (xl) / floating button + bottom sheet (below xl)                                                     |
 
 ## Match table (`match-table/`, Crystalbet-style)
 
@@ -41,6 +42,9 @@ tickets: Open / Settled tabs as `?status=`, paged; signed-out → log in).
   (`?competitions=id,id`): all, ★ favourites (`favorites.ts`, localStorage), one per league
   with flag and count (`getCompetitions`). Links keep the other filter: views are shareable.
 - Day labels ("Today · …") use the browser's date after hydration (no `Date.now()` in render).
+
+Live match rows flash the score when it changes: the live store counts score changes per event
+(`EventLiveState.goals`, only after the first update) and the row re-keys an `animate-flash` overlay.
 
 Correct-score selections are labelled from their key (`cs_2_1` → "2:1", `cs_other` → "Other");
 `MarketCard` wraps markets with more than 3 selections in 3–4 columns.

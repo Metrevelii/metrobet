@@ -104,11 +104,35 @@ export type Score = z.infer<typeof scoreSchema>;
  * FT when finished. `clock`: match minute (football, "67'") or time left in the quarter
  * (basketball, "04:12"); null for tennis. `score` is goals/points/sets.
  */
+/** Something that happened in a match, for the tracker's timeline (football, eSoccer). */
+export const INCIDENT_TYPES = ['goal', 'yellow_card', 'red_card'] as const;
+export const incidentSchema = z.object({
+  type: z.enum(INCIDENT_TYPES),
+  team: z.enum(['home', 'away']),
+  /** Match minute (1–90). */
+  minute: z.number().int().min(0).max(130),
+});
+export type Incident = z.infer<typeof incidentSchema>;
+
+/** Running match statistics, home vs away (football, eSoccer). Possession is a percentage. */
+export const matchStatsSchema = z.object({
+  possession: scoreSchema,
+  shots: scoreSchema,
+  shotsOnTarget: scoreSchema,
+  corners: scoreSchema,
+  yellowCards: scoreSchema,
+  redCards: scoreSchema,
+});
+export type MatchStats = z.infer<typeof matchStatsSchema>;
+
 export const liveStateSchema = z.object({
   period: z.string(),
   clock: z.string().nullable(),
   score: scoreSchema,
   periodScores: z.array(scoreSchema),
+  /** Match tracker data, for sports that have it (absent for basketball and tennis). */
+  stats: matchStatsSchema.optional(),
+  incidents: z.array(incidentSchema).optional(),
 });
 export type LiveState = z.infer<typeof liveStateSchema>;
 

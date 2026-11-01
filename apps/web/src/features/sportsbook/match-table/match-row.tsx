@@ -46,7 +46,7 @@ function TimeCell({ event }: { event: EventSummary }) {
 /** One match as a table row: time, teams (+ live score), a price per column, "+N" markets. */
 export function MatchRow({ event }: { event: EventSummary }) {
   const t = useTranslations('Sports');
-  const { status, live } = useEventLiveState(event);
+  const { status, live, goals = 0 } = useEventLiveState(event);
   const score = status !== 'scheduled' && live ? live.score : null;
   const href = eventHref(event.sport, event.id);
 
@@ -58,8 +58,16 @@ export function MatchRow({ event }: { event: EventSummary }) {
             <TimeCell event={event} />
           </span>
           {score && (
-            <span className="shrink-0 rounded bg-primary/15 px-1.5 py-0.5 text-xs font-black text-primary tabular">
+            <span className="relative shrink-0 overflow-hidden rounded bg-primary/15 px-1.5 py-0.5 text-xs font-black text-primary tabular">
               {score.home}:{score.away}
+              {goals > 0 && (
+                // Re-keyed per goal so the flash plays again.
+                <span
+                  key={goals}
+                  aria-hidden
+                  className="absolute inset-0 animate-flash bg-primary/60 motion-reduce:hidden"
+                />
+              )}
             </span>
           )}
           <Link

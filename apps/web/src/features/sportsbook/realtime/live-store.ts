@@ -20,7 +20,12 @@ export type SelectionLiveState = {
   version: number;
 };
 
-export type EventLiveState = { status: EventStatus; live: LiveState | null };
+export type EventLiveState = {
+  status: EventStatus;
+  live: LiveState | null;
+  /** Increments when the score changes after the first update (replays the goal flash). */
+  goals?: number;
+};
 
 const selections = new Map<string, SelectionLiveState>();
 const events = new Map<string, EventLiveState>();
@@ -51,7 +56,17 @@ function subscribeKey(key: string) {
 }
 
 export function applyUpdate(update: EventUpdate) {
-  events.set(update.eventId, { status: update.status, live: update.live });
+  const before = events.get(update.eventId);
+  const scored =
+    before?.live != null &&
+    update.live != null &&
+    (before.live.score.home !== update.live.score.home ||
+      before.live.score.away !== update.live.score.away);
+  events.set(update.eventId, {
+    status: update.status,
+    live: update.live,
+    goals: (before?.goals ?? 0) + (scored ? 1 : 0),
+  });
   notify(`event:${update.eventId}`);
 
   for (const market of update.markets) {

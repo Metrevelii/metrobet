@@ -1,8 +1,10 @@
 import {
   CORRECT_SCORE_MAX,
+  type Incident,
   type LiveState,
   type Market,
   type MarketStatus,
+  type MatchStats,
   type Score,
   type SelectionKey,
 } from '@metrobet/contracts';
@@ -50,6 +52,42 @@ export const ESOCCER_SCHEDULE: FootballSchedule = {
 };
 
 type Goal = { minute: number; team: 'home' | 'away' };
+type Team = 'home' | 'away';
+type Moment = { minute: number; team: Team };
+
+/**
+ * Everything else that happens in the match (shots, corners, cards, possession swings), drawn
+ * from the same seeded generator *after* the goals, so adding it changed no result.
+ */
+function matchTimeline(
+  rng: Rng,
+  goals: Goal[],
+  lambdaHome: number,
+  lambdaAway: number,
+  ratingGap: number,
+) {
+  const moments = (team: Team, count: number): Moment[] =>
+    Array.from({ length: count }, () => ({ minute: 1 + rng() * 89, team }));
+  const both = (count: (team: Team) => number) => [
+    ...moments('home', count('home')),
+    ...moments('away', count('away')),
+  ];
+  const lambda = (team: Team) => (team === 'home' ? lambdaHome : lambdaAway);
+  const shots = both((team) => poissonSample(rng, 4 + lambda(team) * 5.5));
+  const onTarget = [...shots.filter(() => rng() < 0.33), ...goals];
+  const corners = both((team) => poissonSample(rng, 2.5 + lambda(team) * 1.8));
+  const yellow = both(() => poissonSample(rng, 1.8));
+  const red = both(() => (rng() < 0.06 ? 1 : 0));
+  const basePossession = 50 + Math.max(-14, Math.min(14, ratingGap * 0.6));
+  const phase = rng() * Math.PI * 2;
+  return { shots: [...shots, ...goals], onTarget, corners, yellow, red, basePossession, phase };
+}
+
+const countBy = (moments: Moment[], minute: number): Score => ({
+  home: moments.filter((m) => m.minute <= minute && m.team === 'home').length,
+  away: moments.filter((m) => m.minute <= minute && m.team === 'away').length,
+});
+
 const outcome = (s: Score) => (s.home > s.away ? 'home' : s.home < s.away ? 'away' : 'draw');
 
 export function createFootballMatch(
@@ -70,6 +108,33 @@ export function createFootballMatch(
       team: 'away' as const,
     })),
   ].toSorted((a, b) => a.minute - b.minute);
+
+  const timeline = matchTimeline(rng, goals, lambdaHome, lambdaAway, homeRating - awayRating);
+
+  /** Stats and the incidents list up to a match minute. */
+  const trackerAt = (minute: number): { stats: MatchStats; incidents: Incident[] } => {
+    const swing = Math.sin(minute / 9 + timeline.phase) * 5;
+    const home = Math.round(Math.max(25, Math.min(75, timeline.basePossession + swing)));
+    const at = (type: Incident['type'], list: Moment[]): Incident[] =>
+      list
+        .filter((m) => m.minute <= minute)
+        .map((m) => ({ type, team: m.team, minute: Math.floor(m.minute) + 1 }));
+    return {
+      stats: {
+        possession: { home, away: 100 - home },
+        shots: countBy(timeline.shots, minute),
+        shotsOnTarget: countBy(timeline.onTarget, minute),
+        corners: countBy(timeline.corners, minute),
+        yellowCards: countBy(timeline.yellow, minute),
+        redCards: countBy(timeline.red, minute),
+      },
+      incidents: [
+        ...at('goal', goals),
+        ...at('yellow_card', timeline.yellow),
+        ...at('red_card', timeline.red),
+      ].toSorted((a, b) => a.minute - b.minute),
+    };
+  };
 
   const scoreAt = (minute: number): Score => ({
     home: goals.filter((g) => g.minute <= minute && g.team === 'home').length,
@@ -111,6 +176,7 @@ export function createFootballMatch(
                   firstHalf,
                   { home: score.home - firstHalf.home, away: score.away - firstHalf.away },
                 ],
+          ...trackerAt(minute),
         };
       }
 

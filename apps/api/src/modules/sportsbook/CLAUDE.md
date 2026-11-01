@@ -47,6 +47,10 @@ OddsFeed ──upsert/remove(EventDetail)──▶ SportsbookStore ──diff─
   3 match-minute bet stop), so it has every football market. Basketball = per-minute scoring,
   normal approximation (moneyline, spread, total); tennis = game-by-game best of 3 with exact
   recursion (winner, current set).
+- **Match tracker** (football, eSoccer): `LiveState.stats` (possession, shots, on target,
+  corners, cards) and `incidents` (goals, yellow/red cards with minute and team), drawn from the
+  same seed _after_ the goals, so results never changed. Only `events/:id` and socket updates
+  carry them; `toSummary` strips them so lists stay small.
 - Prices drift every 20 s live / 10 min pre-match so odds move like a real feed.
 - `SPORTSBOOK_FEED=off` disables it.
 
