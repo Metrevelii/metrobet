@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-export const SPORTS = ['football', 'basketball', 'tennis'] as const;
+/** `esoccer`: short simulated-football matches (2 × 4 min) played all day. */
+export const SPORTS = ['football', 'basketball', 'tennis', 'esoccer'] as const;
 export const sportSchema = z.enum(SPORTS);
 export type Sport = z.infer<typeof sportSchema>;
 
@@ -12,6 +13,9 @@ export type Sport = z.infer<typeof sportSchema>;
  * - total: over/under `line` (goals, points)
  * - spread: handicap `line` applied to home
  * - set_winner: winner of set number `line` (tennis)
+ * - ht_1x2: result of the first half (football, eSoccer)
+ * - correct_score: exact final score, `cs_<home>_<away>` up to 3–3, else `cs_other`
+ * - team_total_home / team_total_away: one team's goals over/under `line`
  */
 export const MARKET_TYPES = [
   '1x2',
@@ -21,9 +25,19 @@ export const MARKET_TYPES = [
   'moneyline',
   'spread',
   'set_winner',
+  'ht_1x2',
+  'correct_score',
+  'team_total_home',
+  'team_total_away',
 ] as const;
 export const marketTypeSchema = z.enum(MARKET_TYPES);
 export type MarketType = z.infer<typeof marketTypeSchema>;
+
+/** Correct-score grid: 0–0 … 3–3. Anything outside it is `cs_other`. */
+export const CORRECT_SCORE_MAX = 3;
+const CORRECT_SCORES = [0, 1, 2, 3].flatMap((home) =>
+  [0, 1, 2, 3].map((away) => `cs_${home}_${away}` as const),
+);
 
 export const SELECTION_KEYS = [
   'home',
@@ -36,6 +50,8 @@ export const SELECTION_KEYS = [
   'home_draw',
   'home_away',
   'draw_away',
+  ...CORRECT_SCORES,
+  'cs_other',
 ] as const;
 export const selectionKeySchema = z.enum(SELECTION_KEYS);
 export type SelectionKey = z.infer<typeof selectionKeySchema>;
@@ -142,7 +158,18 @@ export const TABLE_COLUMNS: Record<Sport, TableColumnGroup[]> = {
     { type: 'moneyline', keys: ['home', 'away'] },
     { type: 'set_winner', keys: ['home', 'away'], line: true },
   ],
+  esoccer: [
+    { type: '1x2', keys: ['home', 'draw', 'away'] },
+    { type: 'double_chance', keys: ['home_draw', 'home_away', 'draw_away'] },
+    { type: 'total', keys: ['over', 'under'], line: true },
+  ],
 };
+
+/** The score of a correct-score key (`cs_2_1` → 2–1), or null for `cs_other` / other keys. */
+export function correctScoreOf(key: string): { home: number; away: number } | null {
+  const match = /^cs_(\d+)_(\d+)$/.exec(key);
+  return match ? { home: Number(match[1]), away: Number(match[2]) } : null;
+}
 
 /** Listing filters (days are Tbilisi calendar days; `soon` = starting within an hour). */
 export const DAY_FILTERS = ['all', 'today', 'tomorrow', 'soon'] as const;

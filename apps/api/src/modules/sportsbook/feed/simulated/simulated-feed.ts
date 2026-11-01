@@ -4,7 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { type EventResult, type FeedHandler, OddsFeed } from '../odds-feed.js';
 import { createBasketballMatch } from './basketball.js';
 import { COMPETITIONS, type SimCompetition } from './catalog.js';
-import { createFootballMatch } from './football.js';
+import { createESoccerMatch, createFootballMatch } from './football.js';
 import type { MatchModel } from './match-model.js';
 import { createRng, seedFrom } from './rng.js';
 import { createTennisMatch } from './tennis.js';
@@ -23,6 +23,7 @@ const MODELS: Record<Sport, typeof createFootballMatch> = {
   football: createFootballMatch,
   basketball: createBasketballMatch,
   tennis: createTennisMatch,
+  esoccer: createESoccerMatch,
 };
 
 type Fixture = Omit<EventDetail, 'status' | 'live' | 'markets'> & { model: MatchModel };

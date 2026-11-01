@@ -38,10 +38,15 @@ OddsFeed ──upsert/remove(EventDetail)──▶ SportsbookStore ──diff─
 - **Deterministic:** fixtures per 15-min slot and every match timeline (goals, points, games) come
   from seeded RNG, so the state is a pure function of time. Restarts and multiple instances agree.
 - **Schedule:** each competition plays a round every `cadenceSlots` (football 2 h, basketball
-  1.5 h, tennis 3.5 h) with distinct teams, so no team overlaps itself. 48 h horizon.
-- **Models:** football = Poisson goals (1X2, double chance, totals 1.5/2.5/3.5, BTTS) with a
-  30 s bet stop after goals; basketball = per-minute scoring, normal approximation (moneyline,
-  spread, total); tennis = game-by-game best of 3 with exact recursion (winner, current set).
+  1.5 h, tennis 3.5 h, eSoccer every 15 min) with distinct teams, so no team overlaps itself.
+  48 h horizon.
+- **Models:** football = Poisson goals with a `FootballSchedule` (real minutes per half, break,
+  bet stop after goals, goals factor): 1X2, double chance, totals 1.5/2.5/3.5, BTTS, half-time
+  result (closed at HT), handicap ±1.5, team totals 0.5/1.5, correct score 0–0…3–3 + other.
+  **eSoccer** = the same model on `ESOCCER_SCHEDULE` (2 × 4 min + 1 min break, ×1.45 goals,
+  3 match-minute bet stop), so it has every football market. Basketball = per-minute scoring,
+  normal approximation (moneyline, spread, total); tennis = game-by-game best of 3 with exact
+  recursion (winner, current set).
 - Prices drift every 20 s live / 10 min pre-match so odds move like a real feed.
 - `SPORTSBOOK_FEED=off` disables it.
 

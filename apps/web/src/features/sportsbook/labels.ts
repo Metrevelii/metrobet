@@ -1,4 +1,4 @@
-import type { Competitor, Market, Selection } from '@metrobet/contracts';
+import { type Competitor, correctScoreOf, type Market, type Selection } from '@metrobet/contracts';
 import type { useTranslations } from 'next-intl';
 
 type SportsT = ReturnType<typeof useTranslations<'Sports'>>;
@@ -22,9 +22,16 @@ export function selectionLabel(
   short = false,
 ): string {
   const { key } = selection;
+  if (market.type === 'correct_score') {
+    const score = correctScoreOf(key);
+    return score ? `${score.home}:${score.away}` : t('selections.otherScore');
+  }
   if (key === 'over' || key === 'under')
     return t(`selections.${key}`, { line: formatLine(market.line) });
-  if (short || !['home', 'away', 'draw'].includes(key)) return t(`selections.${key}`, { line: '' });
+  // Correct-score keys returned above; the rest have their own message.
+  const plain = key as Exclude<typeof key, `cs_${string}`>;
+  if (short || !['home', 'away', 'draw'].includes(key))
+    return t(`selections.${plain}`, { line: '' });
   if (key === 'draw') return t('selections.drawLong');
   const team = teams[key as 'home' | 'away'].name;
   if (market.type === 'spread' && market.line !== null) {

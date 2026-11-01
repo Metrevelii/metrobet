@@ -95,6 +95,78 @@ describe('selectionResult', () => {
   });
 });
 
+/** Full time from two halves, with the halves as period scores. */
+const halves = (h1: [number, number], h2: [number, number]) => ({
+  ...final(h1[0] + h2[0], h1[1] + h2[1]),
+  periodScores: [
+    { home: h1[0], away: h1[1] },
+    { home: h2[0], away: h2[1] },
+  ],
+});
+
+describe('selectionResult: newer football markets', () => {
+  it('settles the half-time result from the first half', () => {
+    const match = halves([0, 1], [3, 0]); // 3–1 full time, 0–1 at half-time
+    expect(selectionResult({ marketType: 'ht_1x2', line: null, selectionKey: 'away' }, match)).toBe(
+      'won',
+    );
+    expect(selectionResult({ marketType: '1x2', line: null, selectionKey: 'home' }, match)).toBe(
+      'won',
+    );
+    expect(
+      selectionResult({ marketType: 'ht_1x2', line: null, selectionKey: 'home' }, final(1, 0)),
+    ).toBe('void');
+  });
+
+  it('settles the correct score, with "other" outside 0–0 … 3–3', () => {
+    expect(
+      selectionResult(
+        { marketType: 'correct_score', line: null, selectionKey: 'cs_2_1' },
+        final(2, 1),
+      ),
+    ).toBe('won');
+    expect(
+      selectionResult(
+        { marketType: 'correct_score', line: null, selectionKey: 'cs_1_2' },
+        final(2, 1),
+      ),
+    ).toBe('lost');
+    expect(
+      selectionResult(
+        { marketType: 'correct_score', line: null, selectionKey: 'cs_other' },
+        final(4, 1),
+      ),
+    ).toBe('won');
+    expect(
+      selectionResult(
+        { marketType: 'correct_score', line: null, selectionKey: 'cs_other' },
+        final(3, 3),
+      ),
+    ).toBe('lost');
+  });
+
+  it('settles team totals on that team only', () => {
+    expect(
+      selectionResult(
+        { marketType: 'team_total_home', line: 1.5, selectionKey: 'over' },
+        final(2, 0),
+      ),
+    ).toBe('won');
+    expect(
+      selectionResult(
+        { marketType: 'team_total_away', line: 0.5, selectionKey: 'under' },
+        final(2, 0),
+      ),
+    ).toBe('won');
+    expect(
+      selectionResult(
+        { marketType: 'team_total_away', line: 0.5, selectionKey: 'over' },
+        final(2, 0),
+      ),
+    ).toBe('lost');
+  });
+});
+
 describe('ticketOutcome', () => {
   it('loses as soon as one selection loses, even with others open', () => {
     expect(

@@ -199,7 +199,8 @@
     "sports": {
       "football": "ფეხბურთი",
       "basketball": "კალათბურთი",
-      "tennis": "ჩოგბურთი"
+      "tennis": "ჩოგბურთი",
+      "esoccer": "ესოკერი"
     },
     "live": "ლაივი",
     "upcoming": "მომავალი",
@@ -234,7 +235,11 @@
       "btts": "ორივე გუნდი გაიტანს",
       "moneyline": "გამარჯვებული",
       "spread": "ფორა {line}",
-      "set_winner": "სეტი {line}: გამარჯვებული"
+      "set_winner": "სეტი {line}: გამარჯვებული",
+      "ht_1x2": "პირველი ტაიმის შედეგი",
+      "correct_score": "ზუსტი ანგარიში",
+      "team_total_home": "მასპინძლის ტოტალი {line}",
+      "team_total_away": "სტუმრის ტოტალი {line}"
     },
     "selections": {
       "home": "1",
@@ -247,7 +252,8 @@
       "home_draw": "1X",
       "home_away": "12",
       "draw_away": "X2",
-      "drawLong": "ფრე"
+      "drawLong": "ფრე",
+      "otherScore": "სხვა"
     },
     "columns": {
       "home": "1",

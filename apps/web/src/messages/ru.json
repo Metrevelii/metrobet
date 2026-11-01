@@ -199,7 +199,8 @@
     "sports": {
       "football": "Футбол",
       "basketball": "Баскетбол",
-      "tennis": "Теннис"
+      "tennis": "Теннис",
+      "esoccer": "Киберфутбол"
     },
     "live": "Лайв",
     "upcoming": "Скоро",
@@ -234,7 +235,11 @@
       "btts": "Обе забьют",
       "moneyline": "Победитель",
       "spread": "Фора {line}",
-      "set_winner": "Победитель {line}-го сета"
+      "set_winner": "Победитель {line}-го сета",
+      "ht_1x2": "Исход 1-го тайма",
+      "correct_score": "Точный счёт",
+      "team_total_home": "Индивидуальный тотал хозяев {line}",
+      "team_total_away": "Индивидуальный тотал гостей {line}"
     },
     "selections": {
       "home": "П1",
@@ -247,7 +252,8 @@
       "home_draw": "1Х",
       "home_away": "12",
       "draw_away": "Х2",
-      "drawLong": "Ничья"
+      "drawLong": "Ничья",
+      "otherScore": "Другой"
     },
     "columns": {
       "home": "1",

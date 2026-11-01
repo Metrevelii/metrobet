@@ -29,6 +29,7 @@ describe('sportsbook (e2e)', () => {
       'football',
       'basketball',
       'tennis',
+      'esoccer',
     ]);
 
     const { body } = await http().get('/api/sportsbook/sports/football').expect(200);

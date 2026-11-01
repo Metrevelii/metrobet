@@ -199,7 +199,8 @@
     "sports": {
       "football": "Football",
       "basketball": "Basketball",
-      "tennis": "Tennis"
+      "tennis": "Tennis",
+      "esoccer": "eSoccer"
     },
     "live": "Live",
     "upcoming": "Upcoming",
@@ -234,7 +235,11 @@
       "btts": "Both teams to score",
       "moneyline": "Winner",
       "spread": "Handicap {line}",
-      "set_winner": "Set {line} winner"
+      "set_winner": "Set {line} winner",
+      "ht_1x2": "Half-time result",
+      "correct_score": "Correct score",
+      "team_total_home": "Home team total {line}",
+      "team_total_away": "Away team total {line}"
     },
     "selections": {
       "home": "1",
@@ -247,7 +252,8 @@
       "home_draw": "1X",
       "home_away": "12",
       "draw_away": "X2",
-      "drawLong": "Draw"
+      "drawLong": "Draw",
+      "otherScore": "Other"
     },
     "columns": {
       "home": "1",

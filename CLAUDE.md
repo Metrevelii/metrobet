@@ -161,7 +161,7 @@ isolated so it can be swapped later without touching components:
    favorites/recent, launcher, provider tabs (All + one per provider). Mock aggregator by default;
    `CASINO_AGGREGATOR=public-demos` loads real Pragmatic Play + BGaming demo slots for **local
    development only**. Crash page lists crash games
-4. ✅ Sportsbook: football/basketball/tennis, live matches and odds over Socket.IO, event pages,
+4. ✅ Sportsbook: football/basketball/tennis/eSoccer, live matches and odds over Socket.IO, event pages,
    betslip (singles/accumulator, odds changes). Free deterministic simulated feed.
    ✅ Real bets: server-priced placement (live delay, limits, idempotent), wallet debit,
    automatic settlement from feed results, "My bets" page, live cash-out, live "ticket won"

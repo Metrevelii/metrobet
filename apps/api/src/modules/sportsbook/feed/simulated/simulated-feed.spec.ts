@@ -88,4 +88,42 @@ describe('simulated schedule', () => {
     }
     expect(await feed.result('not-a-sim-event')).toBeNull();
   });
+
+  it('plays eSoccer all day with football markets on a 9-minute schedule', () => {
+    const slots = Array.from({ length: 4 }, (_, i) => 900_000 + i);
+    const esoccer = slots
+      .flatMap((slot) => fixturesForSlot(slot))
+      .filter((f) => f.sport === 'esoccer');
+    expect(esoccer.length).toBeGreaterThanOrEqual(4 * 6); // two leagues × 3 matches every slot
+    const fixture = esoccer[0]!;
+    expect(fixture.model.durationMs).toBe(9 * MINUTE);
+    const live = eventAt(fixture, Date.parse(fixture.startsAt) + 2 * MINUTE) as EventDetail;
+    expect(live.status).toBe('live');
+    expect(live.live?.period).toBe('1H');
+    const types = new Set(live.markets.map((market) => market.type));
+    for (const type of [
+      '1x2',
+      'ht_1x2',
+      'correct_score',
+      'team_total_home',
+      'team_total_away',
+      'spread',
+    ]) {
+      expect(types).toContain(type);
+    }
+  });
+
+  it('prices a correct-score grid whose probabilities cover every score', () => {
+    // Football plays a round every 8 slots: look through a few.
+    const fixture = Array.from({ length: 8 }, (_, i) => fixturesForSlot(500_000 + i))
+      .flat()
+      .find((f) => f.sport === 'football')!;
+    const event = eventAt(fixture, Date.parse(fixture.startsAt) - MINUTE) as EventDetail;
+    const market = event.markets.find((item) => item.type === 'correct_score')!;
+    expect(market.selections).toHaveLength(17);
+    // Implied probabilities include the 6 % margin (prices are rounded, so allow some slack).
+    const implied = market.selections.reduce((sum, selection) => sum + 1 / selection.odds, 0);
+    expect(implied).toBeGreaterThan(0.95);
+    expect(implied).toBeLessThan(1.25);
+  });
 });

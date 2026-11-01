@@ -13,7 +13,14 @@ export function MarketCard({ event, market }: { event: EventDetail; market: Mark
     <Card className="flex flex-col gap-3 p-4">
       <h3 className="text-sm font-semibold">{marketLabel(t, market)}</h3>
       <div
-        className={cn('grid gap-2', market.selections.length === 3 ? 'grid-cols-3' : 'grid-cols-2')}
+        className={cn(
+          'grid gap-2',
+          market.selections.length > 3
+            ? 'grid-cols-3 sm:grid-cols-4'
+            : market.selections.length === 3
+              ? 'grid-cols-3'
+              : 'grid-cols-2',
+        )}
       >
         {market.selections.map((selection) => (
           <OddsButton

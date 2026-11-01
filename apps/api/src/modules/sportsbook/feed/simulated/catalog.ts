@@ -15,7 +15,23 @@ export type SimCompetition = Competition & {
 };
 
 /** Round cadence per sport, in slots: longer than the longest possible match. */
-export const CADENCE: Record<Sport, number> = { football: 8, basketball: 6, tennis: 14 };
+export const CADENCE: Record<Sport, number> = {
+  football: 8,
+  basketball: 6,
+  tennis: 14,
+  esoccer: 1,
+};
+
+/** eSoccer: club teams controlled by a named player, a new round every 15-minute slot. */
+const esoccer = (id: string, name: string, teams: Team[]): SimCompetition => ({
+  id,
+  name,
+  country: 'World',
+  sport: 'esoccer',
+  cadenceSlots: CADENCE.esoccer,
+  matchesPerRound: 3,
+  teams,
+});
 
 const football = (id: string, name: string, country: string, teams: Team[]): SimCompetition => ({
   id,
@@ -28,6 +44,26 @@ const football = (id: string, name: string, country: string, teams: Team[]): Sim
 });
 
 export const COMPETITIONS: SimCompetition[] = [
+  esoccer('esoccer-battle', 'eSoccer Battle · 8 min', [
+    ['Real Madrid (Rafa)', 'RMA', 88],
+    ['Barcelona (Lion)', 'BAR', 87],
+    ['Manchester City (Kodak)', 'MCI', 89],
+    ['Liverpool (Nikkitta)', 'LIV', 86],
+    ['Bayern (Dante)', 'BAY', 87],
+    ['PSG (Petr)', 'PSG', 85],
+    ['Inter (Boulevard)', 'INT', 84],
+    ['Arsenal (Hotshot)', 'ARS', 86],
+  ]),
+  esoccer('esoccer-gt-league', 'eSoccer GT Leagues · 8 min', [
+    ['Juventus (Sabotage)', 'JUV', 84],
+    ['Napoli (Vrsnel)', 'NAP', 83],
+    ['Atlético (Kray)', 'ATM', 84],
+    ['Dortmund (Wiizard)', 'BVB', 82],
+    ['Chelsea (Lucky)', 'CHE', 83],
+    ['Milan (Ivanko)', 'MIL', 82],
+    ['Tottenham (Spex)', 'TOT', 81],
+    ['Benfica (Ftw)', 'BEN', 80],
+  ]),
   football('eng-premier-league', 'Premier League', 'England', [
     ['Arsenal', 'ARS', 89],
     ['Manchester City', 'MCI', 90],

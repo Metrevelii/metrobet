@@ -42,6 +42,9 @@ tickets: Open / Settled tabs as `?status=`, paged; signed-out → log in).
   with flag and count (`getCompetitions`). Links keep the other filter: views are shareable.
 - Day labels ("Today · …") use the browser's date after hydration (no `Date.now()` in render).
 
+Correct-score selections are labelled from their key (`cs_2_1` → "2:1", `cs_other` → "Other");
+`MarketCard` wraps markets with more than 3 selections in 3–4 columns.
+
 Labels: `labels.ts` builds market/selection/period labels from translations (`Sports.*`).
 Short labels (1/X/2) in lists, team names on the event page and betslip.
 

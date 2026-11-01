@@ -1,5 +1,7 @@
 import {
   comboOdds,
+  CORRECT_SCORE_MAX,
+  correctScoreOf,
   type LiveState,
   type MarketType,
   payoutFor,
@@ -52,6 +54,23 @@ export function selectionResult(
       const set = line === null ? undefined : periodScores[line - 1];
       if (!set || set.home === set.away) return 'void';
       return won(winnerOf(set) === selectionKey);
+    }
+    case 'ht_1x2': {
+      // The first period is the first half; a match without one is void.
+      const firstHalf = periodScores[0];
+      return firstHalf ? won(winnerOf(firstHalf) === selectionKey) : 'void';
+    }
+    case 'correct_score': {
+      const exact = correctScoreOf(selectionKey);
+      if (exact) return won(exact.home === score.home && exact.away === score.away);
+      // `cs_other`: any score outside the 0–0 … 3–3 grid.
+      return won(score.home > CORRECT_SCORE_MAX || score.away > CORRECT_SCORE_MAX);
+    }
+    case 'team_total_home':
+    case 'team_total_away': {
+      const goals = marketType === 'team_total_home' ? score.home : score.away;
+      if (line === null || goals === line) return 'void';
+      return won(selectionKey === 'over' ? goals > line : goals < line);
     }
   }
 }

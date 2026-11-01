@@ -113,6 +113,13 @@
       "when": 1793550789930,
       "tag": "0015_player_live_notify",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793551092453,
+      "tag": "0016_esoccer_and_markets",
+      "breakpoints": true
     }
   ]
 }

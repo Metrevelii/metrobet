@@ -1,0 +1,22 @@
+ALTER TYPE "public"."bet_market_type" ADD VALUE 'ht_1x2';--> statement-breakpoint
+ALTER TYPE "public"."bet_market_type" ADD VALUE 'correct_score';--> statement-breakpoint
+ALTER TYPE "public"."bet_market_type" ADD VALUE 'team_total_home';--> statement-breakpoint
+ALTER TYPE "public"."bet_market_type" ADD VALUE 'team_total_away';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_0_0';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_0_1';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_0_2';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_0_3';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_1_0';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_1_1';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_1_2';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_1_3';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_2_0';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_2_1';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_2_2';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_2_3';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_3_0';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_3_1';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_3_2';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_3_3';--> statement-breakpoint
+ALTER TYPE "public"."bet_selection_key" ADD VALUE 'cs_other';--> statement-breakpoint
+ALTER TYPE "public"."bet_sport" ADD VALUE 'esoccer';

@@ -31,7 +31,9 @@ SettlementService (every 15 s) ── OddsFeed.result(eventId) for events with o
    `DUPLICATE_REQUEST`). Ledger keys: `sportsbook:bet|win|refund:<ticketId>`.
 6. **Settlement rules** (`settlement-rules.ts`), from the final score: 1x2, double chance, totals
    (exactly on the line = void), BTTS, moneyline (a tie = void), spread (push = void), set winner
-   (from that set's games; a set not played = void).
+   (from that set's games; a set not played = void), half-time result (first period score; none
+   = void), correct score (exact; `cs_other` = any score outside 0–0…3–3), team totals (that
+   team's goals; on the line = void).
 7. **Ticket outcome:** any lost selection → **lost** immediately (even with legs still open);
    all resolved → **won** at the product of the non-void odds (rounded down to 2 decimals), or
    **void** when every selection is void (stake refunded as `rollback`). Settled once: the ticket
