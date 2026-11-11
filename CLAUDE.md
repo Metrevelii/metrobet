@@ -151,6 +151,7 @@ isolated so it can be swapped later without touching components:
 - `apps/api/src/modules/payments/CLAUDE.md`: deposits, withdrawals, payment gateway port, mock bank
 - `apps/web/src/features/payments/CLAUDE.md`: deposit / withdraw pages, payment result, pending withdrawals
 - `apps/web/src/features/account/CLAUDE.md`: account pages (profile, security, responsible gaming)
+- `apps/api/src/modules/bonus/CLAUDE.md`: bonus money: wagering, conversion, forfeits, stray money
 - `apps/api/src/modules/kyc/CLAUDE.md`: identity verification, provider port, mock provider, staff review
 - `apps/api/src/modules/originals/CLAUDE.md`: in-house studio game server (Supra Fortune, crash games)
 - `apps/web/src/features/originals/CLAUDE.md`: native Originals game clients
@@ -173,7 +174,8 @@ isolated so it can be swapped later without touching components:
    notifications and balance push
 5. 🟡 Promo engine (adjarabet-style promotions as data + plugins, not a branch per promo):
    ✅ page blocks (text, steps, countdown, prizes, FAQ, terms, opt-in) + backoffice page builder +
-   player opt-in. ✅ activity bus + mechanic plugins + **prize wheel** (spins from wager
+   player opt-in. ✅ **bonus money** (separate balance, cash spent first, proportional payouts,
+   wagering → cash, forfeit/expiry) + **deposit bonus** mechanic (welcome offer). ✅ activity bus + mechanic plugins + **prize wheel** (spins from wager
    checkpoints, free-spin rewards). ⏳ symbol collection, leaderboards, more instant-win skins,
    calendar/raffle/cashback, templates/clone, per-promo theme
 6. 🟡 Crash games: ✅ Metro Jet and Longshot (Metrobet Originals, see step 8; one shared crash

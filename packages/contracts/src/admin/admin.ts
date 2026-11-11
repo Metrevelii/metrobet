@@ -329,6 +329,8 @@ export const dashboardSchema = z.object({
   casino: productTotalsSchema,
   sportsbook: productTotalsSchema,
   deposits: z.number().int(),
+  /** Bonus money that became cash today (completed wagering): what bonuses cost. */
+  bonusCost: z.number().int(),
   newPlayers: z.number().int(),
   /** Players with at least one bet today. */
   activePlayers: z.number().int(),

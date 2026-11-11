@@ -11,6 +11,7 @@ import { and, eq, isNotNull, isNull } from 'drizzle-orm';
 import type { Env } from '../../config/env.js';
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { type EventResult, OddsFeed } from '../sportsbook/feed/odds-feed.js';
+import { bonusShare, payoutLegs } from '../wallet/ledger-math.js';
 import { Ledger } from '../wallet/ledger.js';
 import { betSelections, betTickets } from './betting.schema.js';
 import { selectionResult, ticketOutcome } from './settlement-rules.js';
@@ -116,10 +117,12 @@ export class SettlementService implements OnModuleInit, OnModuleDestroy {
             idempotencyKey: `sportsbook:${refund ? 'refund' : 'win'}:${ticket.id}`,
             type: refund ? 'rollback' : 'win',
             playerId: ticket.playerId,
-            legs: [
-              { account: { kind: 'house' }, amount: -outcome.payout },
-              { account: { kind: 'player', playerId: ticket.playerId }, amount: outcome.payout },
-            ],
+            // The stake's bonus-money share comes back as bonus money.
+            legs: payoutLegs(
+              ticket.playerId,
+              outcome.payout,
+              bonusShare(outcome.payout, ticket.stake, ticket.bonusStake),
+            ),
           },
           tx,
         );

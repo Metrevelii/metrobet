@@ -23,6 +23,8 @@ bank page ─card─▶ bank ─signed POST /payments/callback─▶ handleCallb
   is still credited because the card was charged. Deposit limits and the KYC threshold (lifetime
   deposits past `KYC_DEPOSIT_THRESHOLD` need verified KYC) are checked when the deposit starts,
   not in the callback (the bank has already taken the money).
+- After a credited deposit, `payment.deposit` is published on the activity bus (`first`: the
+  player's first successful deposit); deposit bonus promotions react to it.
 
 ## Withdrawal
 
@@ -36,6 +38,8 @@ bank page ─card─▶ bank ─signed POST /payments/callback─▶ handleCallb
 - Staff **approve** (finance): `PaymentGateway.payout`; paid → `withdrawals` → `funding`
   (`payout`, `payment:<id>:payout`, not on the player's side of the ledger); refused → reversal,
   status `failed`; no answer → 502, nothing changes. Row locked `FOR UPDATE` throughout.
+- **Active bonus**: a withdrawal forfeits it; without `forfeitBonus: true` the request is
+  `BONUS_ACTIVE` 409 (the page asks the player to confirm).
 - Audit: `payment.withdrawal_approve | payment.withdrawal_reject`.
 
 ## Endpoints

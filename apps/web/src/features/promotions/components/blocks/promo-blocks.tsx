@@ -1,6 +1,7 @@
 import type { PromoBlockView, PromotionDetail } from '@metrobet/contracts';
 
 import { CountdownBlock } from './countdown-block';
+import { DepositBonusBlock } from './deposit-bonus-block';
 import { FaqBlock } from './faq-block';
 import { OptInBlock } from './opt-in-block';
 import { PrizesBlock } from './prizes-block';
@@ -27,6 +28,8 @@ function PromoBlock({ block, promotion }: { block: PromoBlockView; promotion: Pr
       return <OptInBlock block={block} slug={promotion.slug} />;
     case 'wheel':
       return <WheelBlock block={block} slug={promotion.slug} />;
+    case 'depositBonus':
+      return <DepositBonusBlock block={block} />;
   }
 }
 

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { ActivityModule } from '../activity/activity.module.js';
 import { AuditModule } from '../audit/audit.module.js';
+import { BonusModule } from '../bonus/bonus.module.js';
 import { CasinoModule } from '../casino/casino.module.js';
 import { WebModule } from '../web/web.module.js';
 import { AdminPromotionsController } from './admin-promotions.controller.js';
@@ -11,6 +12,7 @@ import { PromoActivityService } from './engine/promo-activity.service.js';
 import { PromoEligibility } from './engine/promo-eligibility.js';
 import { PROMO_MECHANICS } from './engine/promo-mechanic.js';
 import { WheelController } from './mechanics/wheel/wheel.controller.js';
+import { DepositBonusMechanic } from './mechanics/deposit-bonus/deposit-bonus.mechanic.js';
 import { WheelMechanic } from './mechanics/wheel/wheel.mechanic.js';
 import { WheelService } from './mechanics/wheel/wheel.service.js';
 import { PromotionsController } from './promotions.controller.js';
@@ -18,7 +20,7 @@ import { PromotionsRepository } from './promotions.repository.js';
 import { PromotionsService } from './promotions.service.js';
 
 @Module({
-  imports: [ActivityModule, AuditModule, CasinoModule, WebModule],
+  imports: [ActivityModule, AuditModule, BonusModule, CasinoModule, WebModule],
   controllers: [PromotionsController, AdminPromotionsController, WheelController],
   providers: [
     PromotionsService,
@@ -28,8 +30,13 @@ import { PromotionsService } from './promotions.service.js';
     PromoActivityService,
     // Mechanic plugins: add new ones here.
     WheelMechanic,
+    DepositBonusMechanic,
     WheelService,
-    { provide: PROMO_MECHANICS, inject: [WheelMechanic], useFactory: (...all) => all },
+    {
+      provide: PROMO_MECHANICS,
+      inject: [WheelMechanic, DepositBonusMechanic],
+      useFactory: (...all) => all,
+    },
   ],
   exports: [PromotionsService],
 })

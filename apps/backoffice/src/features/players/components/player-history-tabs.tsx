@@ -4,6 +4,7 @@ import Link from 'next/link';
 export const PLAYER_TABS = [
   { id: 'transactions', label: 'Transactions' },
   { id: 'payments', label: 'Payments' },
+  { id: 'bonuses', label: 'Bonuses' },
   { id: 'identity', label: 'Identity' },
   { id: 'tickets', label: 'Sports tickets' },
   { id: 'rounds', label: 'Game rounds' },

@@ -30,6 +30,13 @@ one.
 Server Action → `POST /api/dev/wallet/deposit` (404 in production), then `router.refresh()` so the
 header and page re-render with the new balance.
 
+## Bonus money
+
+The header chip shows the **playable** balance (cash + bonus, the same total games and live
+pushes report) with a gift icon while bonus money is part of it. The `/wallet` balance card shows
+withdrawable cash and "+ X bonus money"; `BonusCard` (`features/bonus`) shows the active bonus
+(wagering progress, expiry) and recent ended ones.
+
 ## Deposit / withdraw
 
 The balance card links to `/wallet/deposit` and `/wallet/withdraw` (`features/payments`); the

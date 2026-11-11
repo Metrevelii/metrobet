@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module.js';
 import { ActivityModule } from './modules/activity/activity.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { BettingModule } from './modules/betting/betting.module.js';
+import { BonusModule } from './modules/bonus/bonus.module.js';
 import { CasinoModule } from './modules/casino/casino.module.js';
 import { GameWalletModule } from './modules/game-wallet/game-wallet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
@@ -41,6 +42,7 @@ import { WalletModule } from './modules/wallet/wallet.module.js';
     ActivityModule,
     AuthModule,
     BettingModule,
+    BonusModule,
     NotificationsModule,
     CasinoModule,
     GameWalletModule,

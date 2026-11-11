@@ -6,7 +6,8 @@ import { currencySchema } from '../common/currency.js';
  * What moved money. `deposit` comes from payments (and dev deposits); `withdrawal` reserves a
  * requested withdrawal, `withdrawal_reversal` gives it back (cancelled, rejected or failed) and
  * `payout` sends it out (not on the player's side); `bet`, `win` and `rollback` from games and
- * the sportsbook; `cashout` from selling a sports ticket early; `adjustment` from staff.
+ * the sportsbook; `cashout` from selling a sports ticket early; `adjustment` from staff;
+ * `bonus_grant` / `bonus_convert` / `bonus_forfeit` move bonus money (`modules/bonus`).
  */
 export const WALLET_TRANSACTION_TYPES = [
   'deposit',
@@ -18,14 +19,19 @@ export const WALLET_TRANSACTION_TYPES = [
   'cashout',
   'withdrawal_reversal',
   'payout',
+  'bonus_grant',
+  'bonus_convert',
+  'bonus_forfeit',
 ] as const;
 export const walletTransactionTypeSchema = z.enum(WALLET_TRANSACTION_TYPES);
 export type WalletTransactionType = z.infer<typeof walletTransactionTypeSchema>;
 
-/** The player's cash balance in minor units (tetri). */
+/** The player's cash balance in minor units (tetri), and bonus money beside it. */
 export const walletSchema = z.object({
   currency: currencySchema,
   balance: z.number().int().min(0),
+  /** Bonus money of the active bonus (not withdrawable until wagered). */
+  bonusBalance: z.number().int().min(0),
 });
 export type Wallet = z.infer<typeof walletSchema>;
 

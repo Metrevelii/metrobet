@@ -54,6 +54,10 @@ export const BLOCK_LABELS: Record<PromoBlockType, { label: string; description: 
   faq: { label: 'FAQ', description: 'Questions and answers.' },
   terms: { label: 'Terms', description: 'Terms & conditions, one rule per line.' },
   wheel: { label: 'Prize wheel', description: 'Spins earned by wagering; wins free spins.' },
+  depositBonus: {
+    label: 'Deposit bonus',
+    description: 'Bonus money on the first deposit, with wagering.',
+  },
 };
 
 /** Draft blocks: a rich-text heading is always a LocalizedText here ('' everywhere = none). */
@@ -109,6 +113,17 @@ export function newBlock(type: PromoBlockType): PromoBlockDraft {
           freeSpins,
           weight: Math.round(1000 / freeSpins),
         })),
+      };
+    case 'depositBonus':
+      return {
+        id,
+        type,
+        title: emptyText(),
+        minDeposit: toMinor(20),
+        percent: 100,
+        maxBonus: toMinor(500),
+        wageringMultiplier: 10,
+        validDays: 14,
       };
   }
 }

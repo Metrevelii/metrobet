@@ -108,6 +108,8 @@ export const withdrawalInputSchema = z.object({
   amount: minorAmountSchema
     .min(PAYMENT_LIMITS.minWithdrawal, 'withdrawalMin')
     .max(PAYMENT_LIMITS.maxWithdrawal, 'withdrawalMax'),
+  /** Confirms giving up the active bonus (its balance is forfeited). */
+  forfeitBonus: z.boolean().default(false),
 });
 export type WithdrawalInput = z.input<typeof withdrawalInputSchema>;
 
@@ -125,6 +127,8 @@ export const PAYMENT_ERRORS = [
   'CARD_NOT_FOUND',
   'NOT_CANCELLABLE',
   'GATEWAY_UNAVAILABLE',
+  /** An active bonus would be forfeited: confirm with `forfeitBonus: true`. */
+  'BONUS_ACTIVE',
 ] as const;
 export type PaymentError = (typeof PAYMENT_ERRORS)[number];
 

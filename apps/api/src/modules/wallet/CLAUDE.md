@@ -17,8 +17,9 @@ all go through `Ledger.post`; nothing else writes these tables.
 4. **`balance` is a cache of the entries.** `wallet_accounts.balance` = sum of its entries'
    `amount`, updated in the same DB transaction as the entries. Each entry stores
    `balanceAfter`, so history needs no recomputation. Recompute check: `Ledger` spec / e2e.
-5. **Player balances never go negative.** Checked under the row lock and by a DB `check`.
-   System accounts (`house`, `funding`) may go negative: they are the other side of the books.
+5. **Player balances never go negative.** A player's `player` (cash) and `bonus` accounts are
+   checked under the row lock and by a DB `check`. System accounts (`house`, `funding`,
+   `withdrawals`, `marketing`) may go negative: they are the other side of the books.
 6. **Idempotent by key.** Each transaction has a unique `idempotencyKey` (aggregator transaction
    id, payment id, `dev:<uuid>`…). Posting the same key again returns the first result and moves
    nothing; reusing a key for a different player/type/amount is a 409.
@@ -28,6 +29,11 @@ all go through `Ledger.post`; nothing else writes these tables.
 `Ledger.post(input, tx?)`: pass your own DB transaction to commit the money movement together
 with your rows (it runs in a savepoint). The game wallet module does this for every round call.
 
+`Ledger.postStake(input, tx?)`: every stake (casino, sportsbook) — cash first, then bonus money,
+decided under the locks; returns the split so callers can pay winnings back proportionally
+(`bonusShare`, `payoutLegs` in `ledger-math.ts`). `playableBalance` = cash + bonus (what players
+see); `playerBalance` = cash only (withdrawable).
+
 ## Accounts
 
 | kind          | owner  | meaning                                                                 |
@@ -36,20 +42,27 @@ with your rows (it runs in a savepoint). The game wallet module does this for ev
 | `house`       | –      | casino side: bets go in, wins come out                                  |
 | `funding`     | –      | outside money: deposits come from it, withdrawals go to it              |
 | `withdrawals` | –      | requested withdrawals, reserved until paid out or given back            |
+| `bonus`       | player | bonus money of the active bonus (`modules/bonus`)                       |
+| `marketing`   | –      | where bonus money comes from and goes back to                           |
 
 Transaction types (contracts `WALLET_TRANSACTION_TYPES`):
 
-| type                  | entries                       | source                                   |
-| --------------------- | ----------------------------- | ---------------------------------------- |
-| `deposit`             | funding −, player +           | payments (bank callback, dev deposit)    |
-| `withdrawal`          | player −, withdrawals +       | payments: withdrawal requested           |
-| `withdrawal_reversal` | withdrawals −, player +       | payments: cancelled / rejected / refused |
-| `payout`              | withdrawals −, funding +      | payments: paid out (no player leg)       |
-| `bet`                 | player −, house +             | game wallet API (`game-wallet`)          |
-| `win`                 | house −, player +             | game wallet API (`game-wallet`)          |
-| `rollback`            | reverses a bet                | game wallet API (`game-wallet`)          |
-| `adjustment`          | either way, staff + audit log | backoffice (later)                       |
-| `cashout`             | house −, player +             | sportsbook cash-out                      |
+| type                  | entries                       | source                                    |
+| --------------------- | ----------------------------- | ----------------------------------------- |
+| `deposit`             | funding −, player +           | payments (bank callback, dev deposit)     |
+| `withdrawal`          | player −, withdrawals +       | payments: withdrawal requested            |
+| `withdrawal_reversal` | withdrawals −, player +       | payments: cancelled / rejected / refused  |
+| `payout`              | withdrawals −, funding +      | payments: paid out (no player leg)        |
+| `bet`                 | player −, house +             | game wallet API (`game-wallet`)           |
+| `win`                 | house −, player +             | game wallet API (`game-wallet`)           |
+| `rollback`            | reverses a bet                | game wallet API (`game-wallet`)           |
+| `adjustment`          | either way, staff + audit log | backoffice (later)                        |
+| `cashout`             | house −, player +             | sportsbook cash-out                       |
+| `bonus_grant`         | marketing −, bonus +          | bonus granted                             |
+| `bonus_convert`       | bonus −, player +             | wagering done (or stray after completion) |
+| `bonus_forfeit`       | bonus −, marketing +          | forfeited / expired / cancelled           |
+
+Bets and payouts touch `bonus` as well as `player` when bonus money is involved (same types).
 
 `playerActivity(playerId, windows)`: deposits, stakes and returns per window in one query, for
 responsible-gaming limits and the reality check.
@@ -64,5 +77,4 @@ responsible-gaming limits and the reality check.
 
 ## Not yet
 
-Real bank contracts (TBC/BoG), bonus money (a separate
-`bonus` account kind with wagering), staff adjustments with audit, reconciliation job.
+Real bank contracts (TBC/BoG), staff adjustments with audit, reconciliation job.

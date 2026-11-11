@@ -15,8 +15,19 @@ import {
 import { players } from '../players/players.schema.js';
 
 /** See CLAUDE.md for the ledger invariants these tables (and the 0008 triggers) enforce. */
-/** `withdrawals` holds money of requested withdrawals until it is paid out or given back. */
-export const WALLET_ACCOUNT_KINDS = ['player', 'house', 'funding', 'withdrawals'] as const;
+/**
+ * `player`: cash · `bonus`: the player's bonus money (`modules/bonus`) · `house`: bets and wins ·
+ * `funding`: money in and out · `withdrawals`: reserved withdrawals · `marketing`: bonus money
+ * granted and forfeited.
+ */
+export const WALLET_ACCOUNT_KINDS = [
+  'player',
+  'house',
+  'funding',
+  'withdrawals',
+  'bonus',
+  'marketing',
+] as const;
 export type WalletAccountKind = (typeof WALLET_ACCOUNT_KINDS)[number];
 
 export const walletAccountKind = pgEnum('wallet_account_kind', WALLET_ACCOUNT_KINDS);
@@ -41,11 +52,12 @@ export const walletAccounts = pgTable(
       .nullsNotDistinct(),
     check(
       'wallet_accounts_owner_check',
-      sql`(${table.kind} = 'player') = (${table.playerId} is not null)`,
+      // ::text: a migration can't use enum values it adds in the same transaction.
+      sql`(${table.kind}::text in ('player', 'bonus')) = (${table.playerId} is not null)`,
     ),
     check(
       'wallet_accounts_player_balance_check',
-      sql`${table.kind} <> 'player' or ${table.balance} >= 0`,
+      sql`${table.kind}::text not in ('player', 'bonus') or ${table.balance} >= 0`,
     ),
   ],
 );

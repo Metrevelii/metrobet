@@ -76,6 +76,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
         <ProductCard title="Casino & Originals" totals={dashboard.casino} />
         <ProductCard title="Sportsbook" totals={dashboard.sportsbook} />
         <Stat label="Deposits today" value={money(dashboard.deposits)} />
+        <Stat label="Bonus cost today" value={money(dashboard.bonusCost)} />
         <Stat
           label="Player balances"
           value={money(dashboard.playerBalances)}

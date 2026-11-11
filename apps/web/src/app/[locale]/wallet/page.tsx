@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 
 import { getCurrentPlayer } from '@/features/auth';
+import { BonusCard } from '@/features/bonus';
 import { PaymentResult, PendingWithdrawals } from '@/features/payments';
 import { WalletView } from '@/features/wallet';
 import { redirect } from '@/i18n/navigation';
@@ -26,6 +27,7 @@ async function WalletContent({ searchParams }: Pick<Props, 'searchParams'>) {
     <div className="flex flex-col gap-6">
       {payment && <PaymentResult id={payment} />}
       <WalletView page={Number.isInteger(page) && page > 0 ? page : 1}>
+        <BonusCard />
         <PendingWithdrawals />
       </WalletView>
     </div>

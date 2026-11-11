@@ -37,6 +37,8 @@ export const gameRounds = pgTable(
     status: gameRoundStatus().notNull().default('open'),
     /** Bets minus rolled-back bets, and wins, in minor units. */
     betTotal: minor().notNull().default(0),
+    /** The bonus-money part of `betTotal`: wins pay that share back as bonus money. */
+    bonusBetTotal: minor().notNull().default(0),
     winTotal: minor().notNull().default(0),
     openedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     closedAt: timestamp({ withTimezone: true }),
@@ -65,6 +67,8 @@ export const gameTransactions = pgTable(
       .notNull()
       .references(() => players.id),
     amount: minor().notNull(),
+    /** The part of `amount` that was (bets) or went back as (wins, rollbacks) bonus money. */
+    bonusAmount: minor().notNull().default(0),
     /** Rollbacks: the provider transaction id of the refunded bet (at most one rollback each). */
     rollbackOf: text().unique('game_transactions_rollback_of_unique'),
     /** Null when nothing moved (a 0 win, or a rollback of an unknown bet). */

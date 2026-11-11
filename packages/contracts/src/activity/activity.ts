@@ -40,9 +40,22 @@ export const sportsBetActivitySchema = z.object({
 });
 export type SportsBetActivity = z.infer<typeof sportsBetActivitySchema>;
 
+/** A deposit was credited (after the bank's callback). `first`: the player's first ever. */
+export const depositActivitySchema = z.object({
+  id: z.string().min(1).max(128),
+  kind: z.literal('payment.deposit'),
+  playerId: z.uuid(),
+  occurredAt: z.iso.datetime(),
+  amount: minorAmountSchema,
+  currency: currencySchema,
+  first: z.boolean(),
+});
+export type DepositActivity = z.infer<typeof depositActivitySchema>;
+
 export const activityEventSchema = z.discriminatedUnion('kind', [
   casinoBetActivitySchema,
   sportsBetActivitySchema,
+  depositActivitySchema,
 ]);
 export type ActivityEvent = z.infer<typeof activityEventSchema>;
 export type ActivityKind = ActivityEvent['kind'];

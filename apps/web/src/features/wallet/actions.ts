@@ -40,7 +40,8 @@ export async function devDeposit(amount: unknown): Promise<DepositResult> {
   }
 }
 
-/** The signed-in player's balance in minor units, or null (signed out / unavailable). */
+/** What the signed-in player can bet with (cash + bonus money, minor units), or null. */
 export async function currentBalance(): Promise<number | null> {
-  return (await getWallet())?.balance ?? null;
+  const wallet = await getWallet();
+  return wallet ? wallet.balance + wallet.bonusBalance : null;
 }

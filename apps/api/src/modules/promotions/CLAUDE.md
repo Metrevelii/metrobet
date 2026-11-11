@@ -60,6 +60,12 @@ calls `mechanic.onActivity({ promotion, block, event })`. Mechanics never re-che
 kind `freeSpins`, payload `{ count, gameSlug }`), status `granted`. Crediting (aggregator
 free-spins API / wallet) will flip them to `credited`; no promo code changes.
 
+**Deposit bonus** (`mechanics/deposit-bonus/`): on `payment.deposit` with `first` and at least
+`minDeposit`, grants `percent` % of the deposit (max `maxBonus`) as bonus money through
+`BonusService.grant` (wagering `wageringMultiplier` ×, `validDays`). Grant key
+`promo:<promotion>:<block>:<player>`: once per player per promotion. The welcome-bonus seed has
+one (existing databases keep their old copy: add the block in the backoffice).
+
 **Adding a mechanic:** block type in contracts (schema + view without secrets) → a class
 implementing `PromoMechanic` (+ its own tables in `mechanics/<name>/`) → add it to
 `PROMO_MECHANICS` → player endpoints if it has actions → web renderer + backoffice editor.

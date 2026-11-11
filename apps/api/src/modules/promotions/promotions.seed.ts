@@ -240,6 +240,16 @@ export const promotionsSeed = (freeSpinsGame: string): Promotion[] => [
         en: 'Sign up at Metrobet and get a 100% bonus on your first deposit, up to 500 ₾.\n\nThe bonus is credited automatically as soon as your deposit lands and can be used across every section.',
         ru: 'Зарегистрируйтесь на Metrobet и получите бонус 100% на первый депозит, до 500 ₾.\n\nБонус зачисляется автоматически сразу после депозита и действует во всех разделах.',
       }),
+      {
+        id: 'deposit-bonus',
+        type: 'depositBonus',
+        title: { ka: 'შენი ბონუსი', en: 'Your bonus', ru: 'Ваш бонус' },
+        minDeposit: 20_00,
+        percent: 100,
+        maxBonus: 500_00,
+        wageringMultiplier: 10,
+        validDays: 14,
+      },
       terms({
         ka: 'მინიმალური დეპოზიტი 20 ₾.\nბონუსს აქვს 10x ფსონის მოთხოვნა.\nბონუსი მოქმედებს 14 დღის განმავლობაში.',
         en: 'Minimum deposit 20 ₾.\nThe bonus has a 10x wagering requirement.\nThe bonus is valid for 14 days.',

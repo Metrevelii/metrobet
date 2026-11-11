@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/page-header';
 import { Pager } from '@/components/pager';
 import { getCurrentStaff, hasRole } from '@/features/auth';
 import { TicketsTable } from '@/features/bets';
+import { BonusesTable, getPlayerBonuses } from '@/features/bonus';
 import { KycChecksTable, listKycChecks } from '@/features/kyc';
 import { listPayments, PaymentsTable } from '@/features/payments';
 import {
@@ -33,9 +34,19 @@ export const metadata: Metadata = { title: 'Player' };
 
 type Props = PageProps<'/players/[id]'>;
 
-const TABS: PlayerTab[] = ['transactions', 'payments', 'identity', 'tickets', 'rounds'];
+const TABS: PlayerTab[] = ['transactions', 'payments', 'bonuses', 'identity', 'tickets', 'rounds'];
 
-async function History({ id, tab, page }: { id: string; tab: PlayerTab; page: number }) {
+async function History({
+  id,
+  tab,
+  page,
+  canCancelBonus,
+}: {
+  id: string;
+  tab: PlayerTab;
+  page: number;
+  canCancelBonus: boolean;
+}) {
   const href = (target: number) =>
     `/players/${id}?tab=${tab}${target > 1 ? `&page=${target}` : ''}`;
   if (tab === 'tickets') {
@@ -55,6 +66,9 @@ async function History({ id, tab, page }: { id: string; tab: PlayerTab; page: nu
         <Pager page={page} total={payments.total} pageSize={payments.pageSize} href={href} />
       </>
     );
+  }
+  if (tab === 'bonuses') {
+    return <BonusesTable bonuses={await getPlayerBonuses(id)} canCancel={canCancelBonus} />;
   }
   if (tab === 'identity') {
     const checks = await listKycChecks({ playerId: id, page });
@@ -149,7 +163,12 @@ async function PlayerView({ params, searchParams }: Props) {
       <ResponsibleGamingCard player={player} data={responsibleGaming} />
       <PlayerHistoryTabs playerId={player.id} active={tab} />
       <div className="flex flex-col gap-4">
-        <History id={player.id} tab={tab} page={pageParam(query.page)} />
+        <History
+          id={player.id}
+          tab={tab}
+          page={pageParam(query.page)}
+          canCancelBonus={hasRole(staff, ['support', 'risk'])}
+        />
       </div>
     </div>
   );

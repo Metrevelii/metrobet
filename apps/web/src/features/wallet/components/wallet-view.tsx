@@ -73,6 +73,11 @@ export async function WalletView({ page, children }: { page: number; children?: 
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-muted-foreground">{t('balance')}</span>
           <span className="text-3xl font-bold tabular-nums">{money(format, wallet.balance)}</span>
+          {wallet.bonusBalance > 0 && (
+            <span className="text-sm text-muted-foreground">
+              {t('plusBonus', { amount: money(format, wallet.bonusBalance) })}
+            </span>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex">
           <Button asChild>

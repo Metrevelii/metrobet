@@ -20,6 +20,7 @@ export const PROMO_BLOCK_TYPES = [
   'terms',
   'optIn',
   'wheel',
+  'depositBonus',
 ] as const;
 export type PromoBlockType = (typeof PROMO_BLOCK_TYPES)[number];
 
@@ -81,6 +82,20 @@ export const wheelBlockSchema = block('wheel', {
     .max(WHEEL_SEGMENTS_MAX, `At most ${WHEEL_SEGMENTS_MAX} segments`),
 });
 
+/**
+ * Deposit bonus (mechanic): the player's first deposit of at least `minDeposit` gets `percent` %
+ * of it as bonus money, at most `maxBonus`, to be wagered `wageringMultiplier` times within
+ * `validDays`. Once per player per promotion.
+ */
+export const depositBonusBlockSchema = block('depositBonus', {
+  title: text,
+  minDeposit: minorAmountSchema,
+  percent: z.number().int().min(1).max(300),
+  maxBonus: minorAmountSchema,
+  wageringMultiplier: z.number().int().min(1).max(50),
+  validDays: z.number().int().min(1).max(90),
+});
+
 export const promoBlockSchema = z.discriminatedUnion('type', [
   richTextBlockSchema,
   stepsBlockSchema,
@@ -90,6 +105,7 @@ export const promoBlockSchema = z.discriminatedUnion('type', [
   termsBlockSchema,
   optInBlockSchema,
   wheelBlockSchema,
+  depositBonusBlockSchema,
 ]);
 export type PromoBlock = z.infer<typeof promoBlockSchema>;
 export type PromoBlockOf<T extends PromoBlockType> = Extract<PromoBlock, { type: T }>;
@@ -120,6 +136,14 @@ export const promoBlockViewSchema = z.discriminatedUnion('type', [
     earn: wheelBlockSchema.shape.earn,
     freeSpinsGame: z.string(),
     segments: z.array(z.object({ freeSpins: z.number() })),
+  }),
+  view('depositBonus', {
+    title: z.string(),
+    minDeposit: z.number(),
+    percent: z.number(),
+    maxBonus: z.number(),
+    wageringMultiplier: z.number(),
+    validDays: z.number(),
   }),
 ]);
 export type PromoBlockView = z.infer<typeof promoBlockViewSchema>;
@@ -160,5 +184,7 @@ export function localizePromoBlock(item: PromoBlock, locale: Locale): PromoBlock
         title: l(item.title),
         segments: item.segments.map(({ freeSpins }) => ({ freeSpins })),
       };
+    case 'depositBonus':
+      return { ...item, title: l(item.title) };
   }
 }

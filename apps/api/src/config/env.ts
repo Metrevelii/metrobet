@@ -39,6 +39,9 @@ const envSchema = z.object({
   /** `on` settles sportsbook tickets from feed results every 15 s; `off` (e2e) settles by hand. */
   BET_SETTLEMENT: z.enum(['on', 'off']).default('on'),
 
+  /** `on` expires bonuses and settles stray bonus money every minute; `off` (e2e) by hand. */
+  BONUS_SWEEP: z.enum(['on', 'off']).default('on'),
+
   /** `simulated` runs the built-in odds feed; `off` disables it (e.g. in tests that don't need it). */
   SPORTSBOOK_FEED: z.enum(['simulated', 'off']).default('simulated'),
 

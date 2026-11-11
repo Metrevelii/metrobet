@@ -1,5 +1,6 @@
 import {
   type AdminPayment,
+  DEFAULT_CURRENCY,
   type AdminPaymentsPage,
   type adminPaymentsQuerySchema,
   type DepositInput,
@@ -31,9 +32,11 @@ import type { z } from 'zod';
 
 import type { Env } from '../../config/env.js';
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
+import { ActivityBus } from '../activity/activity-bus.js';
 import { AuditService } from '../audit/audit.service.js';
 import { StaffDirectory } from '../auth/staff-directory.js';
 import { AdminPlayersService } from '../players/admin-players.service.js';
+import { BonusService } from '../bonus/bonus.service.js';
 import { PlayersService } from '../players/players.service.js';
 import {
   LimitExceededError,
@@ -51,6 +54,7 @@ const STATUS: Record<PaymentError, HttpStatus> = {
   UNVERIFIED: HttpStatus.FORBIDDEN,
   KYC_REQUIRED: HttpStatus.FORBIDDEN,
   CARD_NOT_FOUND: HttpStatus.NOT_FOUND,
+  BONUS_ACTIVE: HttpStatus.CONFLICT,
   NOT_CANCELLABLE: HttpStatus.CONFLICT,
   GATEWAY_UNAVAILABLE: HttpStatus.BAD_GATEWAY,
 };
@@ -102,6 +106,8 @@ export class PaymentsService {
     @Inject(ResponsibleGamingService) private readonly rg: ResponsibleGamingService,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(StaffDirectory) private readonly staff: StaffDirectory,
+    @Inject(ActivityBus) private readonly activity: ActivityBus,
+    @Inject(BonusService) private readonly bonus: BonusService,
     @Inject(ConfigService) config: ConfigService<Env, true>,
   ) {
     this.webUrl = config.get('WEB_URL', { infer: true }).replace(/\/$/, '');
@@ -144,7 +150,10 @@ export class PaymentsService {
    * Reserves the amount (player → `withdrawals`) and queues the withdrawal for staff. Paid back
    * to a card the player deposited with; needs a confirmed contact.
    */
-  async requestWithdrawal(playerId: string, { cardId, amount }: WithdrawalInput): Promise<Payment> {
+  async requestWithdrawal(
+    playerId: string,
+    { cardId, amount, forfeitBonus }: WithdrawalInput,
+  ): Promise<Payment> {
     const player = await this.players.me(playerId);
     if (!player.verified) {
       throw paymentError('UNVERIFIED', 'Confirm your email or phone before withdrawing');
@@ -157,6 +166,13 @@ export class PaymentsService {
       .from(savedCards)
       .where(and(eq(savedCards.id, cardId), eq(savedCards.playerId, playerId)));
     if (!card) throw paymentError('CARD_NOT_FOUND', 'Card not found');
+    // Withdrawing gives up an active bonus; the player must say so.
+    if (await this.bonus.current(playerId)) {
+      if (!forfeitBonus) {
+        throw paymentError('BONUS_ACTIVE', 'Withdrawing now forfeits your active bonus');
+      }
+      await this.bonus.forfeitForWithdrawal(playerId);
+    }
     try {
       return await this.db.transaction(async (tx) => {
         const [row] = await tx
@@ -250,7 +266,7 @@ export class PaymentsService {
    * a no-op. A success after we expired the payment is still credited (the card was charged).
    */
   async handleCallback(callback: PaymentCallback): Promise<void> {
-    await this.db.transaction(async (tx) => {
+    const credited = await this.db.transaction(async (tx): Promise<PaymentRow | null> => {
       const row = await this.lock(tx, callback.paymentId);
       if (row?.kind !== 'deposit') throw new NotFoundException('Unknown payment');
       if (row.amount !== callback.amount) {
@@ -259,7 +275,7 @@ export class PaymentsService {
       }
       const open = row.status === 'pending' || row.status === 'expired';
       if (!open) {
-        if (row.status === callback.status) return;
+        if (row.status === callback.status) return null;
         this.logger.error(`Callback ${callback.status} for ${row.status} payment ${row.id}`);
         throw new ConflictException('The payment is already final');
       }
@@ -270,7 +286,7 @@ export class PaymentsService {
           reason: callback.reason ?? null,
           providerReference: callback.providerReference,
         });
-        return;
+        return null;
       }
 
       let card: SavedCardRow | null = null;
@@ -302,13 +318,41 @@ export class PaymentsService {
         },
         tx,
       );
-      await this.finish(tx, row.id, {
+      return this.finish(tx, row.id, {
         status: 'succeeded',
         providerReference: callback.providerReference,
         cardId: card?.id ?? null,
         cardMask: card?.mask ?? null,
       });
     });
+    if (credited) await this.publishDeposit(credited);
+  }
+
+  /** Promotions (deposit bonuses) react to credited deposits. A failure never undoes the deposit. */
+  private async publishDeposit(row: PaymentRow) {
+    try {
+      const [deposits] = await this.db
+        .select({ value: count() })
+        .from(payments)
+        .where(
+          and(
+            eq(payments.playerId, row.playerId),
+            eq(payments.kind, 'deposit'),
+            eq(payments.status, 'succeeded'),
+          ),
+        );
+      await this.activity.publish({
+        id: `payment:${row.id}`,
+        kind: 'payment.deposit',
+        playerId: row.playerId,
+        occurredAt: (row.completedAt ?? new Date()).toISOString(),
+        amount: row.amount,
+        currency: DEFAULT_CURRENCY,
+        first: (deposits?.value ?? 0) === 1,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to publish deposit ${row.id}`, error);
+    }
   }
 
   // ── Staff ──────────────────────────────────────────────────────────────────────────────────

@@ -35,7 +35,7 @@ import {
 } from '../responsible-gaming/responsible-gaming.service.js';
 import { SportsbookStore } from '../sportsbook/sportsbook.store.js';
 import { TradingRules } from '../sportsbook/trading/trading-rules.js';
-import { InsufficientFundsError } from '../wallet/ledger-math.js';
+import { bonusShare, InsufficientFundsError, payoutLegs } from '../wallet/ledger-math.js';
 import { Ledger } from '../wallet/ledger.js';
 import {
   type BetSelectionRow,
@@ -165,19 +165,19 @@ export class BettingService {
               position,
             })),
           );
-          ({ playerBalance: balance } = await this.ledger.post(
-            {
-              idempotencyKey: `sportsbook:bet:${ticket!.id}`,
-              type: 'bet',
-              playerId,
-              legs: [
-                { account: { kind: 'player', playerId }, amount: -draft.stake },
-                { account: { kind: 'house' }, amount: draft.stake },
-              ],
-            },
+          // Cash first, then bonus money; the ticket remembers the bonus share for payouts.
+          const posted = await this.ledger.postStake(
+            { idempotencyKey: `sportsbook:bet:${ticket!.id}`, playerId, amount: draft.stake },
             tx,
-          ));
-          tickets.push(ticket!);
+          );
+          balance = posted.playerBalance + posted.bonusBalance;
+          if (posted.fromBonus > 0) {
+            await tx
+              .update(betTickets)
+              .set({ bonusStake: posted.fromBonus })
+              .where(eq(betTickets.id, ticket!.id));
+          }
+          tickets.push({ ...ticket!, bonusStake: posted.fromBonus });
         }
         return { tickets, balance };
       });
@@ -283,7 +283,7 @@ export class BettingService {
     }
     return {
       tickets: await this.toTickets(rows),
-      balance: await this.ledger.playerBalance(playerId),
+      balance: await this.ledger.playableBalance(playerId),
     };
   }
 
@@ -387,18 +387,16 @@ export class BettingService {
           cashout: offer,
         });
       }
-      const { playerBalance } = await this.ledger.post(
+      await this.ledger.post(
         {
           idempotencyKey: `sportsbook:cashout:${ticket.id}`,
           type: 'cashout',
           playerId,
-          legs: [
-            { account: { kind: 'house' }, amount: -offer },
-            { account: { kind: 'player', playerId }, amount: offer },
-          ],
+          legs: payoutLegs(playerId, offer, bonusShare(offer, ticket.stake, ticket.bonusStake)),
         },
         tx,
       );
+      const playerBalance = await this.ledger.playableBalance(playerId, tx);
       const [updated] = await tx
         .update(betTickets)
         .set({ status: 'cashed_out', payout: offer, settledAt: new Date() })

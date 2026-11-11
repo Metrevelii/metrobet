@@ -34,8 +34,11 @@ The protocol (request/response/error schemas, signature header) is in contracts
 5. **Rollbacks**: refund the bet once (a second rollback of the same bet is a no-op). A rollback
    of a bet we never saw is stored as a tombstone, and that bet is refused if it arrives later
    (`TRANSACTION_ROLLED_BACK`). Only bets can be rolled back.
-6. A closed round (`win` with `roundClosed`, the default) takes no more bets or wins.
-7. Activity is published after commit; a failed publish is logged and never undoes the bet.
+6. **Bonus money**: bets use `Ledger.postStake` (cash first); the round keeps `bonusBetTotal` and
+   wins pay that share back as bonus money; a rollback returns the bet's exact split. Balances
+   reported to providers are playable (cash + bonus).
+7. A closed round (`win` with `roundClosed`, the default) takes no more bets or wins.
+8. Activity is published after commit; a failed publish is logged and never undoes the bet.
    A rolled-back bet is not taken back from promotions (known gap).
 
 ## Endpoints

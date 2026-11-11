@@ -139,6 +139,17 @@
         "noSpins": "No spins left. Keep playing to earn more.",
         "failed": "Couldn't spin. Please try again."
       }
+    },
+    "depositBonus": {
+      "headline": "{percent}% up to {max}",
+      "bonus": "Bonus",
+      "bonusValue": "{percent}% up to {max}",
+      "minDeposit": "Minimum deposit",
+      "wagering": "Wagering",
+      "valid": "Valid for",
+      "days": "{days, plural, one {# day} other {# days}}",
+      "howItWorks": "Make your first deposit and the bonus is added automatically. Wager it {wagering} times within {days} days and it becomes cash you can withdraw.",
+      "cta": "Deposit now"
     }
   },
   "Errors": {
@@ -409,7 +420,10 @@
       "adjustment": "Adjustment",
       "cashout": "Cash-out",
       "withdrawal_reversal": "Withdrawal returned",
-      "payout": "Payout"
+      "payout": "Payout",
+      "bonus_grant": "Bonus granted",
+      "bonus_convert": "Bonus converted to cash",
+      "bonus_forfeit": "Bonus forfeited"
     },
     "dev": {
       "title": "Test money (development only)",
@@ -418,7 +432,9 @@
       "limits": "Limits"
     },
     "deposit": "Deposit",
-    "withdraw": "Withdraw"
+    "withdraw": "Withdraw",
+    "titleWithBonus": "Wallet (includes bonus money)",
+    "plusBonus": "+ {amount} bonus money"
   },
   "Originals": {
     "balance": "Balance",
@@ -759,7 +775,8 @@
       "GATEWAY_UNAVAILABLE": "The bank isn't answering. Please try again.",
       "signedOut": "Your session ended. Log in again.",
       "generic": "Something went wrong. Please try again.",
-      "KYC_REQUIRED": "Verify your identity to deposit more than 1 000 ₾ in total."
+      "KYC_REQUIRED": "Verify your identity to deposit more than 1 000 ₾ in total.",
+      "BONUS_ACTIVE": "Withdrawing now forfeits your active bonus. Confirm to continue."
     },
     "validation": {
       "depositMin": "The minimum deposit is 1 ₾.",
@@ -771,6 +788,23 @@
     "kycFirst": "Verify your identity first",
     "kycFirstHint": "Withdrawals need a verified identity (Georgian ID card or passport).",
     "kycPendingHint": "Your document is being checked. You can withdraw as soon as it's approved.",
-    "verifyIdentity": "Verify identity"
+    "verifyIdentity": "Verify identity",
+    "bonusWarning": "Withdrawing now forfeits your active bonus ({amount} bonus money and the wagering so far).",
+    "bonusForfeit": "Forfeit my bonus and withdraw"
+  },
+  "Bonus": {
+    "title": "Bonus",
+    "bonus": "Bonus",
+    "expires": "Expires {date}",
+    "progress": "{wagered} of {required} wagered",
+    "rules": "Bets use your cash first, then bonus money. Every real bet counts (sports tickets at odds 1.50 or more). When the wagering is done, the bonus becomes cash you can withdraw. Withdrawing earlier forfeits it.",
+    "converted": "{amount} became cash",
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "forfeited": "Forfeited",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
+    }
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { type SavedCard, toMajor } from '@metrobet/contracts';
-import { Alert, Button, Card, cn, Field, toast } from '@metrobet/ui';
+import { Alert, Button, Card, Checkbox, cn, Field, toast } from '@metrobet/ui';
 import { CreditCard } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
@@ -14,8 +14,15 @@ import { usePaymentError } from './use-payment-error';
 
 const PRESETS = [20, 50, 100, 200];
 
+type WithdrawFormProps = {
+  cards: SavedCard[];
+  balance: number;
+  /** Bonus money of an active bonus: withdrawing forfeits it, so the player must confirm. */
+  activeBonus: number | null;
+};
+
 /** Card (one the player deposited with) + amount. The money is reserved until staff decide. */
-export function WithdrawForm({ cards, balance }: { cards: SavedCard[]; balance: number }) {
+export function WithdrawForm({ cards, balance, activeBonus }: WithdrawFormProps) {
   const t = useTranslations('Payments');
   const format = useFormatter();
   const router = useRouter();
@@ -24,13 +31,14 @@ export function WithdrawForm({ cards, balance }: { cards: SavedCard[]; balance: 
   const [amount, setAmount] = useState('');
   const [error, setError] = useState<{ form?: string; amount?: string }>({});
   const [pending, startTransition] = useTransition();
+  const [forfeit, setForfeit] = useState(false);
   const minor = parseAmount(amount);
   const money = (value: number) =>
     format.number(toMajor(value), { style: 'currency', currency: 'GEL' });
 
   const submit = () =>
     startTransition(async () => {
-      const result = await requestWithdrawal({ cardId, amount: minor });
+      const result = await requestWithdrawal({ cardId, amount: minor, forfeitBonus: forfeit });
       if (!result.ok) {
         setError(
           result.fieldErrors
@@ -87,7 +95,20 @@ export function WithdrawForm({ cards, balance }: { cards: SavedCard[]; balance: 
         >
           <AmountInput value={amount} onChange={setAmount} presets={PRESETS} />
         </Field>
-        <Button type="submit" size="lg" disabled={pending || minor === null}>
+        {activeBonus !== null && (
+          <div className="flex flex-col gap-3 rounded-md border border-warning/50 bg-warning/10 p-3 text-sm">
+            <p>{t('bonusWarning', { amount: money(activeBonus) })}</p>
+            <label className="flex cursor-pointer items-center gap-2 font-semibold">
+              <Checkbox checked={forfeit} onCheckedChange={(value) => setForfeit(value === true)} />
+              {t('bonusForfeit')}
+            </label>
+          </div>
+        )}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={pending || minor === null || (activeBonus !== null && !forfeit)}
+        >
           {t('requestWithdrawal')}
         </Button>
         <p className="text-xs text-muted-foreground">{t('withdrawalNote')}</p>

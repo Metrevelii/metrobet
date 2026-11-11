@@ -6,7 +6,19 @@ import {
   type WalletTransactionsPage,
 } from '@metrobet/contracts';
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { and, count, countDistinct, desc, eq, gte, inArray, type SQL, sql, sum } from 'drizzle-orm';
+import {
+  and,
+  count,
+  countDistinct,
+  desc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  type SQL,
+  sql,
+  sum,
+} from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { IdempotencyConflictError } from './ledger-math.js';
@@ -31,7 +43,11 @@ export class WalletService {
   ) {}
 
   async getWallet(playerId: string): Promise<Wallet> {
-    return { currency: DEFAULT_CURRENCY, balance: await this.ledger.playerBalance(playerId) };
+    const [balance, bonusBalance] = await Promise.all([
+      this.ledger.playerBalance(playerId),
+      this.ledger.bonusBalance(playerId),
+    ]);
+    return { currency: DEFAULT_CURRENCY, balance, bonusBalance };
   }
 
   /** The player's side of each transaction, newest first. */
@@ -87,7 +103,11 @@ export class WalletService {
           { account: { kind: 'player', playerId }, amount },
         ],
       });
-      return { currency: DEFAULT_CURRENCY, balance: playerBalance };
+      return {
+        currency: DEFAULT_CURRENCY,
+        balance: playerBalance,
+        bonusBalance: await this.ledger.bonusBalance(playerId),
+      };
     } catch (error) {
       if (error instanceof IdempotencyConflictError) throw new ConflictException(error.message);
       throw error;
@@ -115,7 +135,8 @@ export class WalletService {
       .where(
         and(
           eq(walletTransactions.playerId, playerId),
-          eq(walletAccounts.kind, 'player'),
+          // Cash and bonus money both count: a bet paid with bonus money is still a stake.
+          inArray(walletAccounts.kind, ['player', 'bonus']),
           gte(walletTransactions.createdAt, earliest),
         ),
       )
@@ -144,6 +165,15 @@ export class WalletService {
     return new Map(rows.map((row) => [row.playerId!, row.balance]));
   }
 
+  /** Players holding bonus money (for the bonus module's stray-money sweep). */
+  async bonusHolders(): Promise<string[]> {
+    const rows = await this.db
+      .select({ playerId: walletAccounts.playerId })
+      .from(walletAccounts)
+      .where(and(eq(walletAccounts.kind, 'bonus'), gt(walletAccounts.balance, 0)));
+    return rows.map((row) => row.playerId!);
+  }
+
   /** What the platform owes players right now: the sum of every player balance. */
   async totalPlayerBalances(): Promise<number> {
     const [row] = await this.db
@@ -155,18 +185,20 @@ export class WalletService {
 
   /**
    * Money totals since `since`, from the players' side of the ledger: per product (casino =
-   * game wallet `game:*` transactions, sportsbook = `sportsbook:*`), plus deposits and the number
-   * of players who placed a bet.
+   * game wallet `game:*` transactions, sportsbook = `sportsbook:*`), plus deposits, bonus money
+   * converted to cash and the number of players who placed a bet. Stakes and wins include the
+   * bonus-money part.
    */
   async totalsSince(since: Date): Promise<{
     casino: ProductTotals;
     sportsbook: ProductTotals;
     deposits: number;
+    bonusCost: number;
     activePlayers: number;
   }> {
     const product = sql<string>`case when ${walletTransactions.idempotencyKey} like 'sportsbook:%' then 'sportsbook' else 'casino' end`;
     const playerEntries = and(
-      eq(walletAccounts.kind, 'player'),
+      inArray(walletAccounts.kind, ['player', 'bonus']),
       gte(walletTransactions.createdAt, since),
     );
     const [rows, [active]] = await Promise.all([
@@ -175,7 +207,8 @@ export class WalletService {
           product,
           type: walletTransactions.type,
           amount: sum(walletEntries.amount),
-          transactions: count(),
+          // A bet paid with cash and bonus money has two entries: count transactions.
+          transactions: countDistinct(walletEntries.transactionId),
         })
         .from(walletEntries)
         .innerJoin(walletAccounts, eq(walletEntries.accountId, walletAccounts.id))
@@ -201,14 +234,33 @@ export class WalletService {
         bets: pick('bet')?.transactions ?? 0,
       };
     };
-    const deposits = rows
-      .filter((row) => row.type === 'deposit')
-      .reduce((total, row) => total + Number(row.amount ?? 0), 0);
+    const sumOf = (type: string) =>
+      rows
+        .filter((row) => row.type === type)
+        .reduce((total, row) => total + Number(row.amount ?? 0), 0);
     return {
       casino: totals('casino'),
       sportsbook: totals('sportsbook'),
-      deposits,
+      deposits: sumOf('deposit'),
+      // A conversion moves bonus → cash: its player-side entries sum to 0, so take the cash leg.
+      bonusCost: await this.convertedSince(since),
       activePlayers: active?.value ?? 0,
     };
+  }
+
+  private async convertedSince(since: Date): Promise<number> {
+    const [row] = await this.db
+      .select({ value: sum(walletEntries.amount) })
+      .from(walletEntries)
+      .innerJoin(walletAccounts, eq(walletEntries.accountId, walletAccounts.id))
+      .innerJoin(walletTransactions, eq(walletEntries.transactionId, walletTransactions.id))
+      .where(
+        and(
+          eq(walletTransactions.type, 'bonus_convert'),
+          eq(walletAccounts.kind, 'player'),
+          gte(walletTransactions.createdAt, since),
+        ),
+      );
+    return Number(row?.value ?? 0);
   }
 }

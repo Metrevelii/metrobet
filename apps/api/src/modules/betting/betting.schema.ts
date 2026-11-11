@@ -45,6 +45,8 @@ export const betTickets = pgTable(
     requestIndex: integer().notNull(),
     mode: betMode().notNull(),
     stake: minor().notNull(),
+    /** The bonus-money part of the stake: payouts return that share as bonus money. */
+    bonusStake: minor().notNull().default(0),
     odds: odds(14).notNull(),
     potentialWin: minor().notNull(),
     status: ticketStatus().notNull().default('open'),

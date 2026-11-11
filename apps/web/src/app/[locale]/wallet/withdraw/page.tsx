@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 
 import { EmptyState } from '@/components/shared/empty-state';
 import { getCurrentPlayer } from '@/features/auth';
+import { getBonuses } from '@/features/bonus';
 import { getSavedCards, WithdrawForm } from '@/features/payments';
 import { getWallet } from '@/features/wallet';
 import { Link, redirect } from '@/i18n/navigation';
@@ -19,9 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
 async function Withdraw() {
   const player = await getCurrentPlayer();
   if (!player) redirect({ href: '/login?next=/wallet/withdraw', locale: await getLocale() });
-  const [cards, wallet, t] = await Promise.all([
+  const [cards, wallet, bonuses, t] = await Promise.all([
     getSavedCards(),
     getWallet(),
+    getBonuses(),
     getTranslations('Payments'),
   ]);
   if (!player!.verified) {
@@ -74,7 +76,13 @@ async function Withdraw() {
       </Card>
     );
   }
-  return <WithdrawForm cards={cards} balance={wallet.balance} />;
+  return (
+    <WithdrawForm
+      cards={cards}
+      balance={wallet.balance}
+      activeBonus={bonuses?.active ? bonuses.active.balance : null}
+    />
+  );
 }
 
 export default async function WithdrawPage() {

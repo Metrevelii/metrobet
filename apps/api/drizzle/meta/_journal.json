@@ -148,6 +148,13 @@
       "when": 1794418368710,
       "tag": "0020_kyc",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794419776151,
+      "tag": "0021_bonus",
+      "breakpoints": true
     }
   ]
 }

@@ -22,6 +22,7 @@ import {
 import {
   AlignLeft,
   Disc3,
+  Gift,
   ArrowDown,
   ArrowUp,
   CircleHelp,
@@ -36,6 +37,7 @@ import {
   X,
 } from 'lucide-react';
 
+import { DepositBonusSettings } from './deposit-bonus-settings';
 import { WheelSettings } from './wheel-settings';
 import {
   BLOCK_ITEMS,
@@ -56,6 +58,7 @@ const BLOCK_ICONS: Record<PromoBlockType, LucideIcon> = {
   faq: CircleHelp,
   terms: ScrollText,
   wheel: Disc3,
+  depositBonus: Gift,
 };
 
 const HEADING: TextFieldConfig = { key: 'title', label: 'Heading' };
@@ -73,6 +76,7 @@ const BLOCK_FIELDS: Record<PromoBlockType, TextFieldConfig[]> = {
   terms: [{ key: 'body', label: 'Rules', multiline: true, hint: 'One rule per line.' }],
   optIn: [HEADING, { key: 'body', label: 'Text', multiline: true }],
   wheel: [HEADING],
+  depositBonus: [HEADING],
 };
 
 /** Fields of each list item, for blocks that have items. */
@@ -160,6 +164,9 @@ function BlockEditor({ block, path, locale, errors, onChange }: BlockEditorProps
       ))}
       {block.type === 'wheel' && (
         <WheelSettings block={block} path={path} errors={errors} onChange={onChange} />
+      )}
+      {block.type === 'depositBonus' && (
+        <DepositBonusSettings block={block} path={path} errors={errors} onChange={onChange} />
       )}
       {hasItems(block) && (
         <ItemsEditor

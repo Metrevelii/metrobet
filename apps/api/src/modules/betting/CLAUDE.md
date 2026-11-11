@@ -81,3 +81,9 @@ the worst loss. `GET /admin/sportsbook/liability?eventIds=a,b` (totals) and
 
 Partial cash-out, auto cash-out rules, bet builder / same-game combos, system bets, per-player limits, re-settling an already settled ticket (needs reversing the payout),
 early settlement of markets decided before full time (e.g. over 1.5 after two goals).
+
+## Bonus money
+
+Placement debits each ticket with `Ledger.postStake` (cash first, then bonus money) and stores
+`bet_tickets.bonus_stake`. Wins, voids, refunds and cash-outs pay back in the stake's proportions
+(`payoutLegs` + `bonusShare`). Balances in responses are playable (cash + bonus).

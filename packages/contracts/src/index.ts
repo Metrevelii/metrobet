@@ -27,3 +27,4 @@ export * from './realtime/player.js';
 export * from './responsible-gaming/responsible-gaming.js';
 export * from './payments/payments.js';
 export * from './kyc/kyc.js';
+export * from './bonus/bonus.js';

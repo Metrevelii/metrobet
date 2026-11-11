@@ -19,7 +19,12 @@ import {
   LimitExceededError,
   ResponsibleGamingService,
 } from '../responsible-gaming/responsible-gaming.service.js';
-import { IdempotencyConflictError, InsufficientFundsError } from '../wallet/ledger-math.js';
+import {
+  bonusShare,
+  IdempotencyConflictError,
+  InsufficientFundsError,
+  payoutLegs,
+} from '../wallet/ledger-math.js';
 import { Ledger, type Tx } from '../wallet/ledger.js';
 import {
   type GameRoundRow,
@@ -75,7 +80,7 @@ export class GameWalletService {
 
   async balance({ sessionToken }: BalanceRequest): Promise<GameWalletResponse> {
     const session = await this.session(sessionToken);
-    return this.response(await this.ledger.playerBalance(session.playerId));
+    return this.response(await this.ledger.playableBalance(session.playerId));
   }
 
   async bet(request: BetRequest): Promise<GameWalletResponse> {
@@ -97,16 +102,13 @@ export class GameWalletService {
       if (round.status === 'closed') throw gameWalletError('ROUND_CLOSED', 'The round is closed');
       // After the replay check, so a retried bet that was already taken is never refused.
       await this.assertWithinLimits(session.playerId, request.amount);
-      const posted = await this.ledger.post(
+      // Cash first, then bonus money; the round remembers the bonus share for its wins.
+      const posted = await this.ledger.postStake(
         {
           idempotencyKey: ledgerKey(request.transactionId),
-          type: 'bet',
           playerId: session.playerId,
           gameSlug: session.gameSlug,
-          legs: [
-            { account: { kind: 'player', playerId: session.playerId }, amount: -request.amount },
-            { account: { kind: 'house' }, amount: request.amount },
-          ],
+          amount: request.amount,
         },
         tx,
       );
@@ -114,13 +116,17 @@ export class GameWalletService {
         externalId: request.transactionId,
         kind: 'bet',
         amount: request.amount,
+        bonusAmount: posted.fromBonus,
         walletTransactionId: posted.transactionId,
       });
       await tx
         .update(gameRounds)
-        .set({ betTotal: sql`${gameRounds.betTotal} + ${request.amount}` })
+        .set({
+          betTotal: sql`${gameRounds.betTotal} + ${request.amount}`,
+          bonusBetTotal: sql`${gameRounds.bonusBetTotal} + ${posted.fromBonus}`,
+        })
         .where(eq(gameRounds.id, round.id));
-      return { balance: posted.playerBalance, created: row };
+      return { balance: posted.playerBalance + posted.bonusBalance, created: row };
     });
 
     if (created) await this.publishBet(session, created);
@@ -137,6 +143,8 @@ export class GameWalletService {
 
       const round = await this.round(tx, session, request.roundId);
       if (round.status === 'closed') throw gameWalletError('ROUND_CLOSED', 'The round is closed');
+      // The round's bonus-money share of its stakes comes back as bonus money.
+      const bonusPart = bonusShare(request.amount, round.betTotal, round.bonusBetTotal);
       const posted =
         request.amount > 0
           ? await this.ledger.post(
@@ -145,13 +153,7 @@ export class GameWalletService {
                 type: 'win',
                 playerId: session.playerId,
                 gameSlug: session.gameSlug,
-                legs: [
-                  { account: { kind: 'house' }, amount: -request.amount },
-                  {
-                    account: { kind: 'player', playerId: session.playerId },
-                    amount: request.amount,
-                  },
-                ],
+                legs: payoutLegs(session.playerId, request.amount, bonusPart),
               },
               tx,
             )
@@ -160,6 +162,7 @@ export class GameWalletService {
         externalId: request.transactionId,
         kind: 'win',
         amount: request.amount,
+        bonusAmount: bonusPart,
         walletTransactionId: posted?.transactionId ?? null,
       });
       await tx
@@ -169,10 +172,7 @@ export class GameWalletService {
           ...(request.roundClosed && { status: 'closed' as const, closedAt: new Date() }),
         })
         .where(eq(gameRounds.id, round.id));
-      return {
-        balance: posted?.playerBalance ?? (await this.ledger.playerBalance(session.playerId, tx)),
-        created: row,
-      };
+      return { balance: await this.ledger.playableBalance(session.playerId, tx), created: row };
     });
     return this.response(balance);
   }
@@ -210,10 +210,8 @@ export class GameWalletService {
               type: 'rollback',
               playerId: session.playerId,
               gameSlug: session.gameSlug,
-              legs: [
-                { account: { kind: 'house' }, amount: -bet.amount },
-                { account: { kind: 'player', playerId: session.playerId }, amount: bet.amount },
-              ],
+              // The refund goes back where the stake came from.
+              legs: payoutLegs(session.playerId, bet.amount, bet.bonusAmount),
             },
             tx,
           )
@@ -222,19 +220,20 @@ export class GameWalletService {
         externalId: request.transactionId,
         kind: 'rollback',
         amount: bet?.amount ?? 0,
+        bonusAmount: bet?.bonusAmount ?? 0,
         rollbackOf: request.rollbackOf,
         walletTransactionId: posted?.transactionId ?? null,
       });
       if (bet) {
         await tx
           .update(gameRounds)
-          .set({ betTotal: sql`${gameRounds.betTotal} - ${bet.amount}` })
+          .set({
+            betTotal: sql`${gameRounds.betTotal} - ${bet.amount}`,
+            bonusBetTotal: sql`${gameRounds.bonusBetTotal} - ${bet.bonusAmount}`,
+          })
           .where(eq(gameRounds.id, round.id));
       }
-      return {
-        balance: posted?.playerBalance ?? (await this.ledger.playerBalance(session.playerId, tx)),
-        created: row,
-      };
+      return { balance: await this.ledger.playableBalance(session.playerId, tx), created: row };
     });
     return this.response(balance);
   }
@@ -318,7 +317,7 @@ export class GameWalletService {
     round: GameRoundRow,
     values: Pick<
       typeof gameTransactions.$inferInsert,
-      'externalId' | 'kind' | 'amount' | 'rollbackOf' | 'walletTransactionId'
+      'externalId' | 'kind' | 'amount' | 'bonusAmount' | 'rollbackOf' | 'walletTransactionId'
     >,
   ): Promise<GameTransactionRow> {
     const [row] = await tx
@@ -352,7 +351,7 @@ export class GameWalletService {
   }
 
   private async current(tx: Tx, session: GameSession): Promise<Settled> {
-    return { balance: await this.ledger.playerBalance(session.playerId, tx), created: null };
+    return { balance: await this.ledger.playableBalance(session.playerId, tx), created: null };
   }
 
   private response(balance: number): GameWalletResponse {

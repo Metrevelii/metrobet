@@ -64,6 +64,7 @@ describe('wallet (e2e)', () => {
     expect((await deposit(headers, 100_00).expect(200)).body).toEqual({
       currency: 'GEL',
       balance: 100_00,
+      bonusBalance: 0,
     });
     await deposit(headers, 25_50).expect(200);
     await deposit(headers, 1000_01).expect(400); // over the dev limit

@@ -12,6 +12,7 @@ import type { z } from 'zod';
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { AuditService } from '../audit/audit.service.js';
 import { AdminPlayersService } from '../players/admin-players.service.js';
+import { payoutLegs } from '../wallet/ledger-math.js';
 import { Ledger } from '../wallet/ledger.js';
 import { type BetTicketRow, betSelections, betTickets } from './betting.schema.js';
 import { BettingService } from './betting.service.js';
@@ -82,10 +83,7 @@ export class AdminBetsService {
           idempotencyKey: `sportsbook:refund:${id}`,
           type: 'rollback',
           playerId: ticket.playerId,
-          legs: [
-            { account: { kind: 'house' }, amount: -ticket.stake },
-            { account: { kind: 'player', playerId: ticket.playerId }, amount: ticket.stake },
-          ],
+          legs: payoutLegs(ticket.playerId, ticket.stake, ticket.bonusStake),
         },
         tx,
       );

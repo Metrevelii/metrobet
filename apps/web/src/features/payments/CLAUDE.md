@@ -10,6 +10,8 @@ API rules: `apps/api/src/modules/payments/CLAUDE.md`.
   banner shows the real outcome (the callback has already been processed).
 - **Withdraw** (`WithdrawForm`): one of the saved cards + amount. Needs a confirmed contact, a
   verified identity (link to `/account/identity`) and a saved card (otherwise "deposit first").
-  A deposit past the KYC threshold fails with `KYC_REQUIRED` and links there too.
+  A deposit past the KYC threshold fails with `KYC_REQUIRED` and links there too. With an
+  active bonus the form warns that withdrawing forfeits it and needs a checkbox
+  (`forfeitBonus`).
 - Errors: `Payments.errors.<code>`, field errors `Payments.validation.<key>` (keys come from the
   contracts schemas); a deposit limit uses `useLimitMessage` with a link to the limits page.

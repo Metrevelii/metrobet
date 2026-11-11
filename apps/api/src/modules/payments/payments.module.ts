@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 
+import { ActivityModule } from '../activity/activity.module.js';
 import { AuditModule } from '../audit/audit.module.js';
+import { BonusModule } from '../bonus/bonus.module.js';
 import { PlayersModule } from '../players/players.module.js';
 import { ResponsibleGamingModule } from '../responsible-gaming/responsible-gaming.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
@@ -20,7 +22,14 @@ import { PaymentsService } from './payments.service.js';
  * `PaymentGateway` is bound to the mock bank (TBC / BoG stand-in) until real contracts exist.
  */
 @Module({
-  imports: [AuditModule, PlayersModule, ResponsibleGamingModule, WalletModule],
+  imports: [
+    ActivityModule,
+    AuditModule,
+    BonusModule,
+    PlayersModule,
+    ResponsibleGamingModule,
+    WalletModule,
+  ],
   controllers: [
     PaymentsController,
     PaymentCallbackController,

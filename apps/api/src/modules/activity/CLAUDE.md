@@ -23,5 +23,8 @@ producer ──publish(event)──▶ ActivityBus ──insert activity_events 
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `POST /api/dev/activity/casino-bet`     | **Dev only** (404 in production). Body `{ gameSlug, amount }`, player session required. Fakes a bet (no money moves) |
 | Game wallet API (`modules/game-wallet`) | Every real-money bet, after commit, id `game:<provider transaction id>`                                              |
+| Sportsbook (`modules/betting`)          | `sports.bet` per placed ticket (stake, total odds)                                                                   |
+| Payments (`modules/payments`)           | `payment.deposit` per credited deposit (`first` = first ever), id `payment:<id>`                                     |
 
-Subscribe with `bus.subscribe(handler)` in `onModuleInit` (see `PromoActivityService`).
+Subscribe with `bus.subscribe(handler)` in `onModuleInit` (see `PromoActivityService`,
+`BonusService` for wagering).

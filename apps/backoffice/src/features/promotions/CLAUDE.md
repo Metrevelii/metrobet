@@ -31,6 +31,8 @@ re-validates) → adminFetch → api → audit + site revalidation → router.pu
   types that count, free-spins game (type-ahead `<datalist>` fed by the `searchSlotGames` action,
   which reads the public casino API), segments with free spins + weight and the resulting chance.
   The API rejects a game that doesn't exist or isn't a slot (`blocks.N.freeSpinsGame`).
+- `DepositBonusSettings` (deposit bonus blocks): minimum first deposit and maximum bonus in ₾,
+  percent, wagering multiplier, valid days, with a worked example.
 - Schedule inputs are `datetime-local` in the editor's browser time zone, converted to ISO UTC.
 - Field errors use dotted paths from Zod (`title.ka`, `image.desktop`,
   `blocks.2.items.0.title.en`) for both client and server validation.
