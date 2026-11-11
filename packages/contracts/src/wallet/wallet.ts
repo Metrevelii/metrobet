@@ -3,9 +3,10 @@ import { z } from 'zod';
 import { currencySchema } from '../common/currency.js';
 
 /**
- * What moved money. `deposit`/`withdrawal` come from payments (dev deposits for now); `bet`,
- * `win` and `rollback` from games and the sportsbook; `cashout` from selling a sports ticket
- * early; `adjustment` from staff.
+ * What moved money. `deposit` comes from payments (and dev deposits); `withdrawal` reserves a
+ * requested withdrawal, `withdrawal_reversal` gives it back (cancelled, rejected or failed) and
+ * `payout` sends it out (not on the player's side); `bet`, `win` and `rollback` from games and
+ * the sportsbook; `cashout` from selling a sports ticket early; `adjustment` from staff.
  */
 export const WALLET_TRANSACTION_TYPES = [
   'deposit',
@@ -15,6 +16,8 @@ export const WALLET_TRANSACTION_TYPES = [
   'rollback',
   'adjustment',
   'cashout',
+  'withdrawal_reversal',
+  'payout',
 ] as const;
 export const walletTransactionTypeSchema = z.enum(WALLET_TRANSACTION_TYPES);
 export type WalletTransactionType = z.infer<typeof walletTransactionTypeSchema>;

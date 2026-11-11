@@ -1,4 +1,5 @@
 import {
+  Banknote,
   Gamepad2,
   LayoutDashboard,
   Megaphone,
@@ -15,6 +16,7 @@ export const BACKOFFICE_NAV = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/promotions', label: 'Promotions', icon: Megaphone },
   { href: '/players', label: 'Players', icon: Users },
+  { href: '/payments', label: 'Payments', icon: Banknote },
   { href: '/bets', label: 'Bets', icon: Ticket },
   { href: '/sportsbook', label: 'Sportsbook', icon: Trophy },
   { href: '/games', label: 'Games & Providers', icon: Gamepad2 },

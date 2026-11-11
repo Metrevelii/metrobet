@@ -407,14 +407,18 @@
       "win": "Win",
       "rollback": "Bet refunded",
       "adjustment": "Adjustment",
-      "cashout": "Cash-out"
+      "cashout": "Cash-out",
+      "withdrawal_reversal": "Withdrawal returned",
+      "payout": "Payout"
     },
     "dev": {
       "title": "Test money (development only)",
       "failed": "The deposit failed. Is the API running?",
       "added": "{amount} added to your balance",
       "limits": "Limits"
-    }
+    },
+    "deposit": "Deposit",
+    "withdraw": "Withdraw"
   },
   "Originals": {
     "balance": "Balance",
@@ -671,6 +675,60 @@
       "history": "See your transactions",
       "continue": "Keep playing",
       "logout": "Log out"
+    }
+  },
+  "Payments": {
+    "depositTitle": "Deposit",
+    "withdrawTitle": "Withdraw",
+    "backToWallet": "Wallet",
+    "bank": "Pay with",
+    "cards": "Visa, Mastercard",
+    "providers": {
+      "tbc": "TBC Bank",
+      "bog": "Bank of Georgia"
+    },
+    "amount": "Amount",
+    "depositRange": "From 1 ₾ to 10 000 ₾",
+    "continueToBank": "Continue to the bank",
+    "redirecting": "Opening the bank…",
+    "secureNote": "You'll enter your card on the bank's secure page. Metrobet never sees your card number.",
+    "manageLimits": "Manage limits",
+    "toCard": "Pay out to",
+    "available": "Available: {balance}",
+    "requestWithdrawal": "Request withdrawal",
+    "withdrawalNote": "The amount is reserved from your balance right away. We review withdrawals and pay them to your card, usually within a few hours. You can cancel while it's pending.",
+    "withdrawalRequested": "Withdrawal of {amount} requested",
+    "withdrawalCancelled": "Withdrawal cancelled. The money is back in your balance.",
+    "cancel": "Cancel",
+    "pendingTitle": "Pending withdrawals",
+    "pendingHint": "Pending withdrawals are already taken from your balance.",
+    "verifyFirst": "Confirm your account first",
+    "verifyFirstHint": "Withdrawals need a confirmed email or phone number.",
+    "verify": "Confirm account",
+    "noCards": "No card to pay out to",
+    "noCardsHint": "Withdrawals go back to a card you deposited with. Make a deposit first.",
+    "result": {
+      "succeeded": "Deposit of {amount} added to your balance.",
+      "pending": "Your deposit of {amount} is being processed.",
+      "cancelled": "The deposit of {amount} was cancelled.",
+      "failed": "The deposit of {amount} didn't go through"
+    },
+    "errors": {
+      "INSUFFICIENT_FUNDS": "Not enough balance for this withdrawal.",
+      "LIMIT_EXCEEDED": "You reached your deposit limit.",
+      "UNVERIFIED": "Confirm your email or phone before withdrawing.",
+      "CARD_NOT_FOUND": "That card is no longer available.",
+      "NOT_CANCELLABLE": "This withdrawal can no longer be cancelled.",
+      "GATEWAY_UNAVAILABLE": "The bank isn't answering. Please try again.",
+      "signedOut": "Your session ended. Log in again.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "validation": {
+      "depositMin": "The minimum deposit is 1 ₾.",
+      "depositMax": "The maximum deposit is 10 000 ₾.",
+      "withdrawalMin": "The minimum withdrawal is 5 ₾.",
+      "withdrawalMax": "The maximum withdrawal is 10 000 ₾.",
+      "cardRequired": "Choose a card."
     }
   }
 }

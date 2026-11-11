@@ -25,3 +25,4 @@ export * from './sportsbook/bets.js';
 export * from './admin/admin.js';
 export * from './realtime/player.js';
 export * from './responsible-gaming/responsible-gaming.js';
+export * from './payments/payments.js';

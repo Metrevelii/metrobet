@@ -7,6 +7,7 @@ export * from '../../modules/casino/casino.schema.js';
 export * from '../../modules/casino/game-sessions.schema.js';
 export * from '../../modules/game-wallet/game-wallet.schema.js';
 export * from '../../modules/originals/crash/crash.schema.js';
+export * from '../../modules/payments/payments.schema.js';
 export * from '../../modules/players/players.schema.js';
 export * from '../../modules/promotions/mechanics/wheel/wheel.schema.js';
 export * from '../../modules/promotions/promotions.schema.js';

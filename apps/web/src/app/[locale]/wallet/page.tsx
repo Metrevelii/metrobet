@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 
 import { getCurrentPlayer } from '@/features/auth';
+import { PaymentResult, PendingWithdrawals } from '@/features/payments';
 import { WalletView } from '@/features/wallet';
 import { redirect } from '@/i18n/navigation';
 
@@ -18,8 +19,17 @@ async function WalletContent({ searchParams }: Pick<Props, 'searchParams'>) {
   if (!(await getCurrentPlayer())) {
     redirect({ href: '/login?next=/wallet', locale: await getLocale() });
   }
-  const page = Number((await searchParams).page);
-  return <WalletView page={Number.isInteger(page) && page > 0 ? page : 1} />;
+  const query = await searchParams;
+  const page = Number(query.page);
+  const payment = typeof query.payment === 'string' ? query.payment : null;
+  return (
+    <div className="flex flex-col gap-6">
+      {payment && <PaymentResult id={payment} />}
+      <WalletView page={Number.isInteger(page) && page > 0 ? page : 1}>
+        <PendingWithdrawals />
+      </WalletView>
+    </div>
+  );
 }
 
 export default async function WalletPage({ searchParams }: Props) {

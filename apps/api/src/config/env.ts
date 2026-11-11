@@ -51,6 +51,12 @@ const envSchema = z.object({
    * The mock studio's game server signs with it too.
    */
   GAME_WALLET_SECRET: secret,
+
+  /**
+   * Shared with the bank's payment gateway: signs its server-to-server callbacks (HMAC-SHA256
+   * of the body). The mock gateway (TBC / BoG stand-in) signs with it too.
+   */
+  PAYMENT_GATEWAY_SECRET: secret,
 });
 
 const guardedEnvSchema = envSchema.refine(

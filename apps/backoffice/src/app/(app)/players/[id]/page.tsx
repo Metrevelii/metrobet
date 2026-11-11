@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/page-header';
 import { Pager } from '@/components/pager';
 import { getCurrentStaff, hasRole } from '@/features/auth';
 import { TicketsTable } from '@/features/bets';
+import { listPayments, PaymentsTable } from '@/features/payments';
 import {
   getPlayer,
   getPlayerResponsibleGaming,
@@ -31,7 +32,7 @@ export const metadata: Metadata = { title: 'Player' };
 
 type Props = PageProps<'/players/[id]'>;
 
-const TABS: PlayerTab[] = ['transactions', 'tickets', 'rounds'];
+const TABS: PlayerTab[] = ['transactions', 'payments', 'tickets', 'rounds'];
 
 async function History({ id, tab, page }: { id: string; tab: PlayerTab; page: number }) {
   const href = (target: number) =>
@@ -42,6 +43,15 @@ async function History({ id, tab, page }: { id: string; tab: PlayerTab; page: nu
       <>
         <TicketsTable tickets={tickets} showPlayer={false} />
         <Pager page={page} total={tickets.total} pageSize={tickets.pageSize} href={href} />
+      </>
+    );
+  }
+  if (tab === 'payments') {
+    const payments = await listPayments({ playerId: id, page });
+    return (
+      <>
+        <PaymentsTable payments={payments} showPlayer={false} />
+        <Pager page={page} total={payments.total} pageSize={payments.pageSize} href={href} />
       </>
     );
   }

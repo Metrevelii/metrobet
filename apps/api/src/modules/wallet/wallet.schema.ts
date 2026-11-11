@@ -15,7 +15,8 @@ import {
 import { players } from '../players/players.schema.js';
 
 /** See CLAUDE.md for the ledger invariants these tables (and the 0008 triggers) enforce. */
-export const WALLET_ACCOUNT_KINDS = ['player', 'house', 'funding'] as const;
+/** `withdrawals` holds money of requested withdrawals until it is paid out or given back. */
+export const WALLET_ACCOUNT_KINDS = ['player', 'house', 'funding', 'withdrawals'] as const;
 export type WalletAccountKind = (typeof WALLET_ACCOUNT_KINDS)[number];
 
 export const walletAccountKind = pgEnum('wallet_account_kind', WALLET_ACCOUNT_KINDS);

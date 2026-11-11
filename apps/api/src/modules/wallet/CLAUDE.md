@@ -30,23 +30,26 @@ with your rows (it runs in a savepoint). The game wallet module does this for ev
 
 ## Accounts
 
-| kind      | owner  | meaning                                                                 |
-| --------- | ------ | ----------------------------------------------------------------------- |
-| `player`  | player | the player's cash balance (one per player and currency, created lazily) |
-| `house`   | –      | casino side: bets go in, wins come out                                  |
-| `funding` | –      | outside money: deposits come from it, withdrawals go to it              |
+| kind          | owner  | meaning                                                                 |
+| ------------- | ------ | ----------------------------------------------------------------------- |
+| `player`      | player | the player's cash balance (one per player and currency, created lazily) |
+| `house`       | –      | casino side: bets go in, wins come out                                  |
+| `funding`     | –      | outside money: deposits come from it, withdrawals go to it              |
+| `withdrawals` | –      | requested withdrawals, reserved until paid out or given back            |
 
 Transaction types (contracts `WALLET_TRANSACTION_TYPES`):
 
-| type         | entries                       | source                          |
-| ------------ | ----------------------------- | ------------------------------- |
-| `deposit`    | funding −, player +           | payments (dev deposit for now)  |
-| `withdrawal` | player −, funding +           | payments (later)                |
-| `bet`        | player −, house +             | game wallet API (`game-wallet`) |
-| `win`        | house −, player +             | game wallet API (`game-wallet`) |
-| `rollback`   | reverses a bet                | game wallet API (`game-wallet`) |
-| `adjustment` | either way, staff + audit log | backoffice (later)              |
-| `cashout`    | house −, player +             | sportsbook cash-out             |
+| type                  | entries                       | source                                   |
+| --------------------- | ----------------------------- | ---------------------------------------- |
+| `deposit`             | funding −, player +           | payments (bank callback, dev deposit)    |
+| `withdrawal`          | player −, withdrawals +       | payments: withdrawal requested           |
+| `withdrawal_reversal` | withdrawals −, player +       | payments: cancelled / rejected / refused |
+| `payout`              | withdrawals −, funding +      | payments: paid out (no player leg)       |
+| `bet`                 | player −, house +             | game wallet API (`game-wallet`)          |
+| `win`                 | house −, player +             | game wallet API (`game-wallet`)          |
+| `rollback`            | reverses a bet                | game wallet API (`game-wallet`)          |
+| `adjustment`          | either way, staff + audit log | backoffice (later)                       |
+| `cashout`             | house −, player +             | sportsbook cash-out                      |
 
 `playerActivity(playerId, windows)`: deposits, stakes and returns per window in one query, for
 responsible-gaming limits and the reality check.
@@ -61,5 +64,5 @@ responsible-gaming limits and the reality check.
 
 ## Not yet
 
-Real payments (TBC/BoG), withdrawals, bonus money (a separate
+Real bank contracts (TBC/BoG), bonus money (a separate
 `bonus` account kind with wagering), staff adjustments with audit, reconciliation job.

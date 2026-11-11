@@ -1,7 +1,8 @@
 import { toMajor, type WalletTransaction } from '@metrobet/contracts';
 import { Button, Card, cn } from '@metrobet/ui';
-import { ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpFromLine, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
 import { getFormatter, getTranslations } from 'next-intl/server';
+import type { ReactNode } from 'react';
 
 import { EmptyState } from '@/components/shared/empty-state';
 import { Link } from '@/i18n/navigation';
@@ -46,8 +47,11 @@ async function TransactionRow({ item }: { item: WalletTransaction }) {
   );
 }
 
-/** Balance, dev deposits and transaction history. Request-time: render inside <Suspense>. */
-export async function WalletView({ page }: { page: number }) {
+/**
+ * Balance with deposit / withdraw, dev deposits and transaction history. `children` render
+ * between the balance and the history (pending withdrawals). Request-time: inside <Suspense>.
+ */
+export async function WalletView({ page, children }: { page: number; children?: ReactNode }) {
   const [wallet, history, format, t] = await Promise.all([
     getWallet(),
     getWalletTransactions(page),
@@ -70,8 +74,24 @@ export async function WalletView({ page }: { page: number }) {
           <span className="text-xs font-semibold text-muted-foreground">{t('balance')}</span>
           <span className="text-3xl font-bold tabular-nums">{money(format, wallet.balance)}</span>
         </div>
+        <div className="grid grid-cols-2 gap-2 sm:flex">
+          <Button asChild>
+            <Link href="/wallet/deposit">
+              <ArrowDownToLine />
+              {t('deposit')}
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/wallet/withdraw">
+              <ArrowUpFromLine />
+              {t('withdraw')}
+            </Link>
+          </Button>
+        </div>
         {process.env.NODE_ENV !== 'production' && <DevDeposit />}
       </Card>
+
+      {children}
 
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-bold">{t('history')}</h2>

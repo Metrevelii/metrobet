@@ -30,7 +30,12 @@ one.
 Server Action → `POST /api/dev/wallet/deposit` (404 in production), then `router.refresh()` so the
 header and page re-render with the new balance.
 
+## Deposit / withdraw
+
+The balance card links to `/wallet/deposit` and `/wallet/withdraw` (`features/payments`); the
+`/wallet` page composes `PaymentResult` and `PendingWithdrawals` (passed as `WalletView`
+children).
+
 ## Not yet
 
-Real deposit/withdraw flows (payments),
-filters by type/date, bonus balance.
+Filters by type/date, bonus balance.
