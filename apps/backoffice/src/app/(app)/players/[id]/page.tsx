@@ -12,6 +12,7 @@ import { getCurrentStaff, hasRole } from '@/features/auth';
 import { TicketsTable } from '@/features/bets';
 import {
   getPlayer,
+  getPlayerResponsibleGaming,
   getPlayerRounds,
   getPlayerTickets,
   getPlayerTransactions,
@@ -19,6 +20,7 @@ import {
   PlayerStatusBadge,
   PlayerStatusForm,
   type PlayerTab,
+  ResponsibleGamingCard,
   RoundsTable,
   TransactionsTable,
 } from '@/features/players';
@@ -69,6 +71,7 @@ async function PlayerView({ params, searchParams }: Props) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const player = await getPlayer(id);
   if (!player) notFound();
+  const responsibleGaming = await getPlayerResponsibleGaming(id);
   const tab = TABS.find((item) => item === param(query.tab)) ?? 'transactions';
   const facts = [
     ['Balance', money(player.balance)],
@@ -123,6 +126,7 @@ async function PlayerView({ params, searchParams }: Props) {
           </Card>
         )}
       </div>
+      <ResponsibleGamingCard player={player} data={responsibleGaming} />
       <PlayerHistoryTabs playerId={player.id} active={tab} />
       <div className="flex flex-col gap-4">
         <History id={player.id} tab={tab} page={pageParam(query.page)} />

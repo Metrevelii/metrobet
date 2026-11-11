@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { minorAmountSchema } from '../common/money.js';
+import { limitExceededSchema } from '../responsible-gaming/responsible-gaming.js';
 import { marketTypeSchema, selectionKeySchema, sportSchema } from './sportsbook.js';
 
 /**
@@ -150,6 +151,8 @@ export const BET_ERRORS = [
   'CASHOUT_UNAVAILABLE',
   /** The offer went down: see `cashout` for the current amount. */
   'CASHOUT_CHANGED',
+  /** A player-set stake or loss limit: see `limit`. */
+  'LIMIT_EXCEEDED',
 ] as const;
 export type BetError = (typeof BET_ERRORS)[number];
 
@@ -162,6 +165,8 @@ export const betErrorSchema = z.object({
     .optional(),
   /** For CASHOUT_CHANGED: the current offer (minor units). */
   cashout: z.number().int().nullable().optional(),
+  /** For LIMIT_EXCEEDED: the limit hit and what is left of it. */
+  limit: limitExceededSchema.optional(),
 });
 export type BetErrorBody = z.infer<typeof betErrorSchema>;
 

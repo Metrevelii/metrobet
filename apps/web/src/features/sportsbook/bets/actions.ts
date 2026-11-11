@@ -5,6 +5,7 @@ import {
   betErrorSchema,
   cashoutRequestSchema,
   type CashoutResponse,
+  type LimitExceeded,
   cashoutResponseSchema,
   type PlaceBetsResponse,
   placeBetsRequestSchema,
@@ -17,7 +18,8 @@ import { clientHeaders, getSessionToken } from '@/lib/session';
 
 export type PlaceBetsError = BetError | 'signedOut' | 'failed';
 export type PlaceBetsResult =
-  { ok: true; data: PlaceBetsResponse } | { ok: false; error: PlaceBetsError };
+  | { ok: true; data: PlaceBetsResponse }
+  | { ok: false; error: PlaceBetsError; limit?: LimitExceeded };
 
 /** Places the betslip. The request comes from the browser, so it is validated again here. */
 export async function placeBets(input: unknown): Promise<PlaceBetsResult> {
@@ -35,7 +37,7 @@ export async function placeBets(input: unknown): Promise<PlaceBetsResult> {
     if (error instanceof ApiError) {
       if (error.status === 401) return { ok: false, error: 'signedOut' };
       const known = betErrorSchema.safeParse(error.raw);
-      if (known.success) return { ok: false, error: known.data.code };
+      if (known.success) return { ok: false, error: known.data.code, limit: known.data.limit };
     }
     console.error('[sportsbook] Placing bets failed', error);
     return { ok: false, error: 'failed' };

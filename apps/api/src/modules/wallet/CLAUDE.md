@@ -48,15 +48,18 @@ Transaction types (contracts `WALLET_TRANSACTION_TYPES`):
 | `adjustment` | either way, staff + audit log | backoffice (later)              |
 | `cashout`    | house −, player +             | sportsbook cash-out             |
 
+`playerActivity(playerId, windows)`: deposits, stakes and returns per window in one query, for
+responsible-gaming limits and the reality check.
+
 ## Endpoints
 
-| Method | Path                   | Auth   | Notes                                                                                       |
-| ------ | ---------------------- | ------ | ------------------------------------------------------------------------------------------- |
-| GET    | `/wallet`              | player | `Wallet` (balance 0 before the first transaction)                                           |
-| GET    | `/wallet/transactions` | player | `WalletTransactionsPage`, newest first, `?page&pageSize`                                    |
-| POST   | `/dev/wallet/deposit`  | player | **Dev only** (404 in production). `{ amount }` ≤ 1 000 ₾; optional `Idempotency-Key` header |
+| Method | Path                   | Auth   | Notes                                                                                         |
+| ------ | ---------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| GET    | `/wallet`              | player | `Wallet` (balance 0 before the first transaction)                                             |
+| GET    | `/wallet/transactions` | player | `WalletTransactionsPage`, newest first, `?page&pageSize`                                      |
+| POST   | `/dev/wallet/deposit`  | player | **Dev only**, served by `modules/payments` (deposit limits apply). Optional `Idempotency-Key` |
 
 ## Not yet
 
-Real payments (TBC/BoG), withdrawals, limits/self-exclusion checks, bonus money (a separate
+Real payments (TBC/BoG), withdrawals, bonus money (a separate
 `bonus` account kind with wagering), staff adjustments with audit, reconciliation job.

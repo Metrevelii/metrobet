@@ -5,6 +5,7 @@ import {
   cashoutValue,
   comboOdds,
   DEFAULT_CURRENCY,
+  type LimitExceeded,
   type PlaceBetsResponse,
   type placeBetsRequestSchema,
   payoutFor,
@@ -28,6 +29,10 @@ import type { Env } from '../../config/env.js';
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { ActivityBus } from '../activity/activity-bus.js';
 import { PlayersService } from '../players/players.service.js';
+import {
+  LimitExceededError,
+  ResponsibleGamingService,
+} from '../responsible-gaming/responsible-gaming.service.js';
 import { SportsbookStore } from '../sportsbook/sportsbook.store.js';
 import { TradingRules } from '../sportsbook/trading/trading-rules.js';
 import { InsufficientFundsError } from '../wallet/ledger-math.js';
@@ -55,6 +60,7 @@ const STATUS: Record<BetError, HttpStatus> = {
   INSUFFICIENT_FUNDS: HttpStatus.PAYMENT_REQUIRED,
   PLAYER_BLOCKED: HttpStatus.FORBIDDEN,
   DUPLICATE_REQUEST: HttpStatus.CONFLICT,
+  LIMIT_EXCEEDED: HttpStatus.FORBIDDEN,
 };
 
 /** `{ code, message, selections? }` with the code's HTTP status (contracts `betErrorSchema`). */
@@ -62,7 +68,7 @@ export const betError = (
   code: BetError,
   message: string,
   selections?: ProblemSelection[],
-  extra?: { cashout: number | null },
+  extra?: { cashout?: number | null; limit?: LimitExceeded },
 ) =>
   new HttpException({ code, message, ...(selections && { selections }), ...extra }, STATUS[code]);
 
@@ -88,6 +94,7 @@ export class BettingService {
     @Inject(PlayersService) private readonly players: PlayersService,
     @Inject(ActivityBus) private readonly activity: ActivityBus,
     @Inject(ConfigService) private readonly config: ConfigService<Env, true>,
+    @Inject(ResponsibleGamingService) private readonly rg: ResponsibleGamingService,
   ) {}
 
   async place(playerId: string, request: PlaceRequest): Promise<PlaceBetsResponse> {
@@ -121,6 +128,16 @@ export class BettingService {
       if (draft.potentialWin > limits.maxPayout) {
         throw betError('PAYOUT_TOO_HIGH', 'Potential win above the limit');
       }
+    }
+    // The player's own stake / loss limits, for all the stakes of this request together.
+    try {
+      await this.rg.assertCanStake(
+        playerId,
+        drafts.reduce((total, draft) => total + draft.stake, 0),
+      );
+    } catch (error) {
+      if (!(error instanceof LimitExceededError)) throw error;
+      throw betError('LIMIT_EXCEEDED', error.message, undefined, { limit: error.limit });
     }
 
     let placed: { tickets: BetTicketRow[]; balance: number };

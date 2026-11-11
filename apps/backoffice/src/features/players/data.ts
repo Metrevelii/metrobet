@@ -7,6 +7,8 @@ import {
   adminPlayersPageSchema,
   type AdminPlayersQuery,
   type AdminTicketsPage,
+  type ResponsibleGaming,
+  responsibleGamingSchema,
   adminTicketsPageSchema,
   type WalletTransactionsPage,
   walletTransactionsPageSchema,
@@ -47,4 +49,11 @@ export function getPlayerRounds(id: string, page: number): Promise<AdminGameRoun
 
 export function getPlayerTickets(id: string, page: number): Promise<AdminTicketsPage> {
   return adminFetch(withQuery('bets', { playerId: id, page }), adminTicketsPageSchema);
+}
+
+export function getPlayerResponsibleGaming(id: string): Promise<ResponsibleGaming> {
+  return adminFetch(
+    `players/${encodeURIComponent(id)}/responsible-gaming`,
+    responsibleGamingSchema,
+  );
 }

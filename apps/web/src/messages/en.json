@@ -57,13 +57,15 @@
       "INSUFFICIENT_FUNDS": "Not enough balance.",
       "PLAYER_BLOCKED": "Your account cannot place bets.",
       "signedOut": "Your session ended. Log in again.",
-      "failed": "The bet couldn't be placed. Please try again."
+      "failed": "The bet couldn't be placed. Please try again.",
+      "LIMIT_EXCEEDED": "You reached a limit you set."
     },
     "all": "ALL",
     "less": "Lower stake",
     "more": "Raise stake",
     "acceptHigher": "Accept higher odds",
-    "acceptAll": "Accept any odds changes"
+    "acceptAll": "Accept any odds changes",
+    "limits": "Limits"
   },
   "Home": {
     "liveNow": "Live now",
@@ -358,15 +360,19 @@
       "unverified": "Not confirmed",
       "logout": "Log out",
       "wallet": "Wallet",
-      "bets": "My bets"
+      "bets": "My bets",
+      "settings": "Account settings",
+      "responsibleGaming": "Responsible gaming"
     },
     "errors": {
       "invalidCredentials": "Wrong email/phone or password",
-      "accountBlocked": "This account can't sign in. Please contact support.",
+      "accountBlocked": "This account can't sign in. If you took a break or self-excluded, you can sign in again when it ends; otherwise contact support.",
       "accountExists": "An account with this email or phone already exists",
       "invalidCode": "The code is wrong or has expired",
       "tooManyRequests": "Too many attempts. Please wait a minute and try again.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "wrongPassword": "The password is wrong",
+      "signedOut": "Your session ended. Log in again."
     },
     "validation": {
       "identifierRequired": "Enter your email or mobile number",
@@ -406,7 +412,8 @@
     "dev": {
       "title": "Test money (development only)",
       "failed": "The deposit failed. Is the API running?",
-      "added": "{amount} added to your balance"
+      "added": "{amount} added to your balance",
+      "limits": "Limits"
     }
   },
   "Originals": {
@@ -421,7 +428,8 @@
       "NO_BET": "There is no bet to change.",
       "SESSION_EXPIRED": "The game session expired. Reload the page.",
       "PLAYER_BLOCKED": "Your account cannot place bets.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "LIMIT_EXCEEDED": "You reached a stake or loss limit you set. You can manage limits in your account."
     },
     "supra": {
       "spin": "Spin",
@@ -536,5 +544,133 @@
     "ticketVoid": "A ticket was voided: {amount} returned to your balance",
     "ticketLost": "A ticket lost. Better luck next time!",
     "viewBets": "My bets"
+  },
+  "Account": {
+    "title": "My account",
+    "unavailable": "This page is unavailable right now. Please try again later.",
+    "helpLine": "Gambling should stay fun. If it doesn't feel that way, take a break, set limits or contact our support team any time.",
+    "limitReached": "You have {remaining} left of your {period, select, day {daily} week {weekly} other {monthly}} {kind, select, deposit {deposit} stake {stake} other {loss}} limit.",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "responsibleGaming": "Responsible gaming"
+    },
+    "profile": {
+      "title": "Account details",
+      "email": "Email",
+      "phone": "Mobile number",
+      "dateOfBirth": "Date of birth",
+      "memberSince": "Member since",
+      "currency": "Currency",
+      "kyc": "Identity check",
+      "verified": "Confirmed",
+      "verify": "Confirm account",
+      "contactSupport": "To change your contact details or date of birth, contact support.",
+      "kycStatus": {
+        "unverified": "Not started",
+        "pending": "In review",
+        "verified": "Verified",
+        "rejected": "Rejected"
+      }
+    },
+    "security": {
+      "passwordTitle": "Password",
+      "passwordHint": "Changing your password signs you out on every other device.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "changePassword": "Change password",
+      "passwordChanged": "Password changed. Other devices were signed out.",
+      "devicesTitle": "Signed-in devices",
+      "devicesHint": "Sign out any device you don't recognise, then change your password.",
+      "signOutOthers": "{count, plural, one {Sign out the other device} other {Sign out # other devices}}",
+      "signOut": "Sign out",
+      "signedOut": "Signed out",
+      "signOutFailed": "Couldn't sign out. Please try again.",
+      "thisDevice": "This device",
+      "unknownDevice": "Unknown device",
+      "lastActive": "Active {time}"
+    },
+    "limits": {
+      "title": "Limits",
+      "hint": "Lowering a limit works at once. Raising or removing one takes effect after 24 hours.",
+      "kinds": {
+        "deposit": {
+          "title": "Deposit limit",
+          "hint": "How much you can deposit."
+        },
+        "loss": {
+          "title": "Loss limit",
+          "hint": "Stakes minus winnings, across sports and games."
+        },
+        "stake": {
+          "title": "Stake limit",
+          "hint": "How much you can bet, across sports and games."
+        }
+      },
+      "periods": {
+        "day": "24 hours",
+        "week": "7 days",
+        "month": "30 days"
+      },
+      "none": "No limit",
+      "set": "Set",
+      "change": "Change",
+      "amount": "Limit amount",
+      "save": "Save",
+      "remove": "Remove limit",
+      "cancel": "Cancel",
+      "used": "{used} used · {left} left",
+      "pendingRaise": "Changes to {amount} on {time}",
+      "pendingRemoval": "Removed on {time}",
+      "saved": "Limit saved",
+      "savedLater": "Saved. The new limit applies in 24 hours.",
+      "tooHigh": "That amount is above the highest limit.",
+      "failed": "Couldn't save the limit. Please try again."
+    },
+    "realityCheck": {
+      "title": "Reality check",
+      "hint": "A reminder of how long you've played and your result, at the interval you choose.",
+      "off": "Off",
+      "every": "Every {minutes} min",
+      "saved": "You'll get a reminder every {minutes} minutes",
+      "turnedOff": "Reality check turned off",
+      "failed": "Couldn't save. Please try again."
+    },
+    "exclusion": {
+      "title": "Take a break or self-exclude",
+      "hint": "You'll be signed out and can't sign in, bet or deposit until the period ends. It can't be cancelled early.",
+      "breakTitle": "Take a break",
+      "breakHint": "A short pause from betting.",
+      "excludeTitle": "Self-exclusion",
+      "excludeHint": "For a longer time, or for good.",
+      "periods": {
+        "1d": "24 hours",
+        "7d": "7 days",
+        "30d": "30 days",
+        "6m": "6 months",
+        "1y": "1 year",
+        "permanent": "Permanently"
+      },
+      "password": "Confirm with your password",
+      "takeBreak": "Take a break",
+      "selfExclude": "Self-exclude",
+      "confirmTitle": "Are you sure?",
+      "confirmText": "Your account will be closed for {period}. You can't undo this early.",
+      "confirmForever": "Your account will be closed permanently. You can't undo this.",
+      "confirm": "Yes, close my account",
+      "cancel": "Cancel",
+      "done": "Your account is closed until the period ends. Take care.",
+      "doneForever": "Your account is closed. Take care."
+    },
+    "reminder": {
+      "title": "Reality check",
+      "playing": "You've been on Metrobet for {minutes, plural, one {# minute} other {# minutes}}.",
+      "staked": "Staked",
+      "returned": "Won",
+      "net": "Result",
+      "history": "See your transactions",
+      "continue": "Keep playing",
+      "logout": "Log out"
+    }
   }
 }

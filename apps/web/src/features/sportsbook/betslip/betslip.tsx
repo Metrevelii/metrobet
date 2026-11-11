@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState, useTransition } from 'react';
 
 import { EmptyState } from '@/components/shared/empty-state';
+import { LIMITS_HREF, useLimitMessage } from '@/features/account/use-limit-message';
 import { useSignedIn } from '@/features/auth/session-store';
 import { currentBalance } from '@/features/wallet/actions';
 import { setLiveBalance } from '@/features/wallet/live-balance';
@@ -241,6 +242,7 @@ export function Betslip() {
   const slip = useBetslip();
   const signedIn = useSignedIn();
   const router = useRouter();
+  const limitMessage = useLimitMessage();
   const [placing, startPlacing] = useTransition();
   const ids = slip?.items.map((item) => item.selectionId) ?? [];
   useSelectionsSignature(ids);
@@ -294,9 +296,12 @@ export function Betslip() {
             ? { label: t('topUp'), onClick: () => router.push('/wallet') }
             : result.error === 'signedOut'
               ? { label: t('loginToBet'), onClick: () => router.push('/login') }
-              : undefined;
+              : result.error === 'LIMIT_EXCEEDED'
+                ? { label: t('limits'), onClick: () => router.push(LIMITS_HREF) }
+                : undefined;
+        const message = result.limit ? limitMessage(result.limit) : t(errorKey(result.error));
         // One id: a second failure replaces the first instead of stacking.
-        toast.error(t(errorKey(result.error)), { id: 'betslip-error', action });
+        toast.error(message, { id: 'betslip-error', action });
         return;
       }
       toast.dismiss('betslip-error');

@@ -15,6 +15,10 @@ import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { ActivityBus } from '../activity/activity-bus.js';
 import { type GameSession, GameSessions } from '../casino/game-sessions.js';
 import { PlayersService } from '../players/players.service.js';
+import {
+  LimitExceededError,
+  ResponsibleGamingService,
+} from '../responsible-gaming/responsible-gaming.service.js';
 import { IdempotencyConflictError, InsufficientFundsError } from '../wallet/ledger-math.js';
 import { Ledger, type Tx } from '../wallet/ledger.js';
 import {
@@ -40,6 +44,7 @@ const STATUS: Record<GameWalletError, HttpStatus> = {
   TRANSACTION_ROLLED_BACK: HttpStatus.CONFLICT,
   ROUND_CLOSED: HttpStatus.CONFLICT,
   INVALID_ROLLBACK: HttpStatus.BAD_REQUEST,
+  LIMIT_EXCEEDED: HttpStatus.FORBIDDEN,
 };
 
 /** A protocol error: `{ code, message }` body with the code's HTTP status. */
@@ -65,6 +70,7 @@ export class GameWalletService {
     @Inject(GameSessions) private readonly sessions: GameSessions,
     @Inject(PlayersService) private readonly players: PlayersService,
     @Inject(ActivityBus) private readonly activity: ActivityBus,
+    @Inject(ResponsibleGamingService) private readonly rg: ResponsibleGamingService,
   ) {}
 
   async balance({ sessionToken }: BalanceRequest): Promise<GameWalletResponse> {
@@ -89,6 +95,8 @@ export class GameWalletService {
 
       const round = await this.round(tx, session, request.roundId);
       if (round.status === 'closed') throw gameWalletError('ROUND_CLOSED', 'The round is closed');
+      // After the replay check, so a retried bet that was already taken is never refused.
+      await this.assertWithinLimits(session.playerId, request.amount);
       const posted = await this.ledger.post(
         {
           idempotencyKey: ledgerKey(request.transactionId),
@@ -249,6 +257,16 @@ export class GameWalletService {
         throw gameWalletError('DUPLICATE_TRANSACTION', 'Transaction id used for another call');
       }
       throw error;
+    }
+  }
+
+  /** The player's own stake / loss limits (responsible gaming). */
+  private async assertWithinLimits(playerId: string, amount: number) {
+    try {
+      await this.rg.assertCanStake(playerId, amount);
+    } catch (error) {
+      if (!(error instanceof LimitExceededError)) throw error;
+      throw gameWalletError('LIMIT_EXCEEDED', error.message);
     }
   }
 

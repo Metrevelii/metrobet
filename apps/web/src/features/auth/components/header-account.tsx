@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
 
+import { RealityCheck } from '@/features/account/components/reality-check';
 import { getCurrentPlayer } from '../data';
 import { PlayerLive } from '@/features/notifications/player-live';
 
@@ -18,6 +19,7 @@ export async function HeaderAccount() {
       {player ? (
         <>
           <PlayerLive />
+          <RealityCheck />
           <AccountMenu player={player} />
         </>
       ) : (

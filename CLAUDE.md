@@ -147,6 +147,9 @@ isolated so it can be swapped later without touching components:
 - `apps/api/src/modules/player-live/CLAUDE.md`: player live channel (balance, settled tickets) via Postgres NOTIFY
 - `apps/web/src/features/notifications/CLAUDE.md`: live channel client (header balance, ticket toasts)
 - `apps/api/src/modules/game-wallet/CLAUDE.md`: seamless wallet API for game providers (bet/win/rollback)
+- `apps/api/src/modules/responsible-gaming/CLAUDE.md`: player limits, reality check, self-exclusion
+- `apps/api/src/modules/payments/CLAUDE.md`: deposits (dev deposit now), deposit-limit rule
+- `apps/web/src/features/account/CLAUDE.md`: account pages (profile, security, responsible gaming)
 - `apps/api/src/modules/originals/CLAUDE.md`: in-house studio game server (Supra Fortune, crash games)
 - `apps/web/src/features/originals/CLAUDE.md`: native Originals game clients
 
@@ -179,7 +182,10 @@ isolated so it can be swapped later without touching components:
    settlement), audit log, **sportsbook trading** (suspend events/markets, margins and limits per
    sport/competition, liability per selection). ⏳ games & providers, staff management, per-player limits
 8. 🟡 Auth ✅ (players: email or phone, 25+, code verification, password reset; staff accounts
-   with roles replace the shared admin key). ✅ Wallet: double-entry ledger in tetri (idempotent,
+   with roles replace the shared admin key). ✅ **Account + responsible gaming**: `/account`
+   (profile, change password, signed-in devices), deposit/loss/stake limits (stricter at once,
+   looser after 24 h) enforced on sportsbook, casino, Originals and deposits, reality check,
+   take a break / self-exclusion. ✅ Wallet: double-entry ledger in tetri (idempotent,
    append-only, DB-enforced zero-sum), balance in header, `/wallet` history, dev test deposits.
    ✅ Game wallet API (signed bet/win/rollback, rounds, game sessions) + real-money mock slots
    (Golden Fleece) that settle through it; real bets feed promotions. ✅ **Metrobet Originals**

@@ -8,6 +8,7 @@ export const kycStatus = pgEnum('kyc_status', KYC_STATUSES);
 /**
  * Player accounts. Login is by email OR phone (at least one is set; both unique).
  * `verifiedAt`: the login contact was confirmed with a code. KYC is a separate, later process.
+ * A `self_excluded` player with an `excludedUntil` in the past is active again at the next login.
  */
 export const players = pgTable(
   'players',
@@ -24,6 +25,8 @@ export const players = pgTable(
     verifiedAt: timestamp({ withTimezone: true }),
     termsAcceptedAt: timestamp({ withTimezone: true }).notNull(),
     lastLoginAt: timestamp({ withTimezone: true }),
+    /** End of a time-out / self-exclusion (`status: self_excluded`); null = until staff lift it. */
+    excludedUntil: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true })
       .notNull()

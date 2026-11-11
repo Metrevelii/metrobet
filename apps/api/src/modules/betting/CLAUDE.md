@@ -26,6 +26,8 @@ SettlementService (every 15 s) ── OddsFeed.result(eventId) for events with o
 4. **Limits:** stake ≥ 0.10 ₾ and ≤ 20 selections (contracts `BET_LIMITS`); max stake and max
    potential win come from the trading rules (`TradingRules.limitsFor`, sportsbook module:
    competition → sport → `BET_LIMITS` 1 000 ₾ / 100 000 ₾; a combo gets its strictest leg's).
+   Then the player's own stake/loss limits for the request's total stake (responsible-gaming
+   module): `LIMIT_EXCEEDED` (403) with `limit { kind, period, remaining }`.
 5. **Atomic and idempotent:** tickets, selections and the wallet debit commit in one DB
    transaction (`Ledger.post(…, tx)`). Each ticket has `(requestKey, requestIndex)` unique; the
    same `idempotencyKey` again returns the already placed tickets (another player's key →

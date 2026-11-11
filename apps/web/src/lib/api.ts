@@ -26,7 +26,7 @@ export type ApiOptions = {
 };
 
 async function request<T extends z.ZodType>(
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PUT',
   path: string,
   schema: T,
   { params = {}, body, token, headers }: ApiOptions & { params?: QueryParams; body?: unknown },
@@ -46,7 +46,7 @@ async function request<T extends z.ZodType>(
     },
     body: body === undefined ? undefined : JSON.stringify(body),
     // Mutations and authenticated reads are never cached.
-    ...((method === 'POST' || token) && { cache: 'no-store' as const }),
+    ...((method !== 'GET' || token) && { cache: 'no-store' as const }),
   });
 
   if (!response.ok) {
@@ -78,4 +78,14 @@ export function apiPost<T extends z.ZodType>(
   options: ApiOptions = {},
 ) {
   return request('POST', path, schema, { ...options, body });
+}
+
+/** Server-side PUT with a JSON body. Never cached. */
+export function apiPut<T extends z.ZodType>(
+  path: string,
+  schema: T,
+  body: unknown = {},
+  options: ApiOptions = {},
+) {
+  return request('PUT', path, schema, { ...options, body });
 }

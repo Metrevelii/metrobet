@@ -17,6 +17,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     crashed: 'გაფრინდა',
     real: 'რეალური ფული',
     noFunds: 'ბალანსი არ არის საკმარისი',
+    limit: 'შენ მიერ დაწესებული ლიმიტი ამოიწურა',
     error: 'რაღაც შეცდომაა. სცადე თავიდან.',
   },
   en: {
@@ -30,6 +31,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     crashed: 'Flew away',
     real: 'Real money',
     noFunds: 'Not enough balance',
+    limit: 'You have reached a limit you set',
     error: 'Something went wrong. Please try again.',
   },
   ru: {
@@ -43,6 +45,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     crashed: 'Улетел',
     real: 'Реальные деньги',
     noFunds: 'Недостаточно средств',
+    limit: 'Достигнут установленный вами лимит',
     error: 'Что-то пошло не так. Попробуйте ещё раз.',
   },
 };
@@ -69,7 +72,7 @@ if(balance<bet)return;balance-=bet;out.textContent=balance.toFixed(2);m=1;crashA
 const REAL_SLOT_SCRIPT = `
 const reels=[...document.querySelectorAll('.reel')],out=document.getElementById('balance'),msg=document.getElementById('msg'),btn=document.getElementById('play'),sel=document.getElementById('bet');
 const fmt=v=>(v/100).toFixed(2);let bet=Number(sel.value);sel.onchange=()=>{bet=Number(sel.value)};
-const fail=code=>{msg.className='err';msg.textContent=code==='INSUFFICIENT_FUNDS'?L.noFunds:L.error};
+const fail=code=>{msg.className='err';msg.textContent=code==='INSUFFICIENT_FUNDS'?L.noFunds:code==='LIMIT_EXCEEDED'?L.limit:L.error};
 const show=b=>{out.textContent=fmt(b);parent.postMessage({type:'metrobet:balance',balance:b},R.parentOrigin)};
 fetch(location.pathname+'/balance?session='+encodeURIComponent(R.session)).then(r=>r.ok?r.json():Promise.reject()).then(r=>show(r.balance)).catch(()=>fail());
 btn.onclick=async()=>{btn.disabled=true;msg.className='';msg.textContent='';

@@ -12,10 +12,12 @@ import { GameWalletModule } from './modules/game-wallet/game-wallet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
 import { PlayerLiveModule } from './modules/player-live/player-live.module.js';
 import { PlayersModule } from './modules/players/players.module.js';
 import { PromotionsModule } from './modules/promotions/promotions.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
+import { ResponsibleGamingModule } from './modules/responsible-gaming/responsible-gaming.module.js';
 import { SportsbookModule } from './modules/sportsbook/sportsbook.module.js';
 import { StaffModule } from './modules/staff/staff.module.js';
 import { WalletModule } from './modules/wallet/wallet.module.js';
@@ -43,10 +45,12 @@ import { WalletModule } from './modules/wallet/wallet.module.js';
     GameWalletModule,
     HealthModule,
     MediaModule,
+    PaymentsModule,
     PlayerLiveModule,
     PlayersModule,
     PromotionsModule,
     ReportsModule,
+    ResponsibleGamingModule,
     SportsbookModule,
     StaffModule,
     WalletModule,

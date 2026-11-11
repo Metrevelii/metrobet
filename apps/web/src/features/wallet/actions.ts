@@ -1,6 +1,12 @@
 'use server';
 
-import { devDepositInputSchema, type Wallet, walletSchema } from '@metrobet/contracts';
+import {
+  devDepositInputSchema,
+  type LimitExceeded,
+  limitErrorSchema,
+  type Wallet,
+  walletSchema,
+} from '@metrobet/contracts';
 
 import { ApiError, apiPost } from '@/lib/api';
 import { clientHeaders, getSessionToken } from '@/lib/session';
@@ -8,7 +14,9 @@ import { clientHeaders, getSessionToken } from '@/lib/session';
 import { getWallet } from './data';
 
 export type DepositResult =
-  { ok: true; data: Wallet } | { ok: false; error: 'signedOut' | 'failed' };
+  | { ok: true; data: Wallet }
+  | { ok: false; error: 'signedOut' | 'failed' }
+  | { ok: false; error: 'limit'; limit: LimitExceeded };
 
 /** Development only: adds test money to the signed-in player's wallet. Refused in production. */
 export async function devDeposit(amount: unknown): Promise<DepositResult> {
@@ -25,6 +33,8 @@ export async function devDeposit(amount: unknown): Promise<DepositResult> {
     return { ok: true, data: wallet };
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { ok: false, error: 'signedOut' };
+    const limit = error instanceof ApiError ? limitErrorSchema.safeParse(error.raw) : null;
+    if (limit?.success) return { ok: false, error: 'limit', limit: limit.data.limit };
     console.error('[wallet] Dev deposit failed', error);
     return { ok: false, error: 'failed' };
   }

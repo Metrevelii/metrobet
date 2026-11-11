@@ -1,13 +1,27 @@
 import {
+  type ChangePasswordInput,
+  changePasswordInputSchema,
   confirmVerificationInputSchema,
   forgotPasswordInputSchema,
   loginInputSchema,
   type PlayerAuthResponse,
   type PlayerProfile,
+  type PlayerSession,
   registerInputSchema,
   resetPasswordInputSchema,
 } from '@metrobet/contracts';
-import { Body, Controller, Get, HttpCode, Inject, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import type { Request } from 'express';
 import type { z } from 'zod';
@@ -91,5 +105,39 @@ export class PlayersAuthController {
     input: z.output<typeof resetPasswordInputSchema>,
   ): Promise<void> {
     return this.players.resetPassword(input);
+  }
+
+  /** Signs out every other device. 403 when the current password is wrong. */
+  @Post('password/change')
+  @HttpCode(204)
+  @UseGuards(PlayerAuthGuard)
+  changePassword(
+    @CurrentPlayer() player: PlayerPrincipal,
+    @Body(new ZodValidationPipe(changePasswordInputSchema)) input: ChangePasswordInput,
+  ): Promise<void> {
+    return this.players.changePassword(player, input);
+  }
+
+  @Get('sessions')
+  @UseGuards(PlayerAuthGuard)
+  sessions(@CurrentPlayer() player: PlayerPrincipal): Promise<PlayerSession[]> {
+    return this.players.listSessions(player);
+  }
+
+  @Post('sessions/revoke-others')
+  @HttpCode(204)
+  @UseGuards(PlayerAuthGuard)
+  revokeOthers(@CurrentPlayer() player: PlayerPrincipal): Promise<void> {
+    return this.players.revokeOtherSessions(player);
+  }
+
+  @Post('sessions/:id/revoke')
+  @HttpCode(204)
+  @UseGuards(PlayerAuthGuard)
+  revokeSession(
+    @CurrentPlayer() player: PlayerPrincipal,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<void> {
+    return this.players.revokeSession(player, id);
   }
 }

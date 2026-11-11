@@ -24,5 +24,5 @@ server's answer.
 ## Not yet
 
 Real deposits and real-money bets wait for payments + KYC (the wallet exists: see
-`features/wallet`). Profile/settings, 2FA and
-"sign out everywhere" UI come later.
+`features/wallet`). 2FA comes later. Profile, password change and devices are in
+`features/account`.

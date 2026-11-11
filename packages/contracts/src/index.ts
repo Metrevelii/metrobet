@@ -24,3 +24,4 @@ export * from './originals/supra-fortune.js';
 export * from './sportsbook/bets.js';
 export * from './admin/admin.js';
 export * from './realtime/player.js';
+export * from './responsible-gaming/responsible-gaming.js';

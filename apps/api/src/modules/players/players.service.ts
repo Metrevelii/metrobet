@@ -1,4 +1,5 @@
 import {
+  type ChangePasswordInput,
   type confirmVerificationInputSchema,
   type forgotPasswordInputSchema,
   type Identifier,
@@ -6,6 +7,7 @@ import {
   type loginInputSchema,
   type PlayerAuthResponse,
   type PlayerProfile,
+  type PlayerSession,
   type registerInputSchema,
   type resetPasswordInputSchema,
 } from '@metrobet/contracts';
@@ -17,6 +19,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
@@ -24,6 +27,8 @@ import type { z } from 'zod';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { isUniqueViolation } from '../../database/errors.js';
+import { AuditService } from '../audit/audit.service.js';
+import type { PlayerPrincipal } from '../auth/auth.guards.js';
 import { PasswordHasher } from '../auth/password-hasher.js';
 import { type SessionMeta, SessionService } from '../auth/session.service.js';
 import { VerificationService } from '../auth/verification.service.js';
@@ -32,6 +37,10 @@ import { type PlayerRow, players } from './players.schema.js';
 
 const INVALID_CREDENTIALS = 'Wrong email/phone or password';
 const INVALID_CODE = 'The code is wrong or has expired';
+const WRONG_PASSWORD = 'The password is wrong';
+
+/** Audit actor id for a player acting on their own account. */
+export const playerActor = (playerId: string) => `player:${playerId}`;
 
 export function toProfile(row: PlayerRow): PlayerProfile {
   return {
@@ -60,6 +69,7 @@ export class PlayersService {
     @Inject(SessionService) private readonly sessions: SessionService,
     @Inject(VerificationService) private readonly verification: VerificationService,
     @Inject(Notifier) private readonly notifier: Notifier,
+    @Inject(AuditService) private readonly audit: AuditService,
   ) {}
 
   async register(
@@ -105,11 +115,22 @@ export class PlayersService {
     }
     if (row.status === 'suspended')
       throw new ForbiddenException('This account is suspended. Please contact support.');
-    if (row.status === 'self_excluded')
+    const now = new Date();
+    const excluded = row.status === 'self_excluded';
+    if (excluded && (!row.excludedUntil || row.excludedUntil > now)) {
       throw new ForbiddenException('This account is self-excluded.');
+    }
 
-    await this.db.update(players).set({ lastLoginAt: new Date() }).where(eq(players.id, row.id));
-    return { session: await this.sessions.create('player', row.id, meta), player: toProfile(row) };
+    // A time-out or self-exclusion that has ended: the account is active again.
+    const [updated] = await this.db
+      .update(players)
+      .set({ lastLoginAt: now, ...(excluded && { status: 'active', excludedUntil: null }) })
+      .where(eq(players.id, row.id))
+      .returning();
+    return {
+      session: await this.sessions.create('player', row.id, meta),
+      player: toProfile(updated!),
+    };
   }
 
   logout(sessionId: string): Promise<void> {
@@ -169,6 +190,63 @@ export class PlayersService {
       })
       .where(eq(players.id, row.id));
     await this.sessions.revokeAll('player', row.id);
+  }
+
+  /** Signs out every other session; the current one stays. Wrong current password → 403. */
+  async changePassword(
+    { playerId, sessionId }: PlayerPrincipal,
+    { currentPassword, password }: ChangePasswordInput,
+  ): Promise<void> {
+    if (!(await this.checkPassword(playerId, currentPassword))) {
+      throw new ForbiddenException(WRONG_PASSWORD);
+    }
+    await this.db
+      .update(players)
+      .set({ passwordHash: await this.passwords.hash(password) })
+      .where(eq(players.id, playerId));
+    await this.sessions.revokeOthers('player', playerId, sessionId);
+    await this.audit.record({
+      actor: playerActor(playerId),
+      action: 'player.password_change',
+      entityType: 'player',
+      entityId: playerId,
+    });
+  }
+
+  async checkPassword(playerId: string, password: string): Promise<boolean> {
+    return this.passwords.verify((await this.get(playerId)).passwordHash, password);
+  }
+
+  /**
+   * Time-out / self-exclusion until `until` (null: until staff lift it). Signs the player out
+   * everywhere.
+   */
+  async exclude(playerId: string, until: Date | null): Promise<void> {
+    await this.db
+      .update(players)
+      .set({ status: 'self_excluded', excludedUntil: until })
+      .where(eq(players.id, playerId));
+    await this.sessions.revokeAll('player', playerId);
+  }
+
+  async listSessions({ playerId, sessionId }: PlayerPrincipal): Promise<PlayerSession[]> {
+    const rows = await this.sessions.list('player', playerId);
+    return rows.map((row) => ({
+      ...row,
+      createdAt: row.createdAt.toISOString(),
+      lastUsedAt: row.lastUsedAt.toISOString(),
+      current: row.id === sessionId,
+    }));
+  }
+
+  async revokeSession({ playerId }: PlayerPrincipal, id: string): Promise<void> {
+    if (!(await this.sessions.revokeOwn('player', playerId, id))) {
+      throw new NotFoundException('Session not found');
+    }
+  }
+
+  revokeOtherSessions({ playerId, sessionId }: PlayerPrincipal): Promise<void> {
+    return this.sessions.revokeOthers('player', playerId, sessionId);
   }
 
   private async sendCode(

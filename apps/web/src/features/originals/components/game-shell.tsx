@@ -15,6 +15,7 @@ const KNOWN_ERRORS = [
   'NO_BET',
   'SESSION_EXPIRED',
   'PLAYER_BLOCKED',
+  'LIMIT_EXCEEDED',
 ] as const;
 
 /** Translated message for a game server error code (anything unexpected reads as generic). */

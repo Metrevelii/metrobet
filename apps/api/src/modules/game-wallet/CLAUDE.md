@@ -27,7 +27,8 @@ The protocol (request/response/error schemas, signature header) is in contracts
 2. **Per-id advisory lock** (`pg_advisory_xact_lock`): a bet and its rollback take the same key,
    so they never interleave.
 3. **Bets** need a live (unexpired) session and an `active` player. Insufficient balance is
-   `INSUFFICIENT_FUNDS` (402) and nothing is recorded.
+   `INSUFFICIENT_FUNDS` (402) and nothing is recorded. The player's own stake/loss limits are
+   checked after the replay check: `LIMIT_EXCEEDED` (403).
 4. **Wins and rollbacks settle on expired sessions**: the bet was taken while it was valid.
    A win of 0 closes a lost round without a ledger transaction.
 5. **Rollbacks**: refund the bet once (a second rollback of the same bet is a no-op). A rollback
@@ -53,5 +54,5 @@ is signed:** add a controller adapter for its protocol (auth, field names, error
 ## Not yet
 
 Reconciliation of open rounds (wins the provider never delivered), free-spin rewards through the
-provider API (promo rewards stay `granted`), responsible-gaming limits on bets, live balance push
+provider API (promo rewards stay `granted`), live balance push
 over WebSocket.

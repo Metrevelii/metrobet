@@ -37,6 +37,7 @@ const SPIN_ERROR_STATUS: Partial<Record<GameWalletError | 'UNAVAILABLE', HttpSta
   SESSION_NOT_FOUND: HttpStatus.NOT_FOUND,
   SESSION_EXPIRED: HttpStatus.FORBIDDEN,
   PLAYER_BLOCKED: HttpStatus.FORBIDDEN,
+  LIMIT_EXCEEDED: HttpStatus.FORBIDDEN,
 };
 
 /** The mock game client's own error body (`code` only: the page picks the message). */

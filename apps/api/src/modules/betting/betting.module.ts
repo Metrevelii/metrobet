@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ActivityModule } from '../activity/activity.module.js';
 import { AuditModule } from '../audit/audit.module.js';
 import { PlayersModule } from '../players/players.module.js';
+import { ResponsibleGamingModule } from '../responsible-gaming/responsible-gaming.module.js';
 import { SportsbookModule } from '../sportsbook/sportsbook.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
 import { AdminBetsController } from './admin-bets.controller.js';
@@ -15,7 +16,14 @@ import { SettlementService } from './settlement.service.js';
 
 /** Sportsbook tickets: placement, settlement, history. See CLAUDE.md. */
 @Module({
-  imports: [ActivityModule, AuditModule, PlayersModule, SportsbookModule, WalletModule],
+  imports: [
+    ActivityModule,
+    AuditModule,
+    PlayersModule,
+    ResponsibleGamingModule,
+    SportsbookModule,
+    WalletModule,
+  ],
   controllers: [BettingController, AdminBetsController, AdminLiabilityController],
   providers: [BettingService, SettlementService, AdminBetsService, LiabilityService],
   exports: [AdminBetsService],

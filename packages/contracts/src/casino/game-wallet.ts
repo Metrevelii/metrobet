@@ -68,6 +68,8 @@ export const GAME_WALLET_ERRORS = [
   'TRANSACTION_ROLLED_BACK',
   'ROUND_CLOSED',
   'INVALID_ROLLBACK',
+  /** The player's own stake or loss limit (responsible gaming) does not allow this bet. */
+  'LIMIT_EXCEEDED',
 ] as const;
 export type GameWalletError = (typeof GAME_WALLET_ERRORS)[number];
 

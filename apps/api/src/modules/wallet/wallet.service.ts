@@ -2,15 +2,25 @@ import {
   DEFAULT_CURRENCY,
   type ProductTotals,
   type Wallet,
+  type WalletTransactionType,
   type WalletTransactionsPage,
 } from '@metrobet/contracts';
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { and, count, countDistinct, desc, eq, gte, inArray, sql, sum } from 'drizzle-orm';
+import { and, count, countDistinct, desc, eq, gte, inArray, type SQL, sql, sum } from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { IdempotencyConflictError } from './ledger-math.js';
 import { Ledger } from './ledger.js';
 import { walletAccounts, walletEntries, walletTransactions } from './wallet.schema.js';
+
+/** A player's money flow over a window, minor units (all ≥ 0 except as noted). */
+export type PlayerActivityTotals = {
+  deposits: number;
+  /** Bets minus refunded (rolled-back) bets. */
+  stakes: number;
+  /** Wins and cash-outs. */
+  returns: number;
+};
 
 /** Player-facing wallet: balance, history and (for now) dev deposits. Writes go through Ledger. */
 @Injectable()
@@ -82,6 +92,46 @@ export class WalletService {
       if (error instanceof IdempotencyConflictError) throw new ConflictException(error.message);
       throw error;
     }
+  }
+
+  /**
+   * The player's deposits, stakes and returns since each of `windows` (one result per window,
+   * same order), in one query. Responsible-gaming limits and the reality check count with it.
+   */
+  async playerActivity(playerId: string, windows: Date[]): Promise<PlayerActivityTotals[]> {
+    if (windows.length === 0) return [];
+    const earliest = new Date(Math.min(...windows.map((since) => since.getTime())));
+    const columns: Record<string, SQL<string>> = Object.fromEntries(
+      windows.map((since, index) => [
+        `w${index}`,
+        sql<string>`coalesce(sum(${walletEntries.amount}) filter (where ${walletTransactions.createdAt} >= ${since.toISOString()}::timestamptz), 0)`,
+      ]),
+    );
+    const rows = await this.db
+      .select({ type: walletTransactions.type, ...columns })
+      .from(walletEntries)
+      .innerJoin(walletAccounts, eq(walletEntries.accountId, walletAccounts.id))
+      .innerJoin(walletTransactions, eq(walletEntries.transactionId, walletTransactions.id))
+      .where(
+        and(
+          eq(walletTransactions.playerId, playerId),
+          eq(walletAccounts.kind, 'player'),
+          gte(walletTransactions.createdAt, earliest),
+        ),
+      )
+      .groupBy(walletTransactions.type);
+    return windows.map((_, index) => {
+      // The player's side: bets are negative, refunds, wins and deposits positive.
+      const total = (type: WalletTransactionType) =>
+        Number(
+          (rows.find((row) => row.type === type) as Record<string, unknown>)?.[`w${index}`] ?? 0,
+        );
+      return {
+        deposits: total('deposit'),
+        stakes: Math.max(0, -total('bet') - total('rollback')),
+        returns: total('win') + total('cashout'),
+      };
+    });
   }
 
   /** Balances of many players at once (0 for players without an account yet). */

@@ -11,7 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@metrobet/ui';
-import { LogOut, ShieldCheck, Ticket, UserRound, WalletIcon } from 'lucide-react';
+import {
+  HeartHandshake,
+  LogOut,
+  Settings,
+  ShieldCheck,
+  Ticket,
+  UserRound,
+  WalletIcon,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 
@@ -67,6 +75,15 @@ export function AccountMenu({ player }: { player: PlayerProfile }) {
           <Ticket />
           {t('bets')}
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => router.push('/account')}>
+          <Settings />
+          {t('settings')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => router.push('/account/responsible-gaming')}>
+          <HeartHandshake />
+          {t('responsibleGaming')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={pending}
           onSelect={() =>

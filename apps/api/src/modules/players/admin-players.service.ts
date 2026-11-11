@@ -71,7 +71,8 @@ export class AdminPlayersService {
     const before = await this.find(id);
     const [after] = await this.db
       .update(players)
-      .set({ status })
+      // Staff decisions are open-ended: a player's own time-out end no longer applies.
+      .set({ status, excludedUntil: null })
       .where(eq(players.id, id))
       .returning();
     if (status !== 'active') await this.sessions.revokeAll('player', id);
@@ -80,7 +81,7 @@ export class AdminPlayersService {
       action: 'player.status',
       entityType: 'player',
       entityId: id,
-      before: { status: before.status },
+      before: { status: before.status, excludedUntil: before.excludedUntil },
       after: { status, reason },
     });
     return this.toAdmin(after!, (await this.wallet.getWallet(id)).balance);
@@ -124,6 +125,7 @@ export class AdminPlayersService {
       balance,
       createdAt: row.createdAt.toISOString(),
       lastLoginAt: row.lastLoginAt?.toISOString() ?? null,
+      excludedUntil: row.excludedUntil?.toISOString() ?? null,
     };
   }
 }

@@ -49,17 +49,17 @@ next to the field. Optimistic list operations roll back and show the error as a 
 
 ## Screens
 
-| Route               | Roles (admin always)   | What                                                                                                              |
-| ------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `/`                 | every role             | Today (Tbilisi): GGR, stakes/wins/refunds per product, players, open tickets, balances owed                       |
-| `/players`          | support, risk, finance | Search (email, phone, id) + status filter; balance per player                                                     |
-| `/players/[id]`     | support, risk, finance | Account facts; status change with reason (support, risk); tabs: transactions, sports tickets, game rounds         |
-| `/bets`             | support, risk, finance | Sports tickets, filters status / sport                                                                            |
-| `/bets/[id]`        | support, risk, finance | Selections with results; **risk**: settle a selection by hand, void ticket                                        |
-| `/sportsbook`       | risk                   | Live/upcoming events (sport, state, search): open tickets, stakes, worst case; suspend/resume event; 10 s refresh |
-| `/sportsbook/[id]`  | risk                   | Effective margin/limits, liability per selection (net if it wins), player vs feed odds, suspend/resume markets    |
-| `/sportsbook/rules` | risk                   | Margin and stake/payout limits per sport or competition (edit, delete); defaults shown                            |
-| `/audit-log`        | risk                   | Every staff change (who, what, before/after), filter by entity                                                    |
+| Route               | Roles (admin always)   | What                                                                                                                                                         |
+| ------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/`                 | every role             | Today (Tbilisi): GGR, stakes/wins/refunds per product, players, open tickets, balances owed                                                                  |
+| `/players`          | support, risk, finance | Search (email, phone, id) + status filter; balance per player                                                                                                |
+| `/players/[id]`     | support, risk, finance | Account facts; status change with reason (support, risk); responsible gaming (limits, exclusion, read-only); tabs: transactions, sports tickets, game rounds |
+| `/bets`             | support, risk, finance | Sports tickets, filters status / sport                                                                                                                       |
+| `/bets/[id]`        | support, risk, finance | Selections with results; **risk**: settle a selection by hand, void ticket                                                                                   |
+| `/sportsbook`       | risk                   | Live/upcoming events (sport, state, search): open tickets, stakes, worst case; suspend/resume event; 10 s refresh                                            |
+| `/sportsbook/[id]`  | risk                   | Effective margin/limits, liability per selection (net if it wins), player vs feed odds, suspend/resume markets                                               |
+| `/sportsbook/rules` | risk                   | Margin and stake/payout limits per sport or competition (edit, delete); defaults shown                                                                       |
+| `/audit-log`        | risk                   | Every staff change (who, what, before/after), filter by entity                                                                                               |
 
 Pages check the role with `hasRole(getCurrentStaff(), roles)` and show `NoAccess`; the API
 enforces the same roles. Actions ask for a reason (stored in the audit log).

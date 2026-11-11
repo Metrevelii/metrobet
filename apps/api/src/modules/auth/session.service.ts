@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, gt, isNull } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, ne } from 'drizzle-orm';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
 import { sessions, type SessionSubject } from './auth.schema.js';
@@ -60,6 +60,48 @@ export class SessionService {
 
   async revoke(sessionId: string): Promise<void> {
     await this.db.update(sessions).set({ revokedAt: new Date() }).where(eq(sessions.id, sessionId));
+  }
+
+  /** Live sessions of a subject, most recently used first. */
+  list(subjectType: SessionSubject, subjectId: string) {
+    return this.db
+      .select({
+        id: sessions.id,
+        ip: sessions.ip,
+        userAgent: sessions.userAgent,
+        createdAt: sessions.createdAt,
+        lastUsedAt: sessions.lastUsedAt,
+      })
+      .from(sessions)
+      .where(this.live(subjectType, subjectId))
+      .orderBy(desc(sessions.lastUsedAt));
+  }
+
+  /** Revokes one of the subject's own sessions; false when it isn't theirs or already ended. */
+  async revokeOwn(subjectType: SessionSubject, subjectId: string, sessionId: string) {
+    const revoked = await this.db
+      .update(sessions)
+      .set({ revokedAt: new Date() })
+      .where(and(this.live(subjectType, subjectId), eq(sessions.id, sessionId)))
+      .returning({ id: sessions.id });
+    return revoked.length > 0;
+  }
+
+  /** Signs the subject out everywhere except `keepSessionId` (e.g. after a password change). */
+  async revokeOthers(subjectType: SessionSubject, subjectId: string, keepSessionId: string) {
+    await this.db
+      .update(sessions)
+      .set({ revokedAt: new Date() })
+      .where(and(this.live(subjectType, subjectId), ne(sessions.id, keepSessionId)));
+  }
+
+  private live(subjectType: SessionSubject, subjectId: string) {
+    return and(
+      eq(sessions.subjectType, subjectType),
+      eq(sessions.subjectId, subjectId),
+      isNull(sessions.revokedAt),
+      gt(sessions.expiresAt, new Date()),
+    );
   }
 
   /** Signs a subject out everywhere (e.g. after a password reset). */

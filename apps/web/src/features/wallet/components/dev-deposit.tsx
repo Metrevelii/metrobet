@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 
+import { LIMITS_HREF, useLimitMessage } from '@/features/account/use-limit-message';
 import { useRouter } from '@/i18n/navigation';
 
 import { devDeposit } from '../actions';
@@ -17,13 +18,19 @@ export function DevDeposit() {
   const t = useTranslations('Wallet.dev');
   const format = useFormatter();
   const router = useRouter();
+  const limitMessage = useLimitMessage();
   const [pending, startTransition] = useTransition();
 
   const deposit = (major: number) =>
     startTransition(async () => {
       const result = await devDeposit(toMinor(major));
       if (!result.ok) {
-        toast.error(t('failed'), { id: 'dev-deposit' });
+        toast.error(result.error === 'limit' ? limitMessage(result.limit) : t('failed'), {
+          id: 'dev-deposit',
+          ...(result.error === 'limit' && {
+            action: { label: t('limits'), onClick: () => router.push(LIMITS_HREF) },
+          }),
+        });
         return;
       }
       toast.success(

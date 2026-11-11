@@ -54,6 +54,8 @@ export const adminPlayerSchema = z.object({
   balance: z.number().int(),
   createdAt: z.iso.datetime(),
   lastLoginAt: z.iso.datetime().nullable(),
+  /** End of a time-out or self-exclusion; null when permanent or not excluded. */
+  excludedUntil: z.iso.datetime().nullable(),
 });
 export type AdminPlayer = z.infer<typeof adminPlayerSchema>;
 export const adminPlayersPageSchema = pageOf(adminPlayerSchema);
