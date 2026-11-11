@@ -122,6 +122,15 @@ isolated so it can be swapped later without touching components:
 - When you create a new feature module (web feature folder or Nest module), give it a short
   `CLAUDE.md`: purpose, data flow, invariants, gotchas. Add it to the index below.
 
+## User guide (keep it current)
+
+`docs/user-guide.html` is the owner's plain-language guide to every feature (player site and
+backoffice, test cards, codes, a test checklist, "What's new"). It is published as a private
+artifact: https://claude.ai/artifact/JLs5qdY7fTfze82NpQTaLC. **Whenever a user-facing feature
+ships, update the guide in the same commit** (the right section, the checklist, "What's new",
+"Last updated") and republish it to the same artifact URL. Write it for a non-developer: what to
+click and what should happen, no code. Never put secrets in it (point to `apps/api/.env`).
+
 ## CLAUDE.md index
 
 - `apps/web/CLAUDE.md`: player site, routing, i18n, layout shell

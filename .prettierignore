@@ -4,3 +4,5 @@ dist
 .turbo
 coverage
 drizzle/meta
+# Hand-written guide page, published as an artifact (see CLAUDE.md, "User guide")
+docs/user-guide.html

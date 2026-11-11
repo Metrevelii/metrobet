@@ -1,0 +1,469 @@
+<title>Metrobet Test Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: sticky contents rail beside one reading column; stacks to a single column on phones. */
+:root {
+  /* Midnight Pro (the site's own theme): dark first */
+  --bg: #0b0e14;
+  --surface: #141925;
+  --raised: #1c2333;
+  --line: #232b3d;
+  --fg: #e8ecf4;
+  --dim: #8b93a7;
+  --lime: #c6ff3d;
+  --on-lime: #0b0e14;
+  --accent-text: #c6ff3d;
+  --ok: #2ee59d;
+  --warn: #ffb020;
+  --bad: #ff4d5e;
+  --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f4f6fa; --surface: #ffffff; --raised: #ebeef4; --line: #dce1ea;
+    --fg: #0b0e14; --dim: #5b6478; --lime: #b5f03a; --on-lime: #0b0e14;
+    --accent-text: #3f6b00; --ok: #0a8a55; --warn: #a86a00; --bad: #d01f33;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f4f6fa; --surface: #ffffff; --raised: #ebeef4; --line: #dce1ea;
+  --fg: #0b0e14; --dim: #5b6478; --lime: #b5f03a; --on-lime: #0b0e14;
+  --accent-text: #3f6b00; --ok: #0a8a55; --warn: #a86a00; --bad: #d01f33;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent-text); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; border-radius: 4px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+code { background: var(--raised); padding: 0.1em 0.4em; border-radius: 5px; white-space: nowrap; }
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.masthead { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.brand { font: 800 15px/1 var(--font-display); letter-spacing: -0.02em; }
+.brand span { color: var(--accent-text); }
+h1 { font: 800 clamp(30px, 5vw, 44px)/1.1 var(--font-display); letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--dim); max-width: 62ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--dim); font-size: 14px; }
+.quick { display: flex; flex-wrap: wrap; gap: 10px; }
+.quick a {
+  display: inline-flex; flex-direction: column; gap: 2px; text-decoration: none; color: var(--fg);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 0;
+}
+.quick a:hover { border-color: var(--lime); }
+.quick a b { font: 700 14px/1.2 var(--font-display); }
+.quick a span { font: 500 12px/1.2 var(--font-mono); color: var(--dim); }
+
+/* ── Two-column body ────────────────────────────────── */
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; padding-top: 32px; }
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.toc p { margin: 0 0 8px; font: 700 11px/1 var(--font-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+.toc a { color: var(--dim); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--line); }
+.toc a:hover { color: var(--fg); border-left-color: var(--lime); }
+main { display: flex; flex-direction: column; gap: 56px; min-width: 0; }
+
+section { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 20px; }
+.eyebrow { font: 700 11px/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-text); }
+h2 { font: 700 26px/1.2 var(--font-display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h3 { font: 700 17px/1.3 var(--font-display); margin: 8px 0 0; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--dim); }
+ul.plain, ol.steps { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: 6px; max-width: 68ch; }
+ol.steps li::marker { font-family: var(--font-display); font-weight: 700; color: var(--accent-text); }
+
+.where { font-size: 14px; color: var(--dim); }
+.where b { color: var(--fg); font-weight: 700; }
+
+.note {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 14px;
+  display: flex; gap: 10px; max-width: 72ch; font-size: 15px;
+}
+.note::before { content: ""; flex: 0 0 4px; border-radius: 2px; background: var(--warn); }
+.note.tip::before { background: var(--lime); }
+
+/* tables */
+.table { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+th { font: 700 11px/1.2 var(--font-display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); background: var(--raised); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+.cell-wrap td:first-child { white-space: normal; min-width: 130px; }
+
+.pill { display: inline-block; font: 700 12px/1 var(--font-display); padding: 4px 8px; border-radius: 99px; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.pill.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
+.pill.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
+
+.copy {
+  font: 500 14px var(--font-mono); color: var(--fg); background: var(--raised); border: 1px solid var(--line);
+  border-radius: 6px; padding: 4px 8px; cursor: pointer; white-space: nowrap;
+}
+.copy:hover { border-color: var(--lime); }
+.copy[data-done]::after { content: " ✓ copied"; color: var(--ok); font-size: 12px; }
+
+/* checklist */
+.checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.checklist li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.checklist label { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; padding: 12px 14px; cursor: pointer; }
+.checklist input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--lime); }
+.checklist b { font-family: var(--font-display); font-size: 15px; }
+.checklist .how { display: block; color: var(--dim); font-size: 14px; margin-top: 2px; }
+.checklist li:has(input:checked) { opacity: 0.6; }
+.checklist li:has(input:checked) b { text-decoration: line-through; }
+.progress { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--dim); }
+.bar { flex: 1 1 160px; height: 6px; background: var(--raised); border-radius: 99px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--lime); transition: width .3s; }
+.reset { font: 700 13px var(--font-display); background: none; border: 1px solid var(--line); color: var(--dim); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.reset:hover { color: var(--fg); }
+
+/* changelog */
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--line); }
+.log li { padding: 0 0 16px 18px; position: relative; max-width: 70ch; }
+.log li::before { content: ""; position: absolute; left: -6px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--lime); }
+.log b { font-family: var(--font-display); }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .toc { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .toc p { width: 100%; }
+  .toc a { border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">metro<span>bet</span> · test guide</div>
+    <h1>Everything you can use and test</h1>
+    <p class="lede">A plain-language tour of the player site and the backoffice, with the test cards, codes and scenarios to try each feature. It is updated every time a feature ships.</p>
+    <div class="meta"><span>Last updated: <b>11 November 2026</b></span><span>Covers everything up to the bonus money release</span></div>
+    <nav class="quick" aria-label="Open the sites">
+      <a href="http://localhost:3000" target="_blank" rel="noopener"><b>Player site</b><span>localhost:3000</span></a>
+      <a href="http://localhost:3001" target="_blank" rel="noopener"><b>Backoffice</b><span>localhost:3001</span></a>
+      <a href="http://localhost:4000/api/dev/outbox" target="_blank" rel="noopener"><b>Code inbox</b><span>localhost:4000/api/dev/outbox</span></a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p>Contents</p>
+      <a href="#start">Start here</a>
+      <a href="#account">Your account</a>
+      <a href="#money">Money</a>
+      <a href="#identity">Identity check</a>
+      <a href="#limits">Responsible gaming</a>
+      <a href="#sports">Sports betting</a>
+      <a href="#casino">Casino &amp; crash</a>
+      <a href="#promotions">Promotions</a>
+      <a href="#backoffice">Backoffice</a>
+      <a href="#scenarios">Test checklist</a>
+      <a href="#new">What's new</a>
+    </nav>
+
+    <main>
+      <!-- ─────────────────────────────── START ─────────────────────────────── -->
+      <section id="start">
+        <span class="eyebrow">Start here</span>
+        <h2>Before you test</h2>
+        <ol class="steps">
+          <li>Start everything with <code>pnpm dev</code>. After an update, stop it and start it again.</li>
+          <li>Open the <a href="http://localhost:3000" target="_blank" rel="noopener">player site</a>. It opens in Georgian; the language button in the header switches to English or Russian.</li>
+          <li>Open the <a href="http://localhost:3001" target="_blank" rel="noopener">backoffice</a> and sign in as <code>admin@metrobet.local</code>. The password is in the file <code>apps/api/.env</code>, on the line <code>SEED_ADMIN_PASSWORD</code>. The admin can see and do everything.</li>
+        </ol>
+        <div class="note tip"><p><b>Verification codes.</b> The site never sends real emails or SMS. Open <code>localhost:4000/api/dev/outbox?to=YOUR_EMAIL</code> to see the last code sent to that address (sign-up and password reset).</p></div>
+      </section>
+
+      <!-- ─────────────────────────────── ACCOUNT ─────────────────────────────── -->
+      <section id="account">
+        <span class="eyebrow">Player site</span>
+        <h2>Your account</h2>
+        <h3>Sign up and sign in</h3>
+        <ul class="plain">
+          <li><b>Sign up</b> (top right): email or mobile number, a password and your date of birth. You must be 25 or older.</li>
+          <li>Confirm the account with the 6-digit code from the code inbox. Until then the header shows a small orange dot.</li>
+          <li><b>Forgot password</b> works the same way: the reset code is in the code inbox.</li>
+        </ul>
+        <h3>The account menu</h3>
+        <p>Click your email in the header: Wallet, My bets, Account settings, Responsible gaming, Log out.</p>
+        <h3>My account</h3>
+        <p class="where"><b>Where:</b> account menu → Account settings</p>
+        <div class="table cell-wrap"><table>
+          <thead><tr><th>Tab</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td>Profile</td><td>Your details. Once your identity is verified, your name appears here.</td></tr>
+            <tr><td>Identity</td><td>Identity verification (see <a href="#identity">Identity check</a>).</td></tr>
+            <tr><td>Security</td><td>Change your password (other devices are signed out). See every signed-in device and sign out one, or all the others at once.</td></tr>
+            <tr><td>Responsible gaming</td><td>Limits, reality check and take a break (see <a href="#limits">Responsible gaming</a>).</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <!-- ─────────────────────────────── MONEY ─────────────────────────────── -->
+      <section id="money">
+        <span class="eyebrow">Player site</span>
+        <h2>Money</h2>
+        <h3>Wallet</h3>
+        <p class="where"><b>Where:</b> click the balance in the header</p>
+        <ul class="plain">
+          <li>The header shows what you can bet with: your cash plus any bonus money. A gift icon means bonus money is part of it.</li>
+          <li>The wallet page shows your <b>cash</b> (what you can withdraw), any <b>bonus money</b>, the bonus progress, pending withdrawals and every transaction.</li>
+          <li><b>Free test money:</b> the dashed "development only" box adds ₾10–₾500 instantly. It does not trigger the welcome bonus.</li>
+        </ul>
+
+        <h3>Deposit through the bank</h3>
+        <p class="where"><b>Where:</b> Wallet → Deposit</p>
+        <ol class="steps">
+          <li>Choose TBC Bank or Bank of Georgia and an amount, then press <b>Continue to the bank</b>.</li>
+          <li>A test bank page opens. Enter one of the cards below, any future expiry (for example <code>12/30</code>) and any 3-digit CVC.</li>
+          <li>You come back to the wallet with a message saying whether the money arrived.</li>
+        </ol>
+        <div class="table"><table>
+          <thead><tr><th>Test card</th><th>What happens</th></tr></thead>
+          <tbody>
+            <tr><td><button class="copy" type="button" data-copy="4111111111111111">4111 1111 1111 1111</button></td><td><span class="pill ok">Approved</span></td></tr>
+            <tr><td><button class="copy" type="button" data-copy="5555555555554444">5555 5555 5555 4444</button></td><td><span class="pill ok">Approved</span> (Mastercard)</td></tr>
+            <tr><td><button class="copy" type="button" data-copy="4000000000000002">4000 0000 0000 0002</button></td><td><span class="pill bad">Declined</span></td></tr>
+            <tr><td><button class="copy" type="button" data-copy="4000000000000119">4000 0000 0000 0119</button></td><td><span class="pill warn">Approved</span> but withdrawals to it fail</td></tr>
+          </tbody>
+        </table></div>
+        <div class="note"><p>You can deposit up to ₾1,000 in total without verifying your identity. Past that, the deposit asks you to verify first.</p></div>
+
+        <h3>Withdraw</h3>
+        <p class="where"><b>Where:</b> Wallet → Withdraw</p>
+        <ul class="plain">
+          <li>You need a confirmed account, a verified identity and a card you have deposited with. The page tells you which step is missing.</li>
+          <li>The amount leaves your balance at once and waits for staff approval. You can cancel it while it is pending (it shows on the wallet page).</li>
+          <li>Staff approve or reject it in the backoffice. If they reject it, the money comes back and you see their reason.</li>
+        </ul>
+
+        <h3>Bonus money</h3>
+        <ul class="plain">
+          <li>Your <b>first bank deposit of ₾20 or more</b> gets a 100% bonus, up to ₾500.</li>
+          <li>Bets use your cash first, then bonus money. Winnings from bonus money come back as bonus money.</li>
+          <li>Wager the bonus 10 times within 14 days and it turns into cash you can withdraw. Every casino bet counts; sports tickets count at odds of 1.50 or more.</li>
+          <li>The <b>Bonus</b> card on the wallet page shows the progress, for example "₾340 of ₾1,000 wagered".</li>
+          <li>Withdrawing before that cancels the bonus. The withdraw page asks you to tick a box to confirm.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────────────────────── IDENTITY ─────────────────────────────── -->
+      <section id="identity">
+        <span class="eyebrow">Player site</span>
+        <h2>Identity check</h2>
+        <p class="where"><b>Where:</b> My account → Identity → Verify my identity</p>
+        <ol class="steps">
+          <li>A test verification page opens. Enter a first and last name, an 11-digit personal number, a date of birth and a document number.</li>
+          <li>The date of birth must be <b>the same as on your account</b>, or the check fails.</li>
+          <li>You come back to the Identity tab with the result.</li>
+        </ol>
+        <div class="table"><table>
+          <thead><tr><th>Personal number ends in</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td><code>0000</code></td><td><span class="pill bad">Rejected</span> document could not be verified</td></tr>
+            <tr><td><code>9999</code></td><td><span class="pill warn">In review</span> staff decide in the backoffice</td></tr>
+            <tr><td>anything else</td><td><span class="pill ok">Verified</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="note"><p>One personal number can belong to only one account. Using it on a second account is rejected.</p></div>
+      </section>
+
+      <!-- ─────────────────────────────── LIMITS ─────────────────────────────── -->
+      <section id="limits">
+        <span class="eyebrow">Player site</span>
+        <h2>Responsible gaming</h2>
+        <p class="where"><b>Where:</b> My account → Responsible gaming</p>
+        <div class="table cell-wrap"><table>
+          <thead><tr><th>Tool</th><th>How it works</th></tr></thead>
+          <tbody>
+            <tr><td>Limits</td><td>Deposit, loss and stake limits, each per 24 hours, 7 days or 30 days. Lowering a limit works at once; raising or removing one waits 24 hours. A bet or deposit over the limit is blocked with a message saying how much is left.</td></tr>
+            <tr><td>Reality check</td><td>A reminder every 15, 30, 60 or 120 minutes: how long you have played, what you staked and won, with Keep playing or Log out.</td></tr>
+            <tr><td>Take a break</td><td>24 hours, 7 or 30 days. Needs your password. You are signed out and cannot sign in until it ends.</td></tr>
+            <tr><td>Self-exclusion</td><td>6 months, 1 year or permanently. Same as a break, for longer. Cannot be undone early.</td></tr>
+          </tbody>
+        </table></div>
+        <div class="note"><p>Use a separate test account for breaks and self-exclusion: you will be locked out of it.</p></div>
+      </section>
+
+      <!-- ─────────────────────────────── SPORTS ─────────────────────────────── -->
+      <section id="sports">
+        <span class="eyebrow">Player site</span>
+        <h2>Sports betting</h2>
+        <ul class="plain">
+          <li><b>Sports</b>, <b>Live</b> and the home page list football, basketball, tennis and eSoccer. Odds change live. eSoccer matches last about 9 minutes: the quickest way to see a bet settle.</li>
+          <li>Filter by day and league; the ★ saves a league as a favourite.</li>
+          <li>Open a match for every market. Live football and eSoccer matches show a <b>match tracker</b>: timeline, stats, goals and cards.</li>
+          <li><b>Betslip:</b> click odds to add them, choose Single or Accumulator, set a stake (ALL uses your whole balance) and place the bet.</li>
+          <li><b>My bets:</b> Open and Settled tickets. <b>Cash out</b> an open ticket early. When a ticket wins, a notification pops up and the balance updates by itself.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────────────────────── CASINO ─────────────────────────────── -->
+      <section id="casino">
+        <span class="eyebrow">Player site</span>
+        <h2>Casino &amp; crash games</h2>
+        <ul class="plain">
+          <li><b>Slots:</b> categories, providers, search, favourites and recently played. Real money: the Golden Fleece slots and <b>Supra Fortune</b> (Metrobet's own slot). Other slots are demo only.</li>
+          <li><b>Crash:</b> <b>Metro Jet</b> and <b>Longshot</b>, Metrobet's own crash games. Bet before take-off, cash out before the plane flies away.</li>
+          <li>Every game can be played in Demo (free play money) or for real money from your balance.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────────────────────── PROMOTIONS ─────────────────────────────── -->
+      <section id="promotions">
+        <span class="eyebrow">Player site</span>
+        <h2>Promotions</h2>
+        <ul class="plain">
+          <li>Banners on the home and section pages, and the <b>Promotions</b> page, open each promotion's page.</li>
+          <li><b>Wheel of fortune:</b> press Join, then play slots. Every ₾50 bet earns one spin; every spin wins free spins.</li>
+          <li><b>Welcome bonus:</b> the first-deposit offer (see <a href="#money">Bonus money</a>), with a Deposit now button.</li>
+        </ul>
+      </section>
+
+      <!-- ─────────────────────────────── BACKOFFICE ─────────────────────────────── -->
+      <section id="backoffice">
+        <span class="eyebrow">Staff tool</span>
+        <h2>Backoffice</h2>
+        <p>Sign in at <a href="http://localhost:3001" target="_blank" rel="noopener">localhost:3001</a>. Every change staff make asks for a reason and is saved in the audit log.</p>
+        <div class="table cell-wrap"><table>
+          <thead><tr><th>Screen</th><th>What you can do</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td>Today's numbers: profit per product (casino and sports), deposits, bonus cost, new and active players, open tickets, money owed to players.</td></tr>
+            <tr><td>Promotions</td><td>Create, edit, drag to reorder, switch on or off and delete promotions. The page builder has text, steps, countdown, prizes, FAQ, terms, a Join button, a prize wheel and a deposit bonus. A live preview shows the result; changes reach the site immediately.</td></tr>
+            <tr><td>Players</td><td>Search by email, phone or ID. A player's page shows balance, details and limits, plus tabs: Transactions, Payments, Bonuses, Identity, Sports tickets, Game rounds. Suspend or reactivate the account; cancel an active bonus.</td></tr>
+            <tr><td>Payments</td><td>Withdrawal queue: <b>Approve</b> sends the money to the card, <b>Reject</b> returns it (the player sees your reason). "All payments" lists every deposit and withdrawal.</td></tr>
+            <tr><td>KYC</td><td>Identity checks waiting for a person. You see the document details next to the date of birth the player registered with. Approve or reject with a reason.</td></tr>
+            <tr><td>Bets</td><td>Every sports ticket. Open one to <b>void</b> it (the stake is refunded) or settle a selection by hand.</td></tr>
+            <tr><td>Sportsbook</td><td>Live and upcoming events with stakes and the worst-case loss. <b>Suspend</b> an event or a single market (players cannot bet until you resume). <b>Rules:</b> margin and stake/payout limits per sport or league. An event page shows the loss on each outcome.</td></tr>
+            <tr><td>Audit log</td><td>Every staff action: who, what, before and after, and why.</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <!-- ─────────────────────────────── CHECKLIST ─────────────────────────────── -->
+      <section id="scenarios">
+        <span class="eyebrow">Try it</span>
+        <h2>Test checklist</h2>
+        <p class="muted">Tick each scenario as you go. Your ticks are remembered in this browser only.</p>
+        <div class="progress"><span id="done-count">0 of 0 done</span><div class="bar"><i id="done-bar"></i></div><button class="reset" type="button" id="reset">Clear ticks</button></div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" id="t-signup"><span><b>New player</b><span class="how">Sign up, confirm with the code from the code inbox, check the Profile tab.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-deposit"><span><b>Deposit and welcome bonus</b><span class="how">Deposit ₾50 with card 4111…1111. You get ₾50 cash + ₾50 bonus money; the wallet shows the Bonus card.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-declined"><span><b>Declined card</b><span class="how">Deposit with 4000…0002. The wallet says the deposit didn't go through; no money moves.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-esoccer"><span><b>Sports bet</b><span class="how">Put an eSoccer single on the betslip and watch it settle in My bets within about 10 minutes.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-cashout"><span><b>Cash out</b><span class="how">Bet on a live match, then cash out from My bets.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-slots"><span><b>Real-money slot</b><span class="how">Play Supra Fortune for real money. The header balance and the bonus progress move with each spin.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-crash"><span><b>Crash game</b><span class="how">Play Metro Jet: bet, then cash out before it flies away.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-wheel"><span><b>Wheel of fortune</b><span class="how">Join the promotion, bet ₾50 on slots, spin the wheel.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-kyc"><span><b>Identity review</b><span class="how">Verify with a personal number ending 9999. In the backoffice KYC screen, approve it; the Identity tab shows Verified.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-withdraw"><span><b>Withdraw</b><span class="how">Request ₾20 (tick the box if a bonus is active). In the backoffice Payments screen, approve it.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-payout-fail"><span><b>Failed payout</b><span class="how">Deposit with 4000…0119, withdraw to that card, approve it. The bank refuses and the money comes back.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-limit"><span><b>Stake limit</b><span class="how">Set a ₾10 daily stake limit, then try a ₾20 bet. It's blocked with a message.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-break"><span><b>Take a break</b><span class="how">On a spare account, take a 24-hour break. You're signed out and can't sign back in.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-devices"><span><b>Signed-in devices</b><span class="how">Sign in from a second browser, then sign it out from Security.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-suspend"><span><b>Suspend a match</b><span class="how">In the backoffice Sportsbook screen, suspend a live match. Its odds lock on the site until you resume.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-void"><span><b>Void a ticket</b><span class="how">In Bets, void an open ticket. The stake goes back to the player.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-promo"><span><b>Edit a promotion</b><span class="how">Change a promotion's title in the backoffice and see it on the site at once.</span></span></label></li>
+          <li><label><input type="checkbox" id="t-audit"><span><b>Audit log</b><span class="how">Open the Audit log and find the changes you just made.</span></span></label></li>
+        </ul>
+      </section>
+
+      <!-- ─────────────────────────────── CHANGELOG ─────────────────────────────── -->
+      <section id="new">
+        <span class="eyebrow">History</span>
+        <h2>What's new</h2>
+        <ul class="log">
+          <li><b>Bonus money and welcome bonus.</b> First-deposit bonus, cash spent first, wagering progress, bonus cost on the dashboard, staff can cancel a bonus.</li>
+          <li><b>Identity check (KYC).</b> Identity tab, staff review queue, needed for withdrawals and deposits over ₾1,000.</li>
+          <li><b>Deposits and withdrawals.</b> Test bank page, saved cards, withdrawal approval in the backoffice.</li>
+          <li><b>Account page and responsible gaming.</b> Password and devices, limits, reality check, take a break, self-exclusion.</li>
+          <li><b>Sportsbook trading.</b> Suspend events and markets, margins and limits, liability per outcome.</li>
+          <li><b>Live match tracker, eSoccer and more markets, live notifications.</b></li>
+          <li><b>Earlier:</b> sportsbook with betslip and cash-out, slots lobby, Metrobet Originals (Supra Fortune, Metro Jet, Longshot), promotions with the prize wheel, wallet, backoffice players, bets and audit log.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+(function () {
+  var KEY = 'metrobet-test-guide-ticks';
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.checklist input'));
+  var count = document.getElementById('done-count');
+  var bar = document.getElementById('done-bar');
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function save(state) {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ticks just won't be remembered */ }
+  }
+  function render() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    count.textContent = done + ' of ' + boxes.length + ' done';
+    bar.style.width = (boxes.length ? (done / boxes.length) * 100 : 0) + '%';
+  }
+
+  var state = load();
+  boxes.forEach(function (box) {
+    box.checked = Boolean(state[box.id]);
+    box.addEventListener('change', function () {
+      state[box.id] = box.checked;
+      save(state);
+      render();
+    });
+  });
+  document.getElementById('reset').addEventListener('click', function () {
+    state = {};
+    boxes.forEach(function (b) { b.checked = false; });
+    save(state);
+    render();
+  });
+  render();
+
+  document.querySelectorAll('.copy').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var text = button.getAttribute('data-copy');
+      function done() {
+        button.setAttribute('data-done', '');
+        setTimeout(function () { button.removeAttribute('data-done'); }, 1500);
+      }
+      function fallback() {
+        var range = document.createRange();
+        range.selectNodeContents(button);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else {
+        fallback();
+      }
+    });
+  });
+})();
+</script>
