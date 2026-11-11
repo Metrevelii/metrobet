@@ -20,13 +20,14 @@ bank page ─card─▶ bank ─signed POST /payments/callback─▶ handleCallb
   contradicting one for a final payment is 409; the amount must match (400).
 - A successful callback saves the card (`saved_cards`: bank token, mask, brand, expiry; never the
   number). Deposits not completed in 30 min become `expired` (lazily, on reads); a late success
-  is still credited because the card was charged. Deposit limits are checked when the deposit
-  starts, not in the callback (the bank has already taken the money).
+  is still credited because the card was charged. Deposit limits and the KYC threshold (lifetime
+  deposits past `KYC_DEPOSIT_THRESHOLD` need verified KYC) are checked when the deposit starts,
+  not in the callback (the bank has already taken the money).
 
 ## Withdrawal
 
-- Needs a confirmed contact (`UNVERIFIED` 403) and a saved card of the player (paid back to a
-  card used for deposits). KYC will gate it too once a KYC provider exists.
+- Needs a confirmed contact (`UNVERIFIED` 403), a verified identity (`KYC_REQUIRED` 403,
+  `modules/kyc`) and a saved card of the player (paid back to a card used for deposits).
 - Request: player → `withdrawals` account at once (`withdrawal`, key `payment:<id>:hold`), so the
   balance is right and can't be spent twice. `INSUFFICIENT_FUNDS` 402.
 - Player cancel (while `pending`), staff **reject** (reason shown to the player) and a bank

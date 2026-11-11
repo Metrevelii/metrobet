@@ -1,5 +1,5 @@
 import { Button, Card, Skeleton } from '@metrobet/ui';
-import { ChevronLeft, CreditCard, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, CreditCard, ScanFace, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('withdrawTitle'), robots: { index: false } };
 }
 
-/** Needs a confirmed contact and a card the player deposited with. */
+/** Needs a confirmed contact, a verified identity and a card the player deposited with. */
 async function Withdraw() {
   const player = await getCurrentPlayer();
   if (!player) redirect({ href: '/login?next=/wallet/withdraw', locale: await getLocale() });
@@ -35,6 +35,24 @@ async function Withdraw() {
             <Button asChild>
               <Link href="/verify?next=/wallet/withdraw">{t('verify')}</Link>
             </Button>
+          }
+        />
+      </Card>
+    );
+  }
+  if (player!.kycStatus !== 'verified') {
+    return (
+      <Card>
+        <EmptyState
+          icon={ScanFace}
+          title={t('kycFirst')}
+          description={t(player!.kycStatus === 'pending' ? 'kycPendingHint' : 'kycFirstHint')}
+          action={
+            player!.kycStatus !== 'pending' && (
+              <Button asChild>
+                <Link href="/account/identity">{t('verifyIdentity')}</Link>
+              </Button>
+            )
           }
         />
       </Card>

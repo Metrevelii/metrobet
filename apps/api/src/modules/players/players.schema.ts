@@ -27,6 +27,11 @@ export const players = pgTable(
     lastLoginAt: timestamp({ withTimezone: true }),
     /** End of a time-out / self-exclusion (`status: self_excluded`); null = until staff lift it. */
     excludedUntil: timestamp({ withTimezone: true }),
+    /** Identity from the verified document (KYC, `modules/kyc`). One account per person. */
+    firstName: text(),
+    lastName: text(),
+    personalNumber: text().unique('players_personal_number_unique'),
+    kycVerifiedAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true })
       .notNull()

@@ -89,6 +89,9 @@ export const playerProfileSchema = z.object({
   dateOfBirth: z.string(),
   status: playerStatusSchema,
   kycStatus: kycStatusSchema,
+  /** From the verified identity document (null until KYC is verified). */
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
   currency: currencySchema,
   createdAt: z.iso.datetime(),
 });

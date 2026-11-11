@@ -151,6 +151,7 @@ isolated so it can be swapped later without touching components:
 - `apps/api/src/modules/payments/CLAUDE.md`: deposits, withdrawals, payment gateway port, mock bank
 - `apps/web/src/features/payments/CLAUDE.md`: deposit / withdraw pages, payment result, pending withdrawals
 - `apps/web/src/features/account/CLAUDE.md`: account pages (profile, security, responsible gaming)
+- `apps/api/src/modules/kyc/CLAUDE.md`: identity verification, provider port, mock provider, staff review
 - `apps/api/src/modules/originals/CLAUDE.md`: in-house studio game server (Supra Fortune, crash games)
 - `apps/web/src/features/originals/CLAUDE.md`: native Originals game clients
 
@@ -188,13 +189,15 @@ isolated so it can be swapped later without touching components:
    looser after 24 h) enforced on sportsbook, casino, Originals and deposits, reality check,
    take a break / self-exclusion. ✅ **Payments**: deposits through a bank card page (mock TBC / BoG
    behind a gateway port, signed idempotent callbacks, saved cards), withdrawals reserved at once
-   and approved/rejected by finance in the backoffice. ✅ Wallet: double-entry ledger in tetri (idempotent,
+   and approved/rejected by finance in the backoffice. ✅ **KYC**: identity checks through a provider
+   port (mock provider), date-of-birth / age / one-account-per-person checks, staff review queue;
+   required for withdrawals and for deposits past 1 000 ₾. ✅ Wallet: double-entry ledger in tetri (idempotent,
    append-only, DB-enforced zero-sum), balance in header, `/wallet` history, dev test deposits.
    ✅ Game wallet API (signed bet/win/rollback, rounds, game sessions) + real-money mock slots
    (Golden Fleece) that settle through it; real bets feed promotions. ✅ **Metrobet Originals**
    (in-house studio): Supra Fortune slot (5×3, 96.27 %), Metro Jet and Longshot crash (shared live rounds,
-   provably fair, 97 %), native clients over Socket.IO, real money + demo. ⏳ KYC, real bank
-   contracts (TBC/BoG), real provider integrations
+   provably fair, 97 %), native clients over Socket.IO, real money + demo. ⏳ real KYC provider,
+   real bank contracts (TBC/BoG), real game provider integrations
 
 Until step 8, frontends run on **mock data and mock providers**. Keep mocks behind the same
 interfaces the real integrations will use, so swapping them changes no UI code.

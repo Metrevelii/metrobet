@@ -1,4 +1,6 @@
 import {
+  type KycOverview,
+  kycOverviewSchema,
   type PlayerSession,
   playerSessionsSchema,
   type RealityCheckSettings,
@@ -37,3 +39,6 @@ export const getSessions = (): Promise<PlayerSession[] | null> =>
 export const getRealityCheck = cache((): Promise<RealityCheckSettings | null> =>
   playerGet('responsible-gaming/reality-check', realityCheckSettingsSchema),
 );
+
+/** Identity verification status and the latest check. */
+export const getKyc = (): Promise<KycOverview | null> => playerGet('kyc', kycOverviewSchema);

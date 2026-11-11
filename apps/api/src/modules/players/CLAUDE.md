@@ -37,8 +37,9 @@ A player's history lives in the owning modules: `/admin/players/:id/transactions
   normalized to E.164 with Georgia as default country (`555 12 34 56` → `+995555123456`). Both
   columns are unique; at least one is set (DB check).
 - **Age**: `dateOfBirth` must be ≥ 25 years (Georgian law), checked by the shared schema.
-- **Verification** confirms the login contact only. **KYC** (`kycStatus`) is separate and will
-  be driven by a KYC provider (Sumsub/Veriff…) before real-money play.
+- **Verification** confirms the login contact only. **KYC** (`kycStatus`, `firstName`,
+  `lastName`, unique `personalNumber`, `kycVerifiedAt`) is set by `modules/kyc` through
+  `setKyc`; the profile carries the verified name.
 - Validation messages for player schemas are translation keys (see contracts `auth.ts`).
 - Codes are delivered through the `Notifier` port (`modules/notifications`). Dev: API log +
   `GET /api/dev/outbox?to=…` (404 in production).

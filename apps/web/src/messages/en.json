@@ -556,6 +556,7 @@
     "limitReached": "You have {remaining} left of your {period, select, day {daily} week {weekly} other {monthly}} {kind, select, deposit {deposit} stake {stake} other {loss}} limit.",
     "tabs": {
       "profile": "Profile",
+      "identity": "Identity",
       "security": "Security",
       "responsibleGaming": "Responsible gaming"
     },
@@ -575,7 +576,8 @@
         "pending": "In review",
         "verified": "Verified",
         "rejected": "Rejected"
-      }
+      },
+      "name": "Name"
     },
     "security": {
       "passwordTitle": "Password",
@@ -675,6 +677,41 @@
       "history": "See your transactions",
       "continue": "Keep playing",
       "logout": "Log out"
+    },
+    "identity": {
+      "title": "Identity verification",
+      "unavailable": "Identity verification is unavailable right now. Please try again later.",
+      "status": {
+        "unverified": "Not verified",
+        "pending": "In review",
+        "verified": "Verified",
+        "rejected": "Not approved"
+      },
+      "hint": {
+        "unverified": "Verify your identity once to withdraw winnings and deposit without limits. It takes about two minutes.",
+        "pending": "We're checking your document. This usually takes a few hours; we'll update this page.",
+        "verified": "Your identity is verified. Withdrawals are open.",
+        "rejected": "We couldn't verify your identity. Check the reason below and try again."
+      },
+      "name": "Name",
+      "verifiedAt": "Verified on",
+      "start": "Verify my identity",
+      "retry": "Try again",
+      "opening": "Opening…",
+      "alreadyStarted": "A verification is already in progress. Refresh the page.",
+      "failed": "Couldn't start the verification. Please try again.",
+      "needs": {
+        "document": "You'll need your Georgian ID card or passport.",
+        "match": "The date of birth must match the one on your account.",
+        "why": "Georgian law requires us to verify every player before paying out winnings."
+      },
+      "rejections": {
+        "dob_mismatch": "The date of birth on the document doesn't match your account. Contact support if your account has a mistake.",
+        "underage": "You must be 25 or older to play on Metrobet.",
+        "duplicate": "This document is already used by another Metrobet account. Contact support.",
+        "document": "The document couldn't be verified. Make sure it's valid and the details are typed exactly.",
+        "other": "We couldn't verify your identity. Contact support for details."
+      }
     }
   },
   "Payments": {
@@ -721,7 +758,8 @@
       "NOT_CANCELLABLE": "This withdrawal can no longer be cancelled.",
       "GATEWAY_UNAVAILABLE": "The bank isn't answering. Please try again.",
       "signedOut": "Your session ended. Log in again.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "KYC_REQUIRED": "Verify your identity to deposit more than 1 000 ₾ in total."
     },
     "validation": {
       "depositMin": "The minimum deposit is 1 ₾.",
@@ -729,6 +767,10 @@
       "withdrawalMin": "The minimum withdrawal is 5 ₾.",
       "withdrawalMax": "The maximum withdrawal is 10 000 ₾.",
       "cardRequired": "Choose a card."
-    }
+    },
+    "kycFirst": "Verify your identity first",
+    "kycFirstHint": "Withdrawals need a verified identity (Georgian ID card or passport).",
+    "kycPendingHint": "Your document is being checked. You can withdraw as soon as it's approved.",
+    "verifyIdentity": "Verify identity"
   }
 }

@@ -4,6 +4,7 @@ import {
   type ActionResult,
   changePasswordInputSchema,
   exclusionInputSchema,
+  kycStartedSchema,
   type PlayActivity,
   playActivitySchema,
   realityCheckInputSchema,
@@ -138,6 +139,17 @@ export async function exclude(input: unknown): Promise<ActionResult> {
     await clearSessionCookie();
     return { ok: true, data: undefined };
   } catch (error) {
+    return failure(error);
+  }
+}
+
+/** Starts an identity check; the client sends the browser to the provider's page. */
+export async function startKyc(): Promise<ActionResult<string>> {
+  try {
+    const { redirectUrl } = await apiPost('kyc/checks', kycStartedSchema, {}, await options());
+    return { ok: true, data: redirectUrl };
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 409) return { ok: false, error: 'conflict' };
     return failure(error);
   }
 }

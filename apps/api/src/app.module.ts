@@ -10,6 +10,7 @@ import { BettingModule } from './modules/betting/betting.module.js';
 import { CasinoModule } from './modules/casino/casino.module.js';
 import { GameWalletModule } from './modules/game-wallet/game-wallet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { KycModule } from './modules/kyc/kyc.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
@@ -44,6 +45,7 @@ import { WalletModule } from './modules/wallet/wallet.module.js';
     CasinoModule,
     GameWalletModule,
     HealthModule,
+    KycModule,
     MediaModule,
     PaymentsModule,
     PlayerLiveModule,

@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 
 export const ACCOUNT_TABS = [
   { key: 'profile', href: '/account' },
+  { key: 'identity', href: '/account/identity' },
   { key: 'security', href: '/account/security' },
   { key: 'responsibleGaming', href: '/account/responsible-gaming' },
 ] as const;

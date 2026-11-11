@@ -21,7 +21,11 @@ export function DepositForm() {
   const errors = usePaymentError();
   const [provider, setProvider] = useState<PaymentProvider>('tbc');
   const [amount, setAmount] = useState('20');
-  const [error, setError] = useState<{ form?: string; amount?: string; limit?: boolean }>({});
+  const [error, setError] = useState<{
+    form?: string;
+    amount?: string;
+    link?: 'limits' | 'identity';
+  }>({});
   const [pending, startTransition] = useTransition();
   const minor = parseAmount(amount);
 
@@ -37,7 +41,15 @@ export function DepositForm() {
       setError(
         result.fieldErrors
           ? { amount: errors.field(result.fieldErrors.amount) }
-          : { form: errors.message(result), limit: result.error === 'LIMIT_EXCEEDED' },
+          : {
+              form: errors.message(result),
+              link:
+                result.error === 'LIMIT_EXCEEDED'
+                  ? 'limits'
+                  : result.error === 'KYC_REQUIRED'
+                    ? 'identity'
+                    : undefined,
+            },
       );
     });
 
@@ -54,9 +66,12 @@ export function DepositForm() {
         {error.form && (
           <Alert variant="destructive">
             {error.form}{' '}
-            {error.limit && (
-              <Link href={LIMITS_HREF} className="font-semibold underline">
-                {t('manageLimits')}
+            {error.link && (
+              <Link
+                href={error.link === 'limits' ? LIMITS_HREF : '/account/identity'}
+                className="font-semibold underline"
+              >
+                {t(error.link === 'limits' ? 'manageLimits' : 'verifyIdentity')}
               </Link>
             )}
           </Alert>

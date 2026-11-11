@@ -13,5 +13,6 @@ export const E2E_ENV = {
   WEB_REVALIDATE_SECRET: 'e2e-revalidate-secret-0123456789abcdef01234567',
   GAME_WALLET_SECRET: 'e2e-game-wallet-secret-0123456789abcdef0123456',
   PAYMENT_GATEWAY_SECRET: 'e2e-payment-gateway-secret-0123456789abcdef01',
+  KYC_PROVIDER_SECRET: 'e2e-kyc-provider-secret-0123456789abcdef0123456',
   MEDIA_DIR: '.e2e-uploads',
 };

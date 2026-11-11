@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/page-header';
 import { Pager } from '@/components/pager';
 import { getCurrentStaff, hasRole } from '@/features/auth';
 import { TicketsTable } from '@/features/bets';
+import { KycChecksTable, listKycChecks } from '@/features/kyc';
 import { listPayments, PaymentsTable } from '@/features/payments';
 import {
   getPlayer,
@@ -32,7 +33,7 @@ export const metadata: Metadata = { title: 'Player' };
 
 type Props = PageProps<'/players/[id]'>;
 
-const TABS: PlayerTab[] = ['transactions', 'payments', 'tickets', 'rounds'];
+const TABS: PlayerTab[] = ['transactions', 'payments', 'identity', 'tickets', 'rounds'];
 
 async function History({ id, tab, page }: { id: string; tab: PlayerTab; page: number }) {
   const href = (target: number) =>
@@ -52,6 +53,15 @@ async function History({ id, tab, page }: { id: string; tab: PlayerTab; page: nu
       <>
         <PaymentsTable payments={payments} showPlayer={false} />
         <Pager page={page} total={payments.total} pageSize={payments.pageSize} href={href} />
+      </>
+    );
+  }
+  if (tab === 'identity') {
+    const checks = await listKycChecks({ playerId: id, page });
+    return (
+      <>
+        <KycChecksTable checks={checks} showPlayer={false} />
+        <Pager page={page} total={checks.total} pageSize={checks.pageSize} href={href} />
       </>
     );
   }

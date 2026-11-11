@@ -4,6 +4,7 @@ import {
   type adminPaymentsQuerySchema,
   type DepositInput,
   type DepositStarted,
+  KYC_DEPOSIT_THRESHOLD,
   type LimitExceeded,
   PAYMENT_LIMITS,
   type Payment,
@@ -40,6 +41,7 @@ import {
 } from '../responsible-gaming/responsible-gaming.service.js';
 import { InsufficientFundsError } from '../wallet/ledger-math.js';
 import { Ledger, type Tx } from '../wallet/ledger.js';
+import { WalletService } from '../wallet/wallet.service.js';
 import { GatewayUnavailableError, PaymentGateway } from './gateway/payment-gateway.js';
 import { type PaymentRow, payments, type SavedCardRow, savedCards } from './payments.schema.js';
 
@@ -47,6 +49,7 @@ const STATUS: Record<PaymentError, HttpStatus> = {
   INSUFFICIENT_FUNDS: HttpStatus.PAYMENT_REQUIRED,
   LIMIT_EXCEEDED: HttpStatus.FORBIDDEN,
   UNVERIFIED: HttpStatus.FORBIDDEN,
+  KYC_REQUIRED: HttpStatus.FORBIDDEN,
   CARD_NOT_FOUND: HttpStatus.NOT_FOUND,
   NOT_CANCELLABLE: HttpStatus.CONFLICT,
   GATEWAY_UNAVAILABLE: HttpStatus.BAD_GATEWAY,
@@ -92,6 +95,7 @@ export class PaymentsService {
   constructor(
     @Inject(DRIZZLE) private readonly db: Database,
     @Inject(Ledger) private readonly ledger: Ledger,
+    @Inject(WalletService) private readonly wallet: WalletService,
     @Inject(PaymentGateway) private readonly gateway: PaymentGateway,
     @Inject(PlayersService) private readonly players: PlayersService,
     @Inject(AdminPlayersService) private readonly adminPlayers: AdminPlayersService,
@@ -110,6 +114,13 @@ export class PaymentsService {
     playerId: string,
     { provider, amount }: DepositInput,
   ): Promise<DepositStarted> {
+    // Past the lifetime threshold, deposits need a verified identity (anti-money-laundering).
+    if ((await this.players.me(playerId)).kycStatus !== 'verified') {
+      const [lifetime] = await this.wallet.playerActivity(playerId, [new Date(0)]);
+      if (lifetime!.deposits + amount > KYC_DEPOSIT_THRESHOLD) {
+        throw paymentError('KYC_REQUIRED', 'Verify your identity to deposit more');
+      }
+    }
     try {
       await this.rg.assertCanDeposit(playerId, amount);
     } catch (error) {
@@ -134,8 +145,12 @@ export class PaymentsService {
    * to a card the player deposited with; needs a confirmed contact.
    */
   async requestWithdrawal(playerId: string, { cardId, amount }: WithdrawalInput): Promise<Payment> {
-    if (!(await this.players.me(playerId)).verified) {
+    const player = await this.players.me(playerId);
+    if (!player.verified) {
       throw paymentError('UNVERIFIED', 'Confirm your email or phone before withdrawing');
+    }
+    if (player.kycStatus !== 'verified') {
+      throw paymentError('KYC_REQUIRED', 'Verify your identity before withdrawing');
     }
     const [card] = await this.db
       .select()

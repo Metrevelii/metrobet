@@ -114,12 +114,14 @@ export type WithdrawalInput = z.input<typeof withdrawalInputSchema>;
 /**
  * Error codes of the player payment routes (`{ code, message, limit? }`). INSUFFICIENT_FUNDS
  * 402 · LIMIT_EXCEEDED 403 (deposit limit, `limit` set) · UNVERIFIED 403 (confirm the contact
- * first) · CARD_NOT_FOUND 404 · NOT_CANCELLABLE 409 (no longer pending).
+ * first) · KYC_REQUIRED 403 (verify identity: every withdrawal, deposits past
+ * `KYC_DEPOSIT_THRESHOLD`) · CARD_NOT_FOUND 404 · NOT_CANCELLABLE 409 (no longer pending).
  */
 export const PAYMENT_ERRORS = [
   'INSUFFICIENT_FUNDS',
   'LIMIT_EXCEEDED',
   'UNVERIFIED',
+  'KYC_REQUIRED',
   'CARD_NOT_FOUND',
   'NOT_CANCELLABLE',
   'GATEWAY_UNAVAILABLE',

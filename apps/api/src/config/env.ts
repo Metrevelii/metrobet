@@ -57,6 +57,9 @@ const envSchema = z.object({
    * of the body). The mock gateway (TBC / BoG stand-in) signs with it too.
    */
   PAYMENT_GATEWAY_SECRET: secret,
+
+  /** Shared with the KYC provider: signs its callbacks. The mock provider signs with it too. */
+  KYC_PROVIDER_SECRET: secret,
 });
 
 const guardedEnvSchema = envSchema.refine(

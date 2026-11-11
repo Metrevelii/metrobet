@@ -1,6 +1,7 @@
 export { AccountLayout } from './components/account-layout';
 export { ChangePasswordForm } from './components/change-password-form';
 export { ExclusionCard } from './components/exclusion-card';
+export { IdentityCard } from './components/identity-card';
 export { LimitsSection } from './components/limits-section';
 export { ProfileCard } from './components/profile-card';
 export { RealityCheck } from './components/reality-check';

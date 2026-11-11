@@ -1,6 +1,7 @@
 # Account (web)
 
-`/account` (profile), `/account/security` (change password, signed-in devices),
+`/account` (profile), `/account/identity` (KYC: status, "Verify my identity" → provider page →
+back here, rejection reasons), `/account/security` (change password, signed-in devices),
 `/account/responsible-gaming` (limits, reality check, take a break / self-exclusion). Linked from
 the account menu. API rules: `apps/api/src/modules/responsible-gaming/CLAUDE.md`.
 

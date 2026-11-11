@@ -32,7 +32,7 @@ describe('payments (e2e)', () => {
     if (verified) {
       await ctx.db
         .update(players)
-        .set({ verifiedAt: new Date() })
+        .set({ verifiedAt: new Date(), kycStatus: 'verified' })
         .where(eq(players.id, body.player.id));
     }
     return { id: body.player.id, headers: { authorization: `Bearer ${body.session.token}` } };
@@ -236,6 +236,31 @@ describe('payments (e2e)', () => {
       expect.arrayContaining(['deposit', 'withdrawal', 'withdrawal_reversal']),
     );
     expect(history.some((item: { type: string }) => item.type === 'payout')).toBe(false);
+  });
+
+  it('needs a verified identity for withdrawals and for deposits past the threshold', async () => {
+    const player = await signUp();
+    await ctx.db.update(players).set({ kycStatus: 'unverified' }).where(eq(players.id, player.id));
+    await deposit(player, 900_00, { action: 'pay', number: '4111 1111 1111 1111' });
+    const [card] = (await http().get('/api/payments/cards').set(player.headers)).body;
+    const refused = await http()
+      .post('/api/payments/withdrawals')
+      .set(player.headers)
+      .send({ cardId: card.id, amount: 10_00 })
+      .expect(403);
+    expect(refused.body.code).toBe('KYC_REQUIRED');
+    // 900 ₾ deposited: 100 ₾ more is fine, 100.01 ₾ crosses the 1 000 ₾ threshold.
+    const over = await http()
+      .post('/api/payments/deposits')
+      .set(player.headers)
+      .send({ provider: 'tbc', amount: 100_01 })
+      .expect(403);
+    expect(over.body.code).toBe('KYC_REQUIRED');
+    await http()
+      .post('/api/payments/deposits')
+      .set(player.headers)
+      .send({ provider: 'tbc', amount: 100_00 })
+      .expect(201);
   });
 
   it('gives the money back when the bank refuses the payout', async () => {

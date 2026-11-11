@@ -3,6 +3,7 @@ import {
   type confirmVerificationInputSchema,
   type forgotPasswordInputSchema,
   type Identifier,
+  type KycPerson,
   type Locale,
   type loginInputSchema,
   type PlayerAuthResponse,
@@ -22,7 +23,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import type { z } from 'zod';
 
 import { type Database, DRIZZLE } from '../../database/database.tokens.js';
@@ -51,6 +52,8 @@ export function toProfile(row: PlayerRow): PlayerProfile {
     dateOfBirth: row.dateOfBirth,
     status: row.status,
     kycStatus: row.kycStatus,
+    firstName: row.firstName,
+    lastName: row.lastName,
     currency: 'GEL',
     createdAt: row.createdAt.toISOString(),
   };
@@ -227,6 +230,51 @@ export class PlayersService {
       .set({ status: 'self_excluded', excludedUntil: until })
       .where(eq(players.id, playerId));
     await this.sessions.revokeAll('player', playerId);
+  }
+
+  /**
+   * Sets the KYC summary. `verified` stores the document's identity; a personal number already
+   * on another account is refused by the unique index (callers check first with
+   * `personalNumberTaken`).
+   */
+  async setKyc(
+    playerId: string,
+    update:
+      | { status: 'pending' | 'rejected' | 'unverified' }
+      | {
+          status: 'verified';
+          person: Pick<KycPerson, 'firstName' | 'lastName' | 'personalNumber'>;
+        },
+    db: Pick<Database, 'update'> = this.db,
+  ): Promise<void> {
+    await db
+      .update(players)
+      .set(
+        update.status === 'verified'
+          ? { kycStatus: 'verified', kycVerifiedAt: new Date(), ...update.person }
+          : { kycStatus: update.status },
+      )
+      .where(eq(players.id, playerId));
+  }
+
+  /** True when another account already verified with this personal number. */
+  async personalNumberTaken(
+    playerId: string,
+    personalNumber: string,
+    db: Pick<Database, 'select'> = this.db,
+  ): Promise<boolean> {
+    const [row] = await db
+      .select({ id: players.id })
+      .from(players)
+      .where(and(eq(players.personalNumber, personalNumber), ne(players.id, playerId)));
+    return row !== undefined;
+  }
+
+  /** The player row, for modules that need more than the profile (KYC, payments). */
+  async account(playerId: string, db: Pick<Database, 'select'> = this.db): Promise<PlayerRow> {
+    const [row] = await db.select().from(players).where(eq(players.id, playerId));
+    if (!row) throw new NotFoundException('Player not found');
+    return row;
   }
 
   async listSessions({ playerId, sessionId }: PlayerPrincipal): Promise<PlayerSession[]> {

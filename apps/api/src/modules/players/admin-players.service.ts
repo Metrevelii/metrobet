@@ -96,11 +96,18 @@ export class AdminPlayersService {
     return row?.value ?? 0;
   }
 
-  /** Contact details of players, for staff lists of tickets and the like. */
+  /** Contact details (and registered date of birth) of players, for staff lists. */
   async contacts(ids: string[]) {
-    if (ids.length === 0) return new Map<string, Pick<PlayerRow, 'id' | 'email' | 'phone'>>();
+    if (ids.length === 0) {
+      return new Map<string, Pick<PlayerRow, 'id' | 'email' | 'phone' | 'dateOfBirth'>>();
+    }
     const rows = await this.db
-      .select({ id: players.id, email: players.email, phone: players.phone })
+      .select({
+        id: players.id,
+        email: players.email,
+        phone: players.phone,
+        dateOfBirth: players.dateOfBirth,
+      })
       .from(players)
       .where(inArray(players.id, ids));
     return new Map(rows.map((row) => [row.id, row]));

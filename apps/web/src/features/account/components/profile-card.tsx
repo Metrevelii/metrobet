@@ -15,6 +15,7 @@ export async function ProfileCard() {
   const date = (iso: string) =>
     format.dateTime(new Date(iso), { dateStyle: 'long', timeZone: 'Asia/Tbilisi' });
   const rows = [
+    ...(player.firstName ? ([[t('name'), `${player.firstName} ${player.lastName}`]] as const) : []),
     [player.email ? t('email') : t('phone'), player.email ?? player.phone],
     [t('dateOfBirth'), date(`${player.dateOfBirth}T12:00:00Z`)],
     [t('memberSince'), date(player.createdAt)],
